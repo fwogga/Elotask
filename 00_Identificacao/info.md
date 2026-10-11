@@ -6,6 +6,10 @@ EloTask
 ## Ano letivo
 2026-27
 
+## Semestre
+5º Semestre
+
+
 ## Curso(s) envolvido(s)
 Licenciatura em Engenharia Informática (LEIF01)
 
