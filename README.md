@@ -30,7 +30,7 @@ A componente de Inteligência Artificial modela a escala de turnos como um **Pro
 | Backend | Node.js (API REST) |
 | Base de dados | MySQL |
 | Segurança na comunicação | HTTPS/TLS |
-| Ferramentas | GitHub, Docker (opcional), Figma, draw.io, MySQL Workbench, ClickUp |
+| Ferramentas | GitHub, Docker, Figma, draw.io, MySQL Workbench, ClickUp |
 
 ## Arquitetura
 
