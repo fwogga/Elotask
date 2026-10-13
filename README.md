@@ -4,7 +4,7 @@
 
 **Licenciatura em Engenharia Informática**  
 LEIF02 | 25-26  
-**UC:** Projeto de Desenvolvimento Web  
+**UC:** Projeto de Desenvolvimento de Software
 **Docente:** Rui Pascoal 
 
 **Grupo 9 – Turma D01**
