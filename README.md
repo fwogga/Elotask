@@ -56,6 +56,7 @@ Atualmente os trabalhos colaborativos dependem frequentemente da utilização de
 O EloTask destina-se a utilizadores que necessitam de colaborar com outras pessoas, organizar atividades e acompanhar o desenvolvimento de projetos. A plataforma pretende responder às necessidades de diferentes contextos académicos, profissionais e organizacionais.
 
 Os principais **públicos-alvo** são:
+
 •	Estudantes e grupos académicos: para distribuir tarefas, partilhar documentos, organizar reuniões e acompanhar prazos.
 
 •	Equipas de desenvolvimento de software: para gerir tarefas, acompanhar funcionalidades e organizar as etapas de desenvolvimento.
