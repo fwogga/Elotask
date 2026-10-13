@@ -35,11 +35,13 @@ LEIF02 | 25-26
 
 ---
 ## Introdução
+
 O projeto EloTask consiste no desenvolvimento de uma plataforma digital de colaboração e gestão de projetos que pretende integrar em um único ambiente **ferramentas de comunicação, organização e acompanhamento do trabalho em equipa.** A plataforma tem como finalidade facilitar a interação entre os membros de uma equipa permitindo comunicar, gerir tarefas e projetos, partilhar documentos, organizar reuniões e acompanhar o progresso das atividades.
 
 Atualmente os trabalhos colaborativos dependem frequentemente da utilização de diferentes aplicações para realizar tarefas relacionadas com o mesmo projeto. Esta situação pode dificultar a organização da informação a coordenação entre os elementos de uma equipa e o acompanhamento das decisões tomadas.
 
 ## Proposta do projeto - Elotask
+
 O EloTask destina-se a utilizadores que necessitam de colaborar com outras pessoas, organizar atividades e acompanhar o desenvolvimento de projetos. A plataforma pretende responder às necessidades de diferentes contextos académicos, profissionais e organizacionais.
 Os principais **públicos-alvo** são:
 •	Estudantes e grupos académicos: para distribuir tarefas, partilhar documentos, organizar reuniões e acompanhar prazos.
@@ -51,15 +53,18 @@ Os principais **públicos-alvo** são:
 
 
 ## Objetivo do projeto
+
 O desenvolvimento do EloTask pretende responder às dificuldades associadas à utilização de ferramentas dispersas para a comunicação e gestão do trabalho em equipa. Para esse efeito foram definidos um objetivo geral e um conjunto de objetivos específicos.
 
 
 ## Motivação
+
 Muitas equipas utilizam diferentes aplicações para comunicar, realizar reuniões, gerir tarefas e partilhar documentos. Esta utilização pode dificultar a organização da informação e obrigar os utilizadores a alternar entre várias plataformas.
 
 Na gestão de turnos, a necessidade de considerar simultaneamente disponibilidades, horários, competências e períodos de descanso pode tornar a elaboração de escalas uma tarefa complexa.
 
-## Problema  
+## Problema 
+
 Os principais problemas considerados são:
 •	Dispersão da informação por diferentes aplicações.
 •	Separação entre comunicação e tarefas.
@@ -70,6 +75,7 @@ Os principais problemas considerados são:
 •	Dificuldade em elaborar escalas de turnos que respeitem várias restrições em simultâneo.
 
 ## Solução Proposta 
+
 O EloTask pretende centralizar a comunicação e a gestão do trabalho numa única plataforma, permitindo organizar utilizadores, equipas, projetos, tarefas, reuniões, documentos, calendários e turnos.
 
 A solução prevê uma componente de Inteligência Artificial baseada em CSP, destinada a apoiar a geração de escalas e a validação de pedidos de troca de turno.
