@@ -27,13 +27,21 @@ LEIF02 | 25-26
 -Proposta do projeto - EloTask
 
 -Público alvo 
+
 -Objetivo do EloTask
+
 -Motivação 
+
 -Problema 
+
 -Solução Proposta - EloTask 
+
 -Tecnologias
+
 -Arquitetura
+
 -Conclusão 
+
 -Link
 
 ---
