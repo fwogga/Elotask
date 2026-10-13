@@ -57,10 +57,15 @@ O EloTask destina-se a utilizadores que necessitam de colaborar com outras pesso
 
 Os principais **públicos-alvo** são:
 •	Estudantes e grupos académicos: para distribuir tarefas, partilhar documentos, organizar reuniões e acompanhar prazos.
+
 •	Equipas de desenvolvimento de software: para gerir tarefas, acompanhar funcionalidades e organizar as etapas de desenvolvimento.
+
 •	Pequenas e médias empresas: para melhorar a comunicação interna e centralizar a informação.
+
 •	Gestores de projetos e coordenadores de equipas: para planear atividades, distribuir responsabilidades e acompanhar o progresso.
+
 •	Equipas remotas ou híbridas: para facilitar a comunicação e a partilha de informação entre pessoas que trabalham em locais diferentes.
+
 •	Associações e outras organizações: para organizar atividades colaborativas e gerir responsabilidades.
 
 
