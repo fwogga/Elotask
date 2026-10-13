@@ -5,6 +5,7 @@
 **Licenciatura em Engenharia Informática**  
 LEIF02 | 25-26  
 **UC:** Projeto de Desenvolvimento de Software
+
 **Docente:** Rui Pascoal 
 
 **Grupo 9 – Turma D01**
@@ -22,7 +23,9 @@ LEIF02 | 25-26
 
 ## Índice 
 -Introdução 
+
 -Proposta do projeto - EloTask
+
 -Público alvo 
 -Objetivo do EloTask
 -Motivação 
