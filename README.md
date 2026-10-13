@@ -8,6 +8,15 @@ O nome junta **"Elo"**, que simboliza a ligação entre os membros de uma equipa
 
 Projeto académico da UC **Projeto de Desenvolvimento de Software** (Licenciatura em Engenharia Informática, LEIF01, 2026-27), Faculdade de Design, Tecnologia e Comunicação, Universidade Europeia. Docente: Rui Pascoal.
 
+## Equipa
+
+| Nome | Número |
+|---|---|
+| Cássia Baptista | 20231704 |
+| Marlinda Congo | 20241718 |
+| Miguel Almeida | 20240206 |
+| Deuwer Rabelais | 20241521 |
+
 ## Funcionalidades
 
 - **Utilizadores, equipas e projetos**: registo, autenticação, perfis e permissões por perfil
@@ -41,6 +50,7 @@ Utilizador → Frontend → Backend (Node.js) → MySQL
 
 Evolução futura: Load Balancer com várias instâncias do backend e replicação da base de dados.
 
+
 ## Segurança
 
 - Palavras-passe guardadas com hashing seguro, nunca em texto simples
@@ -49,14 +59,7 @@ Evolução futura: Load Balancer com várias instâncias do backend e replicaç�
 - Segredos guardados na configuração do ambiente, não no repositório
 - HTTPS/TLS em toda a comunicação cliente-servidor
 
-## Equipa
 
-| Nome | Número |
-|---|---|
-| Cássia Baptista | 20231704 |
-| Marlinda Congo | 20241718 |
-| Miguel Almeida | 20240206 |
-| Deuwer Rabelais | 20241521 |
 
 ## Estado
 
