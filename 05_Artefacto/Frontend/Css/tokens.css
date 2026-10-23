@@ -1,0 +1,80 @@
+:root {
+  --cor-primaria: #8e36e6;
+  --cor-primaria-escura: #633195;
+  --cor-destaque: #cc67ff;
+
+  --texto-titulo: #300c54;
+  --texto-forte: #3e0e6f;
+  --texto-corpo: #502080;
+  --texto-secundario: #8364a2;
+  --texto-placeholder: #9678b5;
+  --texto-inverso: #ffffff;
+
+  --fundo-pagina: #fbf8fe;
+  --fundo-superficie: #ffffff;
+  --fundo-suave: #f2ebf8;
+  --fundo-pesquisa: #f5eefc;
+  --fundo-icone: #f2e8fc;
+
+  --borda: #ede5f5;
+  --progresso-trilho: #ede6f3;
+
+  --sidebar-gradiente-inicio: #2d1575;
+  --sidebar-gradiente-fim: #df67ee;
+
+  /* Estados */
+  --estado-sucesso: #159a62;
+  --estado-sucesso-fundo: #e2f6ec;
+  --estado-aviso: #e5780f;
+  --estado-aviso-fundo: #ffebd5;
+  --estado-erro: #e3304b;
+  --estado-erro-fundo: #ffe7ea;
+  --estado-notificacao: #ff3b5c;
+
+  /* Fundos dos ícones coloridos (cartões de estatísticas e projetos) */
+  --icone-menta: #ddf5ea;
+  --icone-coral: #ffe5dd;
+  --icone-violeta: #f1e6ff;
+  --icone-vermelho: #f0475b;
+  --icone-laranja: #ff8a1f;
+
+  /* --- Tipografia ------------------------------------------------------- */
+  --fonte: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --peso-regular: 400;
+  --peso-medio: 500;
+  --peso-semibold: 600;
+  --peso-bold: 700;
+
+  --texto-xs: 15px;   /* etiquetas, percentagens */
+  --texto-sm: 16px;   /* metadados */
+  --texto-md: 18px;   /* corpo, links */
+  --texto-lg: 19px;   /* itens de navegação, títulos de cartão */
+  --texto-xl: 20px;   /* subtítulos */
+  --texto-2xl: 23px;  /* títulos de secção */
+  --texto-3xl: 36px;  /* título de página */
+  --texto-numero: 40px; /* números grandes das estatísticas */
+
+  /* --- Espaçamento ------------------------------------------------------ */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 20px;
+  --esp-6: 24px;
+  --esp-7: 32px;
+  --esp-8: 40px;
+
+  /* --- Raios ------------------------------------------------------------ */
+  --raio-nav: 10px;
+  --raio-controlo: 14px;
+  --raio-cartao: 14px;
+  --raio-icone: 16px;
+  --raio-pilula: 999px;
+
+  /* --- Sombras ---------------------------------------------------------- */
+  --sombra-cartao: 0 2px 10px rgba(80, 22, 137, 0.06);
+
+  /* --- Layout ----------------------------------------------------------- */
+  --sidebar-largura: 280px;
+}
