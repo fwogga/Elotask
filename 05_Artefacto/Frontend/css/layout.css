@@ -1,0 +1,231 @@
+/* Estrutura comum aos ecrãs da aplicação: [ sidebar ][ conteúdo ] */
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* --- Sidebar ------------------------------------------------------------ */
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  flex: 0 0 var(--sidebar-largura);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  padding: 30px 13px 24px;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--sidebar-gradiente-inicio), var(--sidebar-gradiente-fim));
+  color: var(--texto-inverso);
+}
+
+/* Círculos decorativos no fundo */
+.sidebar::before,
+.sidebar::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.sidebar::before {
+  width: 320px;
+  height: 320px;
+  left: -60px;
+  bottom: 36px;
+  background: linear-gradient(180deg, var(--cor-primaria), var(--sidebar-gradiente-inicio));
+}
+
+.sidebar::after {
+  width: 300px;
+  height: 300px;
+  left: 54px;
+  bottom: -35px;
+  border: 6px solid rgba(168, 100, 236, 0.25);
+}
+
+/* Mantém o conteúdo da sidebar por cima dos círculos */
+.sidebar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar__marca {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  padding-left: 25px;
+  margin-bottom: 30px;
+  font-size: 33px;
+  font-weight: var(--peso-semibold);
+}
+
+.sidebar__logo {
+  width: 43px;
+  height: 45px;
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+  height: 58px;
+  padding: 0 16px 0 22px;
+  border-radius: var(--raio-nav);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-medio);
+  transition: background-color 0.15s ease;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Item da página atual */
+.nav-item[aria-current="page"] {
+  background: var(--cor-destaque);
+}
+
+.nav-item__icone {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+/* Ponto vermelho de "não lidas" */
+.nav-item__badge {
+  position: absolute;
+  left: 40px;
+  top: 5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--estado-notificacao);
+}
+
+/* margin-top: auto empurra o utilizador para o fundo da sidebar */
+.sidebar__utilizador {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: var(--esp-2) var(--esp-3);
+  border: 0;
+  border-radius: var(--raio-nav);
+  background: none;
+  cursor: pointer;
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-medio);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sidebar__utilizador:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.sidebar__utilizador > img {
+  margin-left: auto;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--cor-primaria);
+  color: var(--texto-inverso);
+  font-size: var(--texto-md);
+  font-weight: var(--peso-bold);
+}
+
+/* --- Conteúdo ----------------------------------------------------------- */
+
+.conteudo {
+  flex: 1;
+  min-width: 0;
+  padding: 22px 26px 34px 31px;
+}
+
+.barra-topo {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 30px;
+}
+
+.pesquisa {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+  width: 416px;
+  max-width: 100%;
+  height: 55px;
+  padding: 0 26px;
+  border-radius: var(--raio-pilula);
+  background: var(--fundo-pesquisa);
+}
+
+.pesquisa input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  outline: none;
+  font-size: var(--texto-lg);
+}
+
+.pesquisa input::placeholder {
+  color: var(--texto-placeholder);
+}
+
+.botao-icone {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* Abaixo de 1100px a sidebar fica só com ícones */
+@media (max-width: 1100px) {
+  :root {
+    --sidebar-largura: 88px;
+  }
+
+  .sidebar__marca span,
+  .nav-item span:not(.nav-item__badge),
+  .sidebar__utilizador span:not(.avatar),
+  .sidebar__utilizador > img {
+    display: none;
+  }
+
+  .sidebar__marca {
+    padding-left: 10px;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .nav-item__badge {
+    left: 44px;
+    top: 10px;
+  }
+
+  .sidebar__utilizador {
+    padding: var(--esp-2) 6px;
+  }
+}

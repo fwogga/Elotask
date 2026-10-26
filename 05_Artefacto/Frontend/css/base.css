@@ -1,0 +1,68 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--fonte);
+  font-size: var(--texto-md);
+  color: var(--texto-titulo);
+  background: var(--fundo-pagina);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Botões e campos não herdam a fonte da página por defeito */
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+img,
+svg {
+  display: block;
+}
+
+/* Contorno visível só quando se navega com o teclado */
+:focus-visible {
+  outline: 3px solid var(--cor-destaque);
+  outline-offset: 2px;
+}
+
+/* Esconde o texto no ecrã mas mantém-no para leitores de ecrã */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

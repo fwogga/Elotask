@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Início · EloTask</title>
+  <link rel="icon" href="../assets/img/logo-elotask.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/layout.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Navegação principal">
+      <a class="sidebar__marca" href="dashboard.html">
+        <img class="sidebar__logo" src="../assets/img/logo-elotask.png" alt="" width="43" height="45">
+        <span>EloTask</span>
+      </a>
+
+      <nav>
+        <ul class="sidebar__nav">
+          <li>
+            <a class="nav-item" href="dashboard.html" aria-current="page">
+              <img class="nav-item__icone" src="../assets/icons/nav-inicio.svg" alt="" width="28" height="28">
+              <span>Início</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="tarefas.html">
+              <img class="nav-item__icone" src="../assets/icons/nav-tarefas.svg" alt="" width="28" height="28">
+              <span>Tarefas</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="projetos.html">
+              <img class="nav-item__icone" src="../assets/icons/nav-projetos.svg" alt="" width="28" height="28">
+              <span>Projetos</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="calendario.html">
+              <img class="nav-item__icone" src="../assets/icons/nav-calendario.svg" alt="" width="28" height="28">
+              <span>Calendário</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="mensagens.html">
+              <img class="nav-item__icone" src="../assets/icons/nav-mensagens.svg" alt="" width="28" height="28">
+              <span>Mensagens</span>
+              <span class="nav-item__badge" aria-hidden="true"></span>
+              <span class="sr-only">(mensagens não lidas)</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="documentos.html">
+              <img class="nav-item__icone" src="../assets/icons/nav-documentos.svg" alt="" width="28" height="28">
+              <span>Documentos</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="reunioes.html">
+              <img class="nav-item__icone" src="../assets/icons/nav-reunioes.svg" alt="" width="28" height="28">
+              <span>Reuniões</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="turnos.html">
+              <img class="nav-item__icone" src="../assets/icons/nav-turnos.svg" alt="" width="28" height="28">
+              <span>Turnos</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <button class="sidebar__utilizador" type="button" aria-haspopup="menu">
+        <span class="avatar" aria-hidden="true">CB</span>
+        <span>Cássia Baptista</span>
+        <img src="../assets/icons/chevron-down.svg" alt="" width="16" height="20">
+      </button>
+    </aside>
+
+    <main class="conteudo">
+      <header class="barra-topo">
+        <form class="pesquisa" role="search">
+          <img src="../assets/icons/search.svg" alt="" width="24" height="24">
+          <label class="sr-only" for="pesquisa">Pesquisar</label>
+          <input id="pesquisa" type="search" placeholder="Pesquisar...">
+        </form>
+        <button class="botao-icone" type="button" aria-label="Notificações">
+          <img src="../assets/icons/bell.svg" alt="" width="40" height="40">
+        </button>
+      </header>
+    </main>
+  </div>
+</body>
+</html>
