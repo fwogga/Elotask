@@ -1,0 +1,129 @@
+/* Peças reutilizadas nos ecrãs */
+
+.cartao {
+  background: var(--fundo-superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-cartao);
+  box-shadow: var(--sombra-cartao);
+}
+
+/* --- Secção com título e link "Ver todos" ------------------------------- */
+
+.seccao {
+  margin-top: 35px;
+}
+
+.seccao__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.seccao__titulo {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-bold);
+}
+
+.link {
+  font-size: var(--texto-md);
+  font-weight: var(--peso-medio);
+  color: var(--cor-primaria);
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* --- Ícone dentro de um quadrado colorido -------------------------------- */
+
+.icone-bloco {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: var(--raio-controlo);
+  background: var(--fundo-icone);
+}
+
+.icone-bloco--menta { background: var(--icone-menta); }
+.icone-bloco--coral { background: var(--icone-coral); }
+.icone-bloco--violeta { background: var(--icone-violeta); }
+.icone-bloco--erro { background: var(--estado-erro-fundo); }
+.icone-bloco--vermelho { background: var(--icone-vermelho); }
+.icone-bloco--laranja { background: var(--icone-laranja); }
+.icone-bloco--primaria { background: var(--cor-primaria); }
+
+/* --- Etiqueta (estado / prioridade) ------------------------------------- */
+
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  padding: 6px 18px;
+  border-radius: var(--raio-pilula);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+}
+
+/* Ponto colorido antes do texto, com a mesma cor da etiqueta */
+.etiqueta--ponto::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.etiqueta--sucesso { color: var(--estado-sucesso); background: var(--estado-sucesso-fundo); }
+.etiqueta--aviso { color: var(--estado-aviso); background: var(--estado-aviso-fundo); }
+.etiqueta--erro { color: var(--estado-erro); background: var(--estado-erro-fundo); }
+
+/* --- Barra de progresso -------------------------------------------------- */
+
+.progresso {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--texto-secundario);
+}
+
+.progresso__trilho {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--raio-pilula);
+  background: var(--progresso-trilho);
+  overflow: hidden;
+}
+
+.progresso__barra {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--cor-primaria);
+}
+
+/* --- Lista dentro de um cartão, com divisórias entre linhas ------------- */
+
+.lista {
+  padding: 0 18px;
+}
+
+.lista > li + li {
+  border-top: 1px solid var(--borda);
+}
+
+/* --- Título de página e aviso de ecrã por fazer -------------------------- */
+
+.titulo-pagina {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-bold);
+}
+
+.em-construcao {
+  margin-top: var(--esp-6);
+  padding: var(--esp-8);
+  text-align: center;
+  color: var(--texto-secundario);
+}
