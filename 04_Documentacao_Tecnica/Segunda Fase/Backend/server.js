@@ -1,18 +1,18 @@
-
-const express = require("express");
+import express from "express";
+import "dotenv/config";
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.status(200).json({
-    mensagem: "API do EloTask a funcionar!",
-    estado: "online"
+  res.json({
+    mensagem: "API do EloTask está a funcionar!"
   });
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor iniciado em http://localhost:${PORT}`);
+  console.log(`Servidor a correr na porta ${PORT}`);
 });
+
