@@ -1,0 +1,27 @@
+{
+  "name": "elotask",
+  "version": "1.0.0",
+  "description": "<img width=\"585\" height=\"165\" alt=\"Screenshot 2026-10-13 115951\" src=\"https://github.com/user-attachments/assets/21b2b876-836d-489a-adc7-37e4187fb9ea\" />",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fwogga/Elotask.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/fwogga/Elotask/issues"
+  },
+  "homepage": "https://github.com/fwogga/Elotask#readme",
+  "dependencies": {
+    "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
