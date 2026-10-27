@@ -7,6 +7,10 @@
 -- Server version: 5.7.24
 -- PHP Version: 8.3.1
 
+CREATE DATABASE IF NOT EXISTS elotask;
+
+USE elotask;
+
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
