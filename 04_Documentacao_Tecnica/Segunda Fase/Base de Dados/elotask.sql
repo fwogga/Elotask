@@ -1588,6 +1588,11 @@ ALTER TABLE `turno_colaboradores`
   ADD CONSTRAINT `fk_turno_colaboradores_utilizador` FOREIGN KEY (`id_utilizador`) REFERENCES `utilizadores` (`id_utilizador`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
+ALTER TABLE utilizadores
+MODIFY COLUMN tipo_utilizador
+ENUM('admin', 'gestor', 'colaborador')
+NOT NULL DEFAULT 'colaborador';
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
