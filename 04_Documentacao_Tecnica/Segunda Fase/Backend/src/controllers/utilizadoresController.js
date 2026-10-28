@@ -1,6 +1,8 @@
 import pool from "../config/database.js";
 import bcrypt from "bcryptjs";
 
+// GET /utilizadores
+
 export async function listarUtilizadores(req, res) {
   try {
     const [utilizadores] = await pool.query(`
@@ -32,6 +34,8 @@ export async function listarUtilizadores(req, res) {
     });
   }
 }
+
+// GET /utilizadores/:id
 
 export async function obterUtilizadorPorId(req, res) {
   try {
@@ -81,6 +85,7 @@ export async function obterUtilizadorPorId(req, res) {
   }
 }
 
+// POST /utilizadores
 
 export async function criarUtilizador(req, res) {
   try {
@@ -163,6 +168,223 @@ export async function criarUtilizador(req, res) {
     return res.status(500).json({
       sucesso: false,
       mensagem: "Erro interno ao criar o utilizador."
+    });
+  }
+}
+
+//PATCH /utilizadores/:id
+
+export async function atualizarUtilizador(req, res) {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "O ID do utilizador é inválido."
+      });
+    }
+
+    const camposPermitidos = [
+      "nome",
+      "email",
+      "password",
+      "tipo_utilizador",
+      "telefone",
+      "foto_perfil",
+      "cargo",
+      "estado"
+    ];
+
+    const dados = req.body;
+
+    if (
+      !dados ||
+      typeof dados !== "object" ||
+      Array.isArray(dados)
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Os dados enviados são inválidos."
+      });
+    }
+
+    const camposRecebidos = Object.keys(dados);
+
+    if (camposRecebidos.length === 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Indica pelo menos um campo para atualizar."
+      });
+    }
+
+    const campoInvalido = camposRecebidos.some(
+      campo => !camposPermitidos.includes(campo)
+    );
+
+    if (campoInvalido) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Foi enviado um campo não permitido."
+      });
+    }
+
+    const [registos] = await pool.query(
+      "SELECT id_utilizador FROM utilizadores WHERE id_utilizador = ?",
+      [id]
+    );
+
+    if (registos.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Utilizador não encontrado."
+      });
+    }
+
+    const atualizacoes = {};
+    const tiposPermitidos = [
+      "admin",
+      "gestor",
+      "colaborador"
+    ];
+    const estadosPermitidos = [
+      "ativo",
+      "inativo",
+      "suspenso"
+    ];
+
+    for (const campo of camposRecebidos) {
+      const valor = dados[campo];
+
+      if (
+        ["nome", "email", "password", "tipo_utilizador", "estado"]
+          .includes(campo) &&
+        (typeof valor !== "string" || !valor.trim())
+      ) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem: `O campo ${campo} é inválido.`
+        });
+      }
+
+      if (campo === "nome") {
+        atualizacoes.nome = valor.trim();
+      }
+
+      if (campo === "email") {
+        atualizacoes.email = valor.trim().toLowerCase();
+      }
+
+      if (campo === "password") {
+        if (valor.length < 8) {
+          return res.status(400).json({
+            sucesso: false,
+            mensagem: "A palavra-passe deve ter pelo menos 8 caracteres."
+          });
+        }
+
+        atualizacoes.password_hash = await bcrypt.hash(valor, 12);
+      }
+
+      if (campo === "tipo_utilizador") {
+        if (!tiposPermitidos.includes(valor)) {
+          return res.status(400).json({
+            sucesso: false,
+            mensagem: "O tipo de utilizador é inválido."
+          });
+        }
+
+        atualizacoes.tipo_utilizador = valor;
+      }
+
+      if (campo === "estado") {
+        if (!estadosPermitidos.includes(valor)) {
+          return res.status(400).json({
+            sucesso: false,
+            mensagem: "O estado do utilizador é inválido."
+          });
+        }
+
+        atualizacoes.estado = valor;
+      }
+
+      if (campo === "telefone" || campo === "cargo") {
+        if (
+          valor !== null &&
+          typeof valor !== "string"
+        ) {
+          return res.status(400).json({
+            sucesso: false,
+            mensagem: `O campo ${campo} deve ser texto ou null.`
+          });
+        }
+
+        atualizacoes[campo] =
+          typeof valor === "string" ? valor.trim() || null : null;
+      }
+
+      if (campo === "foto_perfil") {
+        if (
+          valor !== null &&
+          typeof valor !== "string"
+        ) {
+          return res.status(400).json({
+            sucesso: false,
+            mensagem: "O campo foto_perfil é inválido."
+          });
+        }
+
+        atualizacoes.foto_perfil = valor;
+      }
+    }
+
+    if (atualizacoes.email) {
+      const [emails] = await pool.query(
+        `SELECT id_utilizador
+         FROM utilizadores
+         WHERE email = ? AND id_utilizador <> ?`,
+        [atualizacoes.email, id]
+      );
+
+      if (emails.length > 0) {
+        return res.status(409).json({
+          sucesso: false,
+          mensagem: "Esse email já pertence a outro utilizador."
+        });
+      }
+    }
+
+    const campos = Object.keys(atualizacoes);
+    const valores = Object.values(atualizacoes);
+
+    const clausulas = campos.map(
+      campo => `\`${campo}\` = ?`
+    );
+
+    await pool.query(
+      `UPDATE utilizadores
+       SET ${clausulas.join(", ")}
+       WHERE id_utilizador = ?`,
+      [...valores, id]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Utilizador atualizado com sucesso."
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar utilizador:", error.message);
+
+    if (error.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({
+        sucesso: false,
+        mensagem: "Já existe um registo com esses dados."
+      });
+    }
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao atualizar o utilizador."
     });
   }
 }
