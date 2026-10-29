@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sessão · EloTask</title>
+  <link rel="icon" href="../assets/img/logo-elotask.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/auth.css">
+
+<script type="module" src="../js/pages/auth.js"></script>
+</head>
+<body>
+  <main class="auth"> 
+
+   <section class="auth__marca">
+      <img class="auth__logo" src="../assets/img/logo-elotask.png" alt="" width="96" height="100">
+      <p class="auth__nome">EloTask</p>
+      <p class="auth__slogan">Pessoas. Tarefas. Projetos.</p>
+      <img class="auth__ilustracao" src="../assets/img/ilustracao-equipa.png"
+           alt="Três colegas a trabalhar em conjunto com portáteis" width="460" height="340">
+    </section> 
+<section class="auth__cartao">
+      <h1 class="auth__titulo">Bem-vindo de volta!</h1>
+      <p class="auth__subtitulo">Inicie sessão na sua conta EloTask.</p> 
+
+      <p class="aviso aviso--sucesso" data-aviso-registo hidden role="status">
+        Conta criada com sucesso. Já pode iniciar sessão.
+      </p>
+
+      <form class="form form--coluna" data-form="login" novalidate>
+<p class="aviso aviso--erro" data-erro-geral hidden role="alert"></p>
+
+<div class="campo">
+          <label for="identificador">Email ou utilizador</label>
+          <input id="identificador" name="identificador" type="text"
+                 autocomplete="username" placeholder="nome@exemplo.com"
+                 aria-describedby="erro-identificador">
+          <p class="campo__erro" id="erro-identificador"></p>
+        </div>
+         <div class="campo">
+          <label for="palavra">Palavra-passe</label>
+          <div class="campo__senha">
+            <input id="palavra" name="palavra" type="password"
+                   autocomplete="current-password" placeholder="Palavra-passe"
+                   aria-describedby="erro-palavra">
+            <button class="campo__alternar" type="button" aria-pressed="false"
+                    aria-label="Mostrar palavra-passe" data-alternar-senha>
+             
+              <svg class="olho-aberto" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+              
+              <svg class="olho-fechado" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.9 17.9A10.9 10.9 0 0 1 12 19C5 19 1 12 1 12a18.5 18.5 0 0 1 5.1-5.9M9.9 5.1A10.9 10.9 0 0 1 12 5c7 0 11 7 11 7a18.5 18.5 0 0 1-2.2 3.2M1 1l22 22"/></svg>
+            </button>
+          </div>
+          <p class="campo__erro" id="erro-palavra"></p>
+        </div>
+
+        
+        <div class="campo campo--check">
+          <input id="manter" name="manter" type="checkbox" checked>
+          <label for="manter">Manter sessão iniciada</label>
+        </div>
+
+        <button class="botao" type="submit">Entrar</button>
+        <a class="auth__esqueceu" href="#">Esqueceu a palavra-passe?</a>
+
+        <p class="auth__separador">ou</p>
+
+        <a class="botao botao--secundario" href="registo.html">Registar nova conta</a>
+      </form>
+    </section>
+
+  </main>
+</body>
+</html>
+
+</head>
+<body>
+  ...
+</body>
+</html>
