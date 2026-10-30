@@ -4,14 +4,16 @@ import pool from "../config/database.js";
 export async function listarEquipas(req, res) {
   try {
     const [equipas] = await pool.query(`
-      SELECT
-        e.id_equipa,
-        e.nome,
-        e.descricao,
-        e.id_criador,
-        e.data_criacao
-      FROM equipas e
-      ORDER BY e.data_criacao DESC
+  SELECT
+    e.id_equipa,
+    e.nome,
+    e.descricao,
+    e.id_criador,
+    e.data_criacao,
+    e.estado
+  FROM equipas e
+  WHERE e.estado = 'ativa'
+  ORDER BY e.data_criacao DESC
     `);
 
     return res.status(200).json({
@@ -134,6 +136,58 @@ export async function atualizarEquipa(req, res) {
     return res.status(500).json({
       sucesso: false,
       mensagem: "Erro interno ao atualizar a equipa."
+    });
+  }
+}
+
+
+ // DELETE /equipas/:id
+export async function eliminarEquipa(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Validar o ID
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID da equipa inválido."
+      });
+    }
+
+    // Verificar se a equipa existe e está ativa
+    const [equipas] = await pool.query(
+      `SELECT id_equipa
+       FROM equipas
+       WHERE id_equipa = ? AND estado = 'ativa'`,
+      [id]
+    );
+
+    if (equipas.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Equipa não encontrada ou já se encontra inativa."
+      });
+    }
+
+    // Alterar o estado da equipa para inativa
+    await pool.query(
+      `UPDATE equipas
+       SET estado = 'inativa'
+       WHERE id_equipa = ?`,
+      [id]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Equipa desativada com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao eliminar equipa:", error.message);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao eliminar a equipa."
     });
   }
 }
