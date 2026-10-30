@@ -1,4 +1,5 @@
 import { Router } from "express";
+
 import {
   listarUtilizadores,
   obterUtilizadorPorId,
@@ -6,6 +7,7 @@ import {
   atualizarUtilizador,
   eliminarUtilizador
 } from "../controllers/utilizadoresController.js";
+
 import {
   autenticarToken,
   autorizarPerfil
@@ -13,16 +15,45 @@ import {
 
 const router = Router();
 
-//router.get("/", listarUtilizadores);
+// Consultar todos os utilizadores — apenas administrador
 router.get(
   "/",
   autenticarToken,
   autorizarPerfil("admin"),
   listarUtilizadores
 );
-router.get("/:id", obterUtilizadorPorId);
-router.post("/", criarUtilizador);
-router.patch("/:id", atualizarUtilizador);
-router.delete("/:id", eliminarUtilizador);
+
+// Consultar um utilizador pelo ID — apenas administrador
+router.get(
+  "/:id",
+  autenticarToken,
+  autorizarPerfil("admin"),
+  obterUtilizadorPorId
+);
+
+// Criar um utilizador — apenas administrador
+router.post(
+  "/",
+  autenticarToken,
+  autorizarPerfil("admin"),
+  criarUtilizador
+);
+
+// Atualizar um utilizador — apenas administrador
+router.patch(
+  "/:id",
+  autenticarToken,
+  autorizarPerfil("admin"),
+  atualizarUtilizador
+);
+
+// Desativar um utilizador — apenas administrador
+router.delete(
+  "/:id",
+  autenticarToken,
+  autorizarPerfil("admin"),
+  eliminarUtilizador
+);
 
 export default router;
+

@@ -40,9 +40,6 @@ export function autenticarToken(req, res, next) {
 export function autorizarPerfil(...perfisPermitidos) {
   return (req, res, next) => {
 
-    console.log("Perfil do utilizador:", req.utilizador?.perfil);
-    console.log("Perfis permitidos:", perfisPermitidos);
-
     if (!req.utilizador) {
       return res.status(401).json({
         sucesso: false,
