@@ -388,3 +388,59 @@ export async function atualizarUtilizador(req, res) {
     });
   }
 }
+
+//DELETE /utilizadores/:id
+
+export async function eliminarUtilizador(req, res) {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "O ID do utilizador é inválido."
+      });
+    }
+
+    const [utilizadores] = await pool.query(
+      `SELECT id_utilizador, estado
+       FROM utilizadores
+       WHERE id_utilizador = ?`,
+      [id]
+    );
+
+    if (utilizadores.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Utilizador não encontrado."
+      });
+    }
+
+    if (utilizadores[0].estado === "inativo") {
+      return res.status(409).json({
+        sucesso: false,
+        mensagem: "Este utilizador já se encontra inativo."
+      });
+    }
+
+    await pool.query(
+      `UPDATE utilizadores
+       SET estado = 'inativo'
+       WHERE id_utilizador = ?`,
+      [id]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Utilizador desativado com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao desativar utilizador:", error.message);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao desativar o utilizador."
+    });
+  }
+}
