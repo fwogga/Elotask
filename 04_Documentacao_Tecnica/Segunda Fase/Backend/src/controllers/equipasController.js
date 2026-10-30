@@ -75,3 +75,65 @@ export async function criarEquipa(req, res) {
   }
 }
 
+
+// PUT /equipas/:id
+export async function atualizarEquipa(req, res) {
+  try {
+    const { id } = req.params;
+    const { nome, descricao } = req.body;
+
+    // Validar o ID
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID da equipa inválido."
+      });
+    }
+
+    // Validar o nome
+    if (typeof nome !== "string" || !nome.trim()) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "O nome da equipa é obrigatório."
+      });
+    }
+
+    // Verificar se a equipa existe
+    const [equipas] = await pool.query(
+      "SELECT id_equipa FROM equipas WHERE id_equipa = ?",
+      [id]
+    );
+
+    if (equipas.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Equipa não encontrada."
+      });
+    }
+
+    // Atualizar os dados da equipa
+    await pool.query(
+      `UPDATE equipas
+       SET nome = ?, descricao = ?
+       WHERE id_equipa = ?`,
+      [
+        nome.trim(),
+        descricao?.trim() || null,
+        id
+      ]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Equipa atualizada com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao atualizar equipa:", error.message);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao atualizar a equipa."
+    });
+  }
+}

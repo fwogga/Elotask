@@ -2,7 +2,8 @@ import { Router } from "express";
 
 import {
   listarEquipas,
-  criarEquipa
+  criarEquipa,
+  atualizarEquipa
 } from "../controllers/equipasController.js";
 
 import {
@@ -26,6 +27,14 @@ router.post(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   criarEquipa
+);
+
+// Atualizar equipa — administrador e gestor
+router.put(
+  "/:id",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  atualizarEquipa
 );
 
 export default router;
