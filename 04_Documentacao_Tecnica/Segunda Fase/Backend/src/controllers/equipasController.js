@@ -1,6 +1,6 @@
 import pool from "../config/database.js";
 
-// Get /equipas
+// GET /equipas (ativas)
 export async function listarEquipas(req, res) {
   try {
     const [equipas] = await pool.query(`
@@ -188,6 +188,39 @@ export async function eliminarEquipa(req, res) {
     return res.status(500).json({
       sucesso: false,
       mensagem: "Erro interno ao eliminar a equipa."
+    });
+  }
+}
+
+
+ // GET /equipas (inativas)
+export async function listarEquipasInativas(req, res) {
+  try {
+    const [equipas] = await pool.query(`
+      SELECT
+        e.id_equipa,
+        e.nome,
+        e.descricao,
+        e.id_criador,
+        e.data_criacao,
+        e.estado
+      FROM equipas e
+      WHERE e.estado = 'inativa'
+      ORDER BY e.data_criacao DESC
+    `);
+
+    return res.status(200).json({
+      sucesso: true,
+      total: equipas.length,
+      equipas
+    });
+
+  } catch (error) {
+    console.error("Erro ao listar equipas inativas:", error.message);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao consultar equipas inativas."
     });
   }
 }

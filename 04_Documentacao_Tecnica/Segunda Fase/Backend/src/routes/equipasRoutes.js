@@ -4,7 +4,8 @@ import {
   listarEquipas,
   criarEquipa,
   atualizarEquipa,
-  eliminarEquipa
+  eliminarEquipa,
+  listarEquipasInativas
 } from "../controllers/equipasController.js";
 
 import {
@@ -20,6 +21,14 @@ router.get(
   autenticarToken,
   autorizarPerfil("admin", "gestor", "colaborador"),
   listarEquipas
+);
+
+// Consultar equipas inativas — administrador e gestor
+router.get(
+  "/inativas",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  listarEquipasInativas
 );
 
 // Criar equipa — administrador e gestor
