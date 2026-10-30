@@ -1,6 +1,7 @@
 import express from "express";
 import "dotenv/config";
 import utilizadoresRoutes from "./src/routes/utilizadoresRoutes.js";
+import autenticacaoRoutes from "./src/routes/autenticacaoRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,6 +15,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/utilizadores", utilizadoresRoutes);
+app.use("/autenticacao", autenticacaoRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor a correr na porta ${PORT}`);
