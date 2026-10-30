@@ -6,10 +6,20 @@ import {
   atualizarUtilizador,
   eliminarUtilizador
 } from "../controllers/utilizadoresController.js";
+import {
+  autenticarToken,
+  autorizarPerfil
+} from "../middlewares/autenticacaoMiddleware.js";
 
 const router = Router();
 
-router.get("/", listarUtilizadores);
+//router.get("/", listarUtilizadores);
+router.get(
+  "/",
+  autenticarToken,
+  autorizarPerfil("admin"),
+  listarUtilizadores
+);
 router.get("/:id", obterUtilizadorPorId);
 router.post("/", criarUtilizador);
 router.patch("/:id", atualizarUtilizador);
