@@ -4,6 +4,7 @@ import utilizadoresRoutes from "./src/routes/utilizadoresRoutes.js";
 import autenticacaoRoutes from "./src/routes/autenticacaoRoutes.js";
 import equipasRoutes from "./src/routes/equipasRoutes.js";
 import membrosEquipaRoutes from "./src/routes/membrosEquipaRoutes.js";
+import projetosRoutes from "./src/routes/projetosRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,7 @@ app.use("/utilizadores", utilizadoresRoutes);
 app.use("/autenticacao", autenticacaoRoutes);
 app.use("/equipas", equipasRoutes);
 app.use("/equipas", membrosEquipaRoutes);
+app.use("/projetos", projetosRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor a correr na porta ${PORT}`);
