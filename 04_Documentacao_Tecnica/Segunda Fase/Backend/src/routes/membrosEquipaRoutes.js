@@ -3,7 +3,8 @@ import { Router } from "express";
 
 import {
   adicionarMembroEquipa,
-  listarMembrosEquipa
+  listarMembrosEquipa,
+  removerMembroEquipa
 } from "../controllers/membrosEquipaController.js";
 
 import {
@@ -27,6 +28,14 @@ router.get(
   autenticarToken,
   autorizarPerfil("admin", "gestor", "colaborador"),
   listarMembrosEquipa
+);
+
+// Remover membro da equipa
+router.delete(
+  "/:id/membros/:id_utilizador",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  removerMembroEquipa
 );
 
 export default router;
