@@ -5,7 +5,8 @@ import {
   criarEquipa,
   atualizarEquipa,
   eliminarEquipa,
-  listarEquipasInativas
+  listarEquipasInativas,
+  reativarEquipa
 } from "../controllers/equipasController.js";
 
 import {
@@ -53,6 +54,14 @@ router.delete(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   eliminarEquipa
+);
+
+// Reativar equipa — administrador e gestor
+router.put(
+  "/:id/reativar",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  reativarEquipa
 );
 
 export default router;

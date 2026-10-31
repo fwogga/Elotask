@@ -224,3 +224,55 @@ export async function listarEquipasInativas(req, res) {
     });
   }
 }
+
+
+ // Reativar uma equipa
+export async function reativarEquipa(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Validar o ID
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID da equipa inválido."
+      });
+    }
+
+    // Verificar se a equipa existe e está inativa
+    const [equipas] = await pool.query(
+      `SELECT id_equipa
+       FROM equipas
+       WHERE id_equipa = ? AND estado = 'inativa'`,
+      [id]
+    );
+
+    if (equipas.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Equipa não encontrada ou já se encontra ativa."
+      });
+    }
+
+    // Alterar o estado para ativa
+    await pool.query(
+      `UPDATE equipas
+       SET estado = 'ativa'
+       WHERE id_equipa = ?`,
+      [id]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Equipa reativada com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao reativar equipa:", error.message);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao reativar a equipa."
+    });
+  }
+}
