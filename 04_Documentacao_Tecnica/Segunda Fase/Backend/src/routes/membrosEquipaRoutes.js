@@ -4,7 +4,8 @@ import { Router } from "express";
 import {
   adicionarMembroEquipa,
   listarMembrosEquipa,
-  removerMembroEquipa
+  removerMembroEquipa,
+  reativarMembroEquipa
 } from "../controllers/membrosEquipaController.js";
 
 import {
@@ -36,6 +37,14 @@ router.delete(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   removerMembroEquipa
+);
+
+// Reativar membro da equipa
+router.put(
+  "/:id/membros/:id_utilizador/reativar",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  reativarMembroEquipa
 );
 
 export default router;

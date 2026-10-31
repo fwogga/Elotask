@@ -222,3 +222,98 @@ export async function removerMembroEquipa(req, res) {
     });
   }
 }
+
+// PUT /equipas/:id/membros/:id_utilizador/reativar
+export async function reativarMembroEquipa(req, res) {
+  try {
+    const { id, id_utilizador } = req.params;
+
+    // Validar o ID da equipa
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID da equipa inválido."
+      });
+    }
+
+    // Validar o ID do utilizador
+    if (
+      !Number.isInteger(Number(id_utilizador)) ||
+      Number(id_utilizador) <= 0
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do utilizador inválido."
+      });
+    }
+
+    // Verificar se a equipa existe e está ativa
+    const [equipas] = await pool.query(
+      `SELECT id_equipa
+       FROM equipas
+       WHERE id_equipa = ? AND estado = 'ativa'`,
+      [id]
+    );
+
+    if (equipas.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Equipa não encontrada ou inativa."
+      });
+    }
+
+    // Verificar se o utilizador existe e está ativo
+    const [utilizadores] = await pool.query(
+      `SELECT id_utilizador
+       FROM utilizadores
+       WHERE id_utilizador = ? AND estado = 'ativo'`,
+      [id_utilizador]
+    );
+
+    if (utilizadores.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Utilizador não encontrado ou inativo."
+      });
+    }
+
+    // Verificar se existe uma associação inativa
+    const [membros] = await pool.query(
+      `SELECT id_utilizador
+       FROM membros_equipa
+       WHERE id_equipa = ?
+         AND id_utilizador = ?
+         AND estado = 'inativo'`,
+      [id, id_utilizador]
+    );
+
+    if (membros.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Associação inativa não encontrada."
+      });
+    }
+
+    // Reativar a associação
+    await pool.query(
+      `UPDATE membros_equipa
+       SET estado = 'ativo'
+       WHERE id_equipa = ?
+         AND id_utilizador = ?`,
+      [id, id_utilizador]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Membro reativado na equipa com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao reativar membro:", error.message);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao reativar membro."
+    });
+  }
+}
