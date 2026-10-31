@@ -2,7 +2,8 @@
 import { Router } from "express";
 
 import {
-  adicionarMembroEquipa
+  adicionarMembroEquipa,
+  listarMembrosEquipa
 } from "../controllers/membrosEquipaController.js";
 
 import {
@@ -18,6 +19,14 @@ router.post(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   adicionarMembroEquipa
+);
+
+// Listar membros da equipa
+router.get(
+  "/:id/membros",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor", "colaborador"),
+  listarMembrosEquipa
 );
 
 export default router;

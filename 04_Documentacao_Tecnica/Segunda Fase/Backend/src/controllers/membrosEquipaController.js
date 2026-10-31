@@ -1,6 +1,6 @@
 import pool from "../config/database.js";
 
-// POST /:id/membros
+// POST equipas/:id/membros
 export async function adicionarMembroEquipa(req, res) {
   try {
     const { id } = req.params;
@@ -89,6 +89,70 @@ export async function adicionarMembroEquipa(req, res) {
     return res.status(500).json({
       sucesso: false,
       mensagem: "Erro interno ao adicionar membro à equipa."
+    });
+  }
+}
+
+// GET equipas/:id/membros
+export async function listarMembrosEquipa(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Validar o ID da equipa
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID da equipa inválido."
+      });
+    }
+
+    // Verificar se a equipa existe e está ativa
+    const [equipas] = await pool.query(
+      `SELECT id_equipa, nome
+       FROM equipas
+       WHERE id_equipa = ? AND estado = 'ativa'`,
+      [id]
+    );
+
+    if (equipas.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Equipa não encontrada ou inativa."
+      });
+    }
+
+    // Consultar os membros da equipa
+    const [membros] = await pool.query(
+      `SELECT
+         u.id_utilizador,
+         u.nome,
+         u.email,
+         u.tipo_utilizador,
+         u.cargo,
+         me.funcao,
+         me.data_entrada
+       FROM membros_equipa me
+       INNER JOIN utilizadores u
+         ON me.id_utilizador = u.id_utilizador
+       WHERE me.id_equipa = ?
+         AND u.estado = 'ativo'
+       ORDER BY u.nome ASC`,
+      [id]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      equipa: equipas[0],
+      total_membros: membros.length,
+      membros
+    });
+
+  } catch (error) {
+    console.error("Erro ao listar membros da equipa:", error.message);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao listar membros da equipa."
     });
   }
 }
