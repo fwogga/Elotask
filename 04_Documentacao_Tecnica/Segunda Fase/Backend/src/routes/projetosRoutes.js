@@ -3,7 +3,9 @@ import { Router } from "express";
 import {
   criarProjeto,
   listarProjetos,
-  obterProjetoPorId
+  obterProjetoPorId,
+  atualizarProjeto,
+  atualizarEstadoProjeto
 } from "../controllers/projetosController.js";
 
 import {
@@ -35,6 +37,22 @@ router.get(
   autenticarToken,
   autorizarPerfil("admin", "gestor", "colaborador"),
   obterProjetoPorId
+);
+
+// Atualizar um projeto
+router.put(
+  "/:id",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  atualizarProjeto
+);
+
+// Atualizar estado do projeto
+router.put(
+  "/:id/estado",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  atualizarEstadoProjeto
 );
 
 export default router;

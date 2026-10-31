@@ -170,3 +170,194 @@ export async function obterProjetoPorId(req, res) {
     });
   }
 }
+
+// PUT /projetos/:id
+export async function atualizarProjeto(req, res) {
+  try {
+    const { id } = req.params;
+
+    const {
+      nome,
+      descricao,
+      data_inicio,
+      data_fim,
+      estado
+    } = req.body;
+
+    // Validar o ID do projeto
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do projeto inválido."
+      });
+    }
+
+    // Validar o nome
+    if (
+      typeof nome !== "string" ||
+      nome.trim() === ""
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "O nome do projeto é obrigatório."
+      });
+    }
+
+    // Estados permitidos na base de dados
+    const estadosPermitidos = [
+      "planeado",
+      "em_curso",
+      "concluido",
+      "suspenso",
+      "cancelado"
+    ];
+
+    if (!estadosPermitidos.includes(estado)) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Estado do projeto inválido."
+      });
+    }
+
+    // Validar as datas
+    if (
+      data_inicio &&
+      isNaN(Date.parse(data_inicio))
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "A data de início é inválida."
+      });
+    }
+
+    if (
+      data_fim &&
+      isNaN(Date.parse(data_fim))
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "A data de fim é inválida."
+      });
+    }
+
+    // Verificar a ordem das datas
+    if (
+      data_inicio &&
+      data_fim &&
+      new Date(data_fim) < new Date(data_inicio)
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "A data de fim não pode ser anterior à data de início."
+      });
+    }
+
+    // Verificar se o projeto existe
+    const [projetos] = await pool.query(
+      `SELECT id_projeto
+       FROM projetos
+       WHERE id_projeto = ?`,
+      [id]
+    );
+
+    if (projetos.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Projeto não encontrado."
+      });
+    }
+
+    // Atualizar os dados do projeto
+    await pool.query(
+      `UPDATE projetos
+       SET nome = ?,
+           descricao = ?,
+           data_inicio = ?,
+           data_fim = ?,
+           estado = ?
+       WHERE id_projeto = ?`,
+      [
+        nome.trim(),
+        descricao || null,
+        data_inicio || null,
+        data_fim || null,
+        estado,
+        id
+      ]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Projeto atualizado com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao atualizar projeto:", error.message);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao atualizar projeto."
+    });
+  }
+}
+
+// PUT/projetos/:id/estado
+
+export async function atualizarEstadoProjeto(req, res) {
+  try {
+    const { id } = req.params;
+    const { estado } = req.body;
+
+    const estadosPermitidos = [
+      "planeado",
+      "em_curso",
+      "concluido",
+      "suspenso",
+      "cancelado"
+    ];
+
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do projeto inválido."
+      });
+    }
+
+    if (!estadosPermitidos.includes(estado)) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Estado do projeto inválido."
+      });
+    }
+
+    const [projetos] = await pool.query(
+      "SELECT id_projeto FROM projetos WHERE id_projeto = ?",
+      [id]
+    );
+
+    if (projetos.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Projeto não encontrado."
+      });
+    }
+
+    await pool.query(
+      "UPDATE projetos SET estado = ? WHERE id_projeto = ?",
+      [estado, id]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Estado do projeto atualizado com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao atualizar estado do projeto:", error);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao atualizar estado do projeto."
+    });
+  }
+}
