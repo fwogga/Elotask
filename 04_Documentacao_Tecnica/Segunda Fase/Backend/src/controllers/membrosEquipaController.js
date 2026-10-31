@@ -381,3 +381,77 @@ export async function listarMembrosInativosEquipa(req, res) {
     });
   }
 }
+
+// PUT /equipas/:id/membros/id_utilizador
+export async function atualizarFuncaoMembro(req, res) {
+  try {
+    const { id, id_utilizador } = req.params;
+    const { funcao } = req.body;
+
+    // Validar o ID da equipa
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID da equipa inválido."
+      });
+    }
+
+    // Validar o ID do utilizador
+    if (
+      !Number.isInteger(Number(id_utilizador)) ||
+      Number(id_utilizador) <= 0
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do utilizador inválido."
+      });
+    }
+
+    // Validar a função
+    if (typeof funcao !== "string" || funcao.trim() === "") {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "A função do membro é obrigatória."
+      });
+    }
+
+    // Verificar se o membro pertence à equipa e está ativo
+    const [membros] = await pool.query(
+      `SELECT id_utilizador
+       FROM membros_equipa
+       WHERE id_equipa = ?
+         AND id_utilizador = ?
+         AND estado = 'ativo'`,
+      [id, id_utilizador]
+    );
+
+    if (membros.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Membro não encontrado nesta equipa ou está inativo."
+      });
+    }
+
+    // Atualizar a função do membro
+    await pool.query(
+      `UPDATE membros_equipa
+       SET funcao = ?
+       WHERE id_equipa = ?
+         AND id_utilizador = ?`,
+      [funcao.trim(), id, id_utilizador]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Função do membro atualizada com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao atualizar função do membro:", error.message);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao atualizar a função do membro."
+    });
+  }
+}

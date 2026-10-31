@@ -6,7 +6,8 @@ import {
   listarMembrosEquipa,
   removerMembroEquipa,
   reativarMembroEquipa,
-  listarMembrosInativosEquipa
+  listarMembrosInativosEquipa,
+  atualizarFuncaoMembro
 } from "../controllers/membrosEquipaController.js";
 
 import {
@@ -56,4 +57,11 @@ router.get(
   listarMembrosInativosEquipa
 );
 
+// Atualizar a função do membro da equipa
+router.put(
+  "/:id/membros/:id_utilizador",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  atualizarFuncaoMembro
+);
 export default router;
