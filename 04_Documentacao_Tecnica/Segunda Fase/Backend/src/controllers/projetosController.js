@@ -1,6 +1,6 @@
 import pool from "../config/database.js";
 
-// POST /
+// POST /projetos
 export async function criarProjeto(req, res) {
   try {
     const {
@@ -74,6 +74,43 @@ export async function criarProjeto(req, res) {
     return res.status(500).json({
       sucesso: false,
       mensagem: "Erro interno ao criar projeto."
+    });
+  }
+}
+
+// GET /projetos
+export async function listarProjetos(req, res) {
+  try {
+    const [projetos] = await pool.query(
+      `SELECT
+         p.id_projeto,
+         p.nome,
+         p.descricao,
+         p.data_inicio,
+         p.data_fim,
+         p.estado,
+         p.data_criacao,
+         u.id_utilizador AS id_criador,
+         u.nome AS nome_criador,
+         u.email AS email_criador
+       FROM projetos p
+       INNER JOIN utilizadores u
+         ON p.id_criador = u.id_utilizador
+       ORDER BY p.data_criacao DESC`
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      total_projetos: projetos.length,
+      projetos
+    });
+
+  } catch (error) {
+    console.error("Erro ao listar projetos:", error.message);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao listar projetos."
     });
   }
 }

@@ -1,7 +1,8 @@
 import { Router } from "express";
 
 import {
-  criarProjeto
+  criarProjeto,
+  listarProjetos
 } from "../controllers/projetosController.js";
 
 import {
@@ -17,6 +18,14 @@ router.post(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   criarProjeto
+);
+
+// Listar todos os projetos
+router.get(
+  "/",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor", "colaborador"),
+  listarProjetos
 );
 
 export default router;
