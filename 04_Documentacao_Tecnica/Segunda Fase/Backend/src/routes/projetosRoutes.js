@@ -2,7 +2,8 @@ import { Router } from "express";
 
 import {
   criarProjeto,
-  listarProjetos
+  listarProjetos,
+  obterProjetoPorId
 } from "../controllers/projetosController.js";
 
 import {
@@ -26,6 +27,14 @@ router.get(
   autenticarToken,
   autorizarPerfil("admin", "gestor", "colaborador"),
   listarProjetos
+);
+
+// Consultar um projeto específico
+router.get(
+  "/:id",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor", "colaborador"),
+  obterProjetoPorId
 );
 
 export default router;

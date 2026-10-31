@@ -114,3 +114,59 @@ export async function listarProjetos(req, res) {
     });
   }
 }
+
+// Get /projetos/:id
+export async function obterProjetoPorId(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Validar o ID do projeto
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do projeto inválido."
+      });
+    }
+
+    // Procurar o projeto na base de dados
+    const [projetos] = await pool.query(
+      `SELECT
+         p.id_projeto,
+         p.nome,
+         p.descricao,
+         p.data_inicio,
+         p.data_fim,
+         p.estado,
+         p.data_criacao,
+         u.id_utilizador AS id_criador,
+         u.nome AS nome_criador,
+         u.email AS email_criador
+       FROM projetos p
+       INNER JOIN utilizadores u
+         ON p.id_criador = u.id_utilizador
+       WHERE p.id_projeto = ?`,
+      [id]
+    );
+
+    // Verificar se o projeto existe
+    if (projetos.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Projeto não encontrado."
+      });
+    }
+
+    return res.status(200).json({
+      sucesso: true,
+      projeto: projetos[0]
+    });
+
+  } catch (error) {
+    console.error("Erro ao consultar projeto:", error.message);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao consultar projeto."
+    });
+  }
+}
