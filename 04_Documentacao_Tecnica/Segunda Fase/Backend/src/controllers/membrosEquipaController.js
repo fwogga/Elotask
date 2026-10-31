@@ -317,3 +317,67 @@ export async function reativarMembroEquipa(req, res) {
     });
   }
 }
+
+// GET /equipas/:id/membros/inativos
+export async function listarMembrosInativosEquipa(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Validar o ID da equipa
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID da equipa inválido."
+      });
+    }
+
+    // Verificar se a equipa existe
+    const [equipas] = await pool.query(
+      `SELECT id_equipa, nome
+       FROM equipas
+       WHERE id_equipa = ?`,
+      [id]
+    );
+
+    if (equipas.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Equipa não encontrada."
+      });
+    }
+
+    // Consultar os membros inativos
+    const [membros] = await pool.query(
+      `SELECT
+         u.id_utilizador,
+         u.nome,
+         u.email,
+         u.tipo_utilizador,
+         u.estado AS estado_utilizador,
+         me.funcao,
+         me.data_entrada
+       FROM membros_equipa me
+       INNER JOIN utilizadores u
+         ON me.id_utilizador = u.id_utilizador
+       WHERE me.id_equipa = ?
+         AND me.estado = 'inativo'
+       ORDER BY u.nome ASC`,
+      [id]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      equipa: equipas[0],
+      total_membros_inativos: membros.length,
+      membros
+    });
+
+  } catch (error) {
+    console.error("Erro ao listar membros inativos:", error.message);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao listar membros inativos."
+    });
+  }
+}

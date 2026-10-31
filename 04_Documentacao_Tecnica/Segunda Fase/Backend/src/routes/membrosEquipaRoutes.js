@@ -5,7 +5,8 @@ import {
   adicionarMembroEquipa,
   listarMembrosEquipa,
   removerMembroEquipa,
-  reativarMembroEquipa
+  reativarMembroEquipa,
+  listarMembrosInativosEquipa
 } from "../controllers/membrosEquipaController.js";
 
 import {
@@ -45,6 +46,14 @@ router.put(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   reativarMembroEquipa
+);
+
+// Listar membros inativos da equipa
+router.get(
+  "/:id/membros/inativos",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  listarMembrosInativosEquipa
 );
 
 export default router;
