@@ -11,20 +11,116 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="../css/tokens.css">
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/layout.css">
-  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/pages/reunioes.css">
 
-  <script type="module" src="../js/main.js"></script>
+  <script type="module" src="../js/comum.js"></script>
+  <script type="module" src="../js/pages/reunioes.js"></script>
 </head>
 <body>
   <div class="app">
     <aside class="sidebar" data-sidebar data-ativo="reunioes"></aside>
 
-    <main class="conteudo">
-      <h1 class="titulo-pagina">Reuniões</h1>
-      <p class="cartao em-construcao">Este ecrã ainda está em construção.</p>
+    <main class="conteudo conteudo--reunioes">
+      <header class="cabecalho-pagina">
+        <h1 class="titulo-pagina">Reuniões</h1>
+        <button class="botao botao--compacto" type="button" data-agendar>
+          <img src="../assets/icons/plus.svg" alt="" width="24" height="24">
+          Agendar reunião
+        </button>
+      </header>
+
+      <div class="separadores" role="tablist" aria-label="Reuniões">
+        <button class="separador" type="button" role="tab" id="tab-proximas" aria-controls="lista-reunioes" aria-selected="true" data-separador="proximas">Próximas</button>
+        <button class="separador" type="button" role="tab" id="tab-passadas" aria-controls="lista-reunioes" aria-selected="false" tabindex="-1" data-separador="passadas">Passadas</button>
+      </div>
+
+      <ul class="cartao lista-reunioes" id="lista-reunioes" role="tabpanel" aria-labelledby="tab-proximas" data-lista></ul>
     </main>
   </div>
+
+  <dialog class="dialogo dialogo--largo" data-dialogo-agendar aria-labelledby="agendar-titulo">
+    <form class="formulario" novalidate data-form>
+      <header class="formulario__total">
+        <h2 class="dialogo__titulo" id="agendar-titulo">Agendar reunião</h2>
+        <p class="agendar__instrucao">Define os detalhes e convida a tua equipa. <span class="agendar__nota">* Campos obrigatórios</span></p>
+      </header>
+
+      <div class="campo">
+        <label for="titulo">Título da reunião *</label>
+        <input id="titulo" name="titulo" type="text" maxlength="120" placeholder="Ex.: Revisão do design do website" aria-describedby="erro-titulo">
+        <p class="campo__erro" id="erro-titulo"></p>
+      </div>
+
+      <div class="campo">
+        <label for="projeto">Projeto *</label>
+        <select id="projeto" name="projetoId" aria-describedby="erro-projeto">
+          <option value="">Escolher projeto</option>
+          <option value="todos">Todos os projetos</option>
+        </select>
+        <p class="campo__erro" id="erro-projeto"></p>
+      </div>
+
+      <fieldset class="campo formulario__total" aria-describedby="erro-participantes">
+        <legend class="campo__rotulo campo__rotulo--com-contagem">
+          Participantes *
+          <span class="campo__contagem" data-contagem aria-live="polite"></span>
+        </legend>
+        <div class="participantes" data-participantes>
+          <div class="participantes__escolhidos" data-escolhidos></div>
+          <div class="participantes__adicionar">
+            <label class="sr-only" for="adicionar">Adicionar participante</label>
+            <select id="adicionar" data-adicionar>
+              <option value="">Adicionar participantes</option>
+            </select>
+            <img src="../assets/icons/plus-roxo.svg" alt="" width="19" height="19">
+          </div>
+        </div>
+        <p class="campo__erro" id="erro-participantes"></p>
+      </fieldset>
+
+      <div class="campo">
+        <label for="data">Data *</label>
+        <input id="data" name="data" type="date" aria-describedby="erro-data">
+        <p class="campo__erro" id="erro-data"></p>
+      </div>
+
+      <div class="agendar__horas">
+        <div class="campo">
+          <label for="inicio">Hora de início *</label>
+          <input id="inicio" name="inicio" type="time" value="10:00" aria-describedby="erro-inicio">
+          <p class="campo__erro" id="erro-inicio"></p>
+        </div>
+        <div class="campo">
+          <label for="fim">Hora de fim *</label>
+          <input id="fim" name="fim" type="time" value="11:00" aria-describedby="erro-fim">
+          <p class="campo__erro" id="erro-fim"></p>
+        </div>
+      </div>
+
+      <div class="campo formulario__total">
+        <label for="local">Local ou ligação de videoconferência *</label>
+        <div class="campo__com-icone">
+          <input id="local" name="local" type="text" placeholder="https://meet.elotask.pt/... ou Sala 2.04" aria-describedby="erro-local">
+          <img src="../assets/icons/video.svg" alt="" width="24" height="24">
+        </div>
+        <p class="campo__erro" id="erro-local"></p>
+      </div>
+
+      <div class="campo formulario__total">
+        <label for="descricao">Descrição</label>
+        <textarea id="descricao" name="descricao" rows="2" placeholder="Objetivo da reunião, pontos a discutir..."></textarea>
+      </div>
+
+      <div class="agendar__acoes formulario__total">
+        <div class="agendar__info">
+          <p>Os convites serão enviados ao agendar a reunião.</p>
+          <p class="agendar__duracao" data-duracao>Fuso horário: Lisboa · Duração: 1 hora</p>
+        </div>
+        <button class="botao botao--secundario" type="button" data-cancelar>Cancelar</button>
+        <button class="botao" type="submit">Agendar reunião</button>
+      </div>
+    </form>
+  </dialog>
 </body>
 </html>

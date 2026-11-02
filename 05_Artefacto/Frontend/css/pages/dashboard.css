@@ -11,12 +11,6 @@
   color: var(--texto-secundario);
 }
 
-.grelha-4 {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
-}
-
 /* --- Estatísticas -------------------------------------------------------- */
 
 .estatisticas {
@@ -56,49 +50,6 @@
   line-height: 1.25;
 }
 
-/* --- Projetos ------------------------------------------------------------ */
-
-.projeto {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 20px;
-  height: 100%;
-  padding: 22px 20px;
-}
-
-.projeto__cabecalho {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.projeto__nome {
-  font-size: var(--texto-lg);
-  font-weight: var(--peso-semibold);
-}
-
-.projeto:hover .projeto__nome {
-  color: var(--cor-primaria);
-}
-
-.projeto .icone-bloco {
-  width: 50px;
-  height: 50px;
-}
-
-.projeto .progresso {
-  align-self: stretch;
-}
-
-.projeto__rodape {
-  display: flex;
-  align-items: center;
-  gap: var(--esp-2);
-  font-size: 15.5px;
-  color: var(--texto-secundario);
-}
-
 /* --- Tarefas recentes + Próximas reuniões ------------------------------- */
 
 .dashboard-fundo {
@@ -125,6 +76,10 @@
   gap: 22px;
   min-height: 80px;
   padding: 14px 12px 14px 6px;
+}
+
+.tarefa:hover .tarefa__titulo {
+  color: var(--cor-primaria);
 }
 
 .tarefa .icone-bloco {
@@ -198,16 +153,7 @@
   color: var(--texto-secundario);
 }
 
-.erro-carregar {
-  margin-top: var(--esp-6);
-  color: var(--estado-erro);
-}
-
 @media (max-width: 1280px) {
-  .grelha-4 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .dashboard-fundo {
     grid-template-columns: minmax(0, 1fr);
   }

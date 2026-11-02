@@ -3,17 +3,113 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EloTask</title>
+  <title>EloTask · Conecta. Comunica. Colabora.</title>
+  <meta name="description" content="O EloTask reúne comunicação, tarefas, projetos, reuniões, documentos e turnos num único ambiente digital.">
+  <link rel="icon" href="assets/img/logo-elotask.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/pages/boas-vindas.css">
 </head>
-<body>
-  <h1>EloTask</h1>
-  <p>Pessoas. Tarefas. Projetos.</p>
+<body class="bv">
+  <header class="bv-topo">
+    <a class="bv-marca" href="index.html">
+      <img src="assets/img/logo-elotask.png" alt="" width="46" height="48">
+      <span>EloTask</span>
+    </a>
+    <nav class="bv-topo__acoes" aria-label="Principal">
+      <a class="bv-topo__link" href="#funcionalidades">Funcionalidades</a>
+      <a class="bv-topo__link" href="#para-quem">Para quem</a>
+      <div class="bv-topo__botoes">
+        <a class="bv-botao bv-botao--secundario" href="pages/login.html">Iniciar sessão</a>
+        <a class="bv-botao" href="pages/registro.html">Criar conta</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="bv-hero">
+      <div class="bv-hero__texto">
+        <p class="bv-lema">Conecta. Comunica. Colabora.</p>
+        <h1 class="bv-hero__titulo">Aproxime as pessoas das suas <span>tarefas.</span></h1>
+        <p class="bv-hero__descricao">
+          O EloTask reúne comunicação, tarefas, projetos, reuniões, documentos e turnos num único ambiente digital,
+          para que a sua equipa trabalhe organizada e sempre ligada.
+        </p>
+        <div class="bv-hero__botoes">
+          <a class="bv-botao" href="pages/registro.html">Criar conta</a>
+          <a class="bv-botao bv-botao--secundario" href="pages/login.html">Já tenho conta</a>
+        </div>
+      </div>
+      <img class="bv-hero__ilustracao" src="assets/img/ilustracao-equipa.png"
+           alt="Três colegas a trabalhar em conjunto com portáteis" width="588" height="470">
+    </section>
+
+    <section class="bv-funcionalidades" id="funcionalidades">
+      <div class="bv-cabecalho">
+        <p class="bv-sobretitulo">Funcionalidades</p>
+        <h2 class="bv-titulo">Tudo o que a sua equipa precisa, num só lugar</h2>
+        <p class="bv-subtitulo">Menos aplicações, menos informação dispersa e mais tempo para o que realmente importa.</p>
+      </div>
+
+      <ul class="bv-cartoes">
+        <li class="bv-cartao">
+          <span class="bv-cartao__icone"><img src="assets/icons/bv-tarefas.svg" alt="" width="24" height="24"></span>
+          <h3>Tarefas e projetos</h3>
+          <p>Crie, atribua e acompanhe tarefas e projetos, com responsáveis e prazos sempre claros.</p>
+        </li>
+        <li class="bv-cartao">
+          <span class="bv-cartao__icone"><img src="assets/icons/bv-mensagens.svg" alt="" width="24" height="24"></span>
+          <h3>Mensagens e reuniões</h3>
+          <p>Converse em equipa ou individualmente e organize reuniões sem sair da plataforma.</p>
+        </li>
+        <li class="bv-cartao">
+          <span class="bv-cartao__icone"><img src="assets/icons/bv-calendario.svg" alt="" width="24" height="24"></span>
+          <h3>Calendário e documentos</h3>
+          <p>Consulte prazos e eventos num só calendário e partilhe documentos com controlo de acesso.</p>
+        </li>
+        <li class="bv-cartao">
+          <span class="bv-cartao__icone"><img src="assets/icons/bv-turnos.svg" alt="" width="24" height="24"></span>
+          <h3>Gestão de turnos</h3>
+          <p>Registe disponibilidades, gere escalas e valide pedidos de troca com apoio de inteligência artificial.</p>
+        </li>
+      </ul>
+    </section>
+
+    <section class="bv-publicos" id="para-quem">
+      <h2 class="bv-titulo">Pensado para quem trabalha em equipa</h2>
+      <ul class="bv-publicos__lista">
+        <li>Estudantes e grupos académicos</li>
+        <li>Equipas de desenvolvimento de software</li>
+        <li>Pequenas e médias empresas</li>
+        <li>Gestores e coordenadores de projetos</li>
+        <li>Equipas remotas ou híbridas</li>
+        <li>Associações e organizações</li>
+      </ul>
+    </section>
+
+    <section class="bv-adesao">
+      <div class="bv-adesao__caixa">
+        <div class="bv-adesao__texto">
+          <p class="bv-sobretitulo">Junte-se ao EloTask</p>
+          <h2>Pronto para ligar a sua equipa?</h2>
+          <p>Crie a sua conta para começar ou entre se já faz parte de uma equipa no EloTask.</p>
+        </div>
+        <div class="bv-adesao__acoes">
+          <a class="bv-botao bv-botao--branco" href="pages/registro.html">Criar conta</a>
+          <p>Já tem conta? <a href="pages/login.html">Iniciar sessão</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bv-rodape">
+    <p>EloTask · Conecta. Comunica. Colabora.</p>
+    <p>© 2026 EloTask</p>
+  </footer>
 </body>
 </html>

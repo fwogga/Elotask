@@ -1,0 +1,912 @@
+/* Estilos partilhados por todas as páginas. As cores e tamanhos vêm de tokens.css,
+   que tem de ser carregado antes deste ficheiro. */
+
+/* ==========================================================================
+   1. Base: reset e estilos globais
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--fonte);
+  font-size: var(--texto-md);
+  color: var(--texto-titulo);
+  background: var(--fundo-pagina);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Botões e campos não herdam a fonte da página por defeito */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+img,
+svg {
+  display: block;
+}
+
+/* Contorno visível só quando se navega com o teclado */
+:focus-visible {
+  outline: 3px solid var(--cor-destaque);
+  outline-offset: 2px;
+}
+
+/* Esconde o texto no ecrã mas mantém-no para leitores de ecrã */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   2. Layout: [ sidebar ][ conteúdo ], comum aos ecrãs da aplicação
+   ========================================================================== */
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* --- Sidebar ------------------------------------------------------------ */
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  flex: 0 0 var(--sidebar-largura);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  padding: 30px 13px 24px;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--sidebar-gradiente-inicio), var(--sidebar-gradiente-fim));
+  color: var(--texto-inverso);
+}
+
+/* Círculos decorativos no fundo */
+.sidebar::before,
+.sidebar::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.sidebar::before {
+  width: 320px;
+  height: 320px;
+  left: -60px;
+  bottom: 36px;
+  background: linear-gradient(180deg, var(--cor-primaria), var(--sidebar-gradiente-inicio));
+}
+
+.sidebar::after {
+  width: 300px;
+  height: 300px;
+  left: 54px;
+  bottom: -35px;
+  border: 6px solid rgba(168, 100, 236, 0.25);
+}
+
+/* Mantém o conteúdo da sidebar por cima dos círculos */
+.sidebar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar__marca {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  padding-left: 25px;
+  margin-bottom: 30px;
+  font-size: 33px;
+  font-weight: var(--peso-semibold);
+}
+
+.sidebar__logo {
+  width: 43px;
+  height: 45px;
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+  height: 58px;
+  padding: 0 16px 0 22px;
+  border-radius: var(--raio-nav);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-medio);
+  transition: background-color 0.15s ease;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Item da página atual */
+.nav-item[aria-current="page"] {
+  background: var(--cor-destaque);
+}
+
+.nav-item__icone {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+/* Ponto vermelho de "não lidas" */
+.nav-item__badge {
+  position: absolute;
+  left: 40px;
+  top: 5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--estado-notificacao);
+}
+
+/* margin-top: auto empurra o utilizador para o fundo da sidebar */
+.sidebar__utilizador {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: var(--esp-2) var(--esp-3);
+  border: 0;
+  border-radius: var(--raio-nav);
+  background: none;
+  cursor: pointer;
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-medio);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sidebar__utilizador:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.sidebar__utilizador > img {
+  margin-left: auto;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--cor-primaria);
+  color: var(--texto-inverso);
+  font-size: var(--texto-md);
+  font-weight: var(--peso-bold);
+}
+
+/* --- Conteúdo ----------------------------------------------------------- */
+
+.conteudo {
+  flex: 1;
+  min-width: 0;
+  padding: 22px 26px 34px 31px;
+}
+
+.barra-topo {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 30px;
+}
+
+.pesquisa {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+  width: 416px;
+  max-width: 100%;
+  height: 55px;
+  padding: 0 26px;
+  border-radius: var(--raio-pilula);
+  background: var(--fundo-pesquisa);
+}
+
+.pesquisa input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  outline: none;
+  font-size: var(--texto-lg);
+}
+
+.pesquisa input::placeholder {
+  color: var(--texto-placeholder);
+}
+
+.botao-icone {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* Abaixo de 1100px a sidebar fica só com ícones */
+@media (max-width: 1100px) {
+  :root {
+    --sidebar-largura: 88px;
+  }
+
+  .sidebar__marca span,
+  .nav-item span:not(.nav-item__badge),
+  .sidebar__utilizador span:not(.avatar),
+  .sidebar__utilizador > img {
+    display: none;
+  }
+
+  .sidebar__marca {
+    padding-left: 10px;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .nav-item__badge {
+    left: 44px;
+    top: 10px;
+  }
+
+  .sidebar__utilizador {
+    padding: var(--esp-2) 6px;
+  }
+}
+
+/* ==========================================================================
+   3. Componentes reutilizados em vários ecrãs
+   ========================================================================== */
+
+.cartao {
+  background: var(--fundo-superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-cartao);
+  box-shadow: var(--sombra-cartao);
+}
+
+/* --- Título de página com ações à direita ------------------------------- */
+
+.titulo-pagina {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-bold);
+}
+
+.cabecalho-pagina {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-6);
+  flex-wrap: wrap;
+}
+
+.cabecalho-pagina .titulo-pagina {
+  flex: 1;
+  font-size: 42px;
+  color: var(--texto-forte);
+}
+
+.em-construcao {
+  margin-top: var(--esp-6);
+  padding: var(--esp-8);
+  text-align: center;
+  color: var(--texto-secundario);
+}
+
+.erro-carregar {
+  margin-top: var(--esp-6);
+  color: var(--estado-erro);
+}
+
+.vazio {
+  padding: var(--esp-7) var(--esp-6);
+  text-align: center;
+  color: var(--texto-secundario);
+}
+
+/* --- Secção com título e link "Ver todos" ------------------------------- */
+
+.seccao {
+  margin-top: 35px;
+}
+
+.seccao__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.seccao__titulo {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-bold);
+}
+
+.link {
+  font-size: var(--texto-md);
+  font-weight: var(--peso-medio);
+  color: var(--cor-primaria);
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* --- Botões -------------------------------------------------------------- */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-3);
+  height: 52px;
+  padding: 0 26px;
+  border: 0;
+  border-radius: var(--raio-controlo);
+  background: var(--cor-primaria);
+  color: var(--texto-inverso);
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.botao:hover {
+  background: var(--cor-primaria-escura);
+}
+
+.botao--compacto {
+  padding: 0 24px;
+  border-radius: 12px;
+  font-weight: var(--peso-medio);
+}
+
+.botao--secundario {
+  background: var(--fundo-superficie);
+  border: 1.5px solid var(--borda-campo);
+  color: var(--texto-placeholder);
+  font-weight: var(--peso-medio);
+}
+
+.botao--secundario:hover {
+  background: var(--fundo-ativo);
+}
+
+.botao--perigo {
+  background: var(--estado-erro);
+}
+
+.botao--perigo:hover {
+  background: #c41f38;
+}
+
+.botao-texto {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cor-primaria);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  cursor: pointer;
+}
+
+/* --- Campos de formulário ----------------------------------------------- */
+
+/* Os estilos de formulário só se aplicam dentro de .formulario, para não
+   alterarem os formulários de login/registo (auth.css) */
+.formulario .campo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.formulario .campo > label,
+.campo__rotulo {
+  font-size: var(--texto-md);
+  color: var(--texto-placeholder);
+}
+
+.formulario .campo input,
+.formulario .campo select,
+.formulario .campo textarea {
+  width: 100%;
+  min-height: 54px;
+  padding: 0 18px;
+  border: 1.5px solid var(--borda-campo);
+  border-radius: 10px;
+  background: var(--fundo-superficie);
+  font-size: var(--texto-xl);
+  color: var(--texto-forte);
+}
+
+.formulario .campo textarea {
+  min-height: 88px;
+  padding: 14px 18px;
+  resize: vertical;
+}
+
+.formulario .campo input:focus,
+.formulario .campo select:focus,
+.formulario .campo textarea:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+  box-shadow: 0 0 0 3px rgba(142, 54, 230, 0.15);
+}
+
+.formulario .campo [aria-invalid="true"] {
+  border-color: var(--estado-erro);
+}
+
+fieldset.campo {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+fieldset.campo > legend {
+  margin-bottom: 10px;
+  padding: 0;
+}
+
+.formulario .campo__erro {
+  font-size: var(--texto-xs);
+  color: var(--estado-erro);
+}
+
+.formulario .campo__erro:empty {
+  display: none;
+}
+
+/* select com a seta do design em vez da do browser */
+.formulario .campo select,
+.filtro {
+  appearance: none;
+  padding-right: 48px;
+  background-image: url("../assets/icons/chevron-down-roxo.svg");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  cursor: pointer;
+}
+
+/* --- Pesquisa com contorno (Tarefas, Documentos) ------------------------ */
+
+.pesquisa--contorno {
+  background: var(--fundo-superficie);
+  border: 1px solid var(--borda);
+}
+
+/* --- Filtros (selects compactos) ---------------------------------------- */
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-6);
+  margin-top: 26px;
+}
+
+.filtro {
+  min-height: 54px;
+  padding-left: 22px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-controlo);
+  background-color: var(--fundo-superficie);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-medio);
+  color: var(--texto-titulo);
+}
+
+/* --- Separadores (tabs) -------------------------------------------------- */
+
+.separadores {
+  display: flex;
+  gap: var(--esp-2);
+  margin-top: 26px;
+  border-bottom: 1px solid var(--borda);
+}
+
+.separador {
+  position: relative;
+  padding: 16px 24px 18px;
+  border: 0;
+  background: none;
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-medio);
+  color: #895eb3;
+  cursor: pointer;
+}
+
+.separador[aria-selected="true"] {
+  background: var(--fundo-ativo);
+  color: #8830e0;
+}
+
+.separador[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 4px;
+  background: var(--cor-roxo);
+}
+
+/* --- Avatares ------------------------------------------------------------ */
+
+.avatar--sm { width: 38px; height: 38px; font-size: 13px; }
+.avatar--md { width: 50px; height: 50px; font-size: 17px; }
+.avatar--lg { width: 58px; height: 58px; font-size: var(--texto-xl); }
+.avatar--xl { width: 64px; height: 64px; font-size: var(--texto-xl); }
+
+.avatar--violeta { background: var(--avatar-violeta); }
+.avatar--menta { background: var(--avatar-menta); }
+.avatar--laranja { background: var(--avatar-laranja); }
+
+/* Avatares sobrepostos (cartões de tarefa, reuniões) */
+.pilha-avatares {
+  display: flex;
+}
+
+.pilha-avatares > * {
+  border: 2px solid var(--fundo-superficie);
+  box-sizing: content-box;
+}
+
+.pilha-avatares > * + * {
+  margin-left: -10px;
+}
+
+/* --- Grelha de 4 colunas e cartão de projeto (Início e Projetos) -------- */
+
+.grelha-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.projeto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  height: 100%;
+  padding: 22px 20px;
+}
+
+.projeto__cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.projeto__nome {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-semibold);
+}
+
+.projeto:hover .projeto__nome {
+  color: var(--cor-primaria);
+}
+
+.projeto .icone-bloco {
+  width: 50px;
+  height: 50px;
+}
+
+.projeto .progresso {
+  align-self: stretch;
+}
+
+.projeto__rodape {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: 15.5px;
+  color: var(--texto-secundario);
+}
+
+/* --- Ícone dentro de um quadrado colorido -------------------------------- */
+/* O tamanho é definido por cada ecrã; aqui só a forma e a cor. */
+
+.icone-bloco {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: var(--raio-controlo);
+  background: var(--fundo-icone);
+}
+
+.icone-bloco--menta { background: var(--icone-menta); }
+.icone-bloco--coral { background: var(--icone-coral); }
+.icone-bloco--violeta { background: var(--icone-violeta); }
+.icone-bloco--erro { background: var(--estado-erro-fundo); }
+.icone-bloco--vermelho { background: var(--icone-vermelho); }
+.icone-bloco--laranja { background: var(--icone-laranja); }
+.icone-bloco--primaria { background: var(--cor-primaria); }
+
+/* --- Etiqueta (estado / prioridade) ------------------------------------- */
+
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  padding: 6px 18px;
+  border-radius: var(--raio-pilula);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+}
+
+/* Ponto colorido antes do texto, com a mesma cor da etiqueta */
+.etiqueta--ponto::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.etiqueta--sucesso { color: var(--estado-sucesso); background: var(--estado-sucesso-fundo); }
+.etiqueta--aviso { color: var(--estado-aviso); background: var(--estado-aviso-fundo); }
+.etiqueta--erro { color: var(--estado-erro); background: var(--estado-erro-fundo); }
+
+/* --- Barra de progresso -------------------------------------------------- */
+
+.progresso {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--texto-secundario);
+}
+
+.progresso__trilho {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--raio-pilula);
+  background: var(--progresso-trilho);
+  overflow: hidden;
+}
+
+.progresso__barra {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--cor-primaria);
+}
+
+/* --- Lista dentro de um cartão, com divisórias entre linhas ------------- */
+
+.lista {
+  padding: 0 18px;
+}
+
+.lista > li + li {
+  border-top: 1px solid var(--borda);
+}
+
+/* --- Janela modal (<dialog>) --------------------------------------------- */
+
+.dialogo {
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  padding: 30px;
+  border: 1px solid var(--borda);
+  border-radius: 18px;
+  background: var(--fundo-superficie);
+  color: var(--texto-titulo);
+  box-shadow: 0 24px 60px rgba(48, 12, 84, 0.25);
+}
+
+.dialogo::backdrop {
+  background: rgba(48, 12, 84, 0.35);
+}
+
+.dialogo--pequeno {
+  width: min(460px, calc(100vw - 32px));
+}
+
+.dialogo__titulo {
+  margin-bottom: var(--esp-6);
+  font-size: 28px;
+  font-weight: var(--peso-bold);
+}
+
+.dialogo__texto {
+  font-size: var(--texto-lg);
+}
+
+.dialogo__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--esp-4);
+  margin-top: var(--esp-6);
+}
+
+.botao--perigo-texto {
+  margin-right: auto;
+  color: var(--estado-erro);
+}
+
+.formulario {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 32px;
+}
+
+.formulario__total {
+  grid-column: 1 / -1;
+}
+
+/* Lista de caixas de seleção (ex.: responsáveis) */
+.escolhas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.escolha {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  padding: 4px 14px 4px 4px;
+  border: 1.5px solid var(--borda-campo);
+  border-radius: var(--raio-pilula);
+  font-size: var(--texto-sm);
+  cursor: pointer;
+}
+
+.escolha:has(input:checked) {
+  border-color: var(--cor-primaria);
+  background: var(--fundo-ativo);
+}
+
+.escolha input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.escolha:has(input:focus-visible) {
+  outline: 3px solid var(--cor-destaque);
+}
+
+/* --- Menu de opções (⋮) -------------------------------------------------- */
+
+.menu {
+  position: relative;
+}
+
+.menu__lista {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 10;
+  min-width: 180px;
+  padding: 6px;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  background: var(--fundo-superficie);
+  box-shadow: 0 12px 30px rgba(48, 12, 84, 0.15);
+}
+
+.menu__lista[hidden] {
+  display: none;
+}
+
+.menu__item {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font-size: var(--texto-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu__item:hover {
+  background: var(--fundo-ativo);
+}
+
+.menu__item--perigo {
+  color: var(--estado-erro);
+}
+
+/* --- Aviso temporário (toast) -------------------------------------------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 100;
+  padding: 14px 24px;
+  border-radius: var(--raio-controlo);
+  background: var(--texto-titulo);
+  color: var(--texto-inverso);
+  font-size: var(--texto-sm);
+  box-shadow: 0 12px 30px rgba(48, 12, 84, 0.3);
+  opacity: 0;
+  transform: translate(-50%, 12px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast--visivel {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (max-width: 1280px) {
+  .grelha-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .grelha-4,
+  .formulario {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

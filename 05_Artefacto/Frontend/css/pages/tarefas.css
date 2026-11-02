@@ -1,0 +1,170 @@
+/* Ecrã Tarefas (quadro Kanban) */
+
+.conteudo--tarefas {
+  padding: 40px 28px 40px 34px;
+}
+
+.cabecalho-pagina .titulo-pagina {
+  font-size: 46px;
+  color: var(--texto-titulo);
+}
+
+.pesquisa--larga {
+  width: 589px;
+  height: 58px;
+  gap: 18px;
+}
+
+.quadro {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  align-items: start;
+  margin-top: 34px;
+}
+
+.coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 240px;
+  padding: 0 12px 14px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-icone);
+  background: var(--fundo-coluna);
+  transition: box-shadow 0.15s ease;
+}
+
+.coluna--concluida {
+  background: var(--estado-sucesso-fundo);
+}
+
+/* Enquanto se arrasta uma tarefa por cima */
+.coluna--alvo {
+  box-shadow: inset 0 0 0 2px var(--cor-primaria);
+}
+
+.coluna__titulo {
+  padding: 24px 8px 12px 10px;
+  font-size: 26px;
+  font-weight: var(--peso-semibold);
+}
+
+.coluna--progresso .coluna__titulo {
+  color: var(--cor-primaria);
+}
+
+.coluna--concluida .coluna__titulo {
+  color: var(--estado-sucesso);
+}
+
+.coluna__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.coluna__vazia {
+  padding: var(--esp-6) var(--esp-4);
+  border: 2px dashed var(--borda-campo);
+  border-radius: var(--raio-cartao);
+  text-align: center;
+  font-size: var(--texto-sm);
+  color: var(--texto-secundario);
+}
+
+/* --- Cartão de tarefa ---------------------------------------------------- */
+
+.tarefa-cartao {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 20px 20px 24px;
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tarefa-cartao:hover {
+  box-shadow: 0 6px 16px rgba(80, 22, 137, 0.12);
+}
+
+.tarefa-cartao--a-arrastar {
+  opacity: 0.5;
+}
+
+.tarefa-cartao__titulo {
+  font-size: 21px;
+  font-weight: var(--peso-semibold);
+}
+
+/* O botão cobre o cartão todo, para se poder abrir com clique ou teclado */
+.tarefa-cartao__abrir {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: inherit;
+}
+
+.tarefa-cartao__abrir::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.tarefa-cartao__projeto,
+.tarefa-cartao__prazo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  color: var(--texto-secundario);
+}
+
+.tarefa-cartao__projeto {
+  gap: 12px;
+}
+
+.tarefa-cartao__rodape {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-top: 6px;
+}
+
+.tarefa-cartao__rodape .etiqueta {
+  margin-left: auto;
+  padding: 6px 22px;
+}
+
+.tarefa-cartao__prazo--atrasada {
+  font-weight: var(--peso-semibold);
+  color: var(--estado-erro);
+}
+
+.coluna--concluida .tarefa-cartao__titulo {
+  text-decoration: line-through;
+  text-decoration-color: rgba(48, 12, 84, 0.35);
+}
+
+@media (max-width: 1400px) {
+  .pesquisa--larga {
+    width: 360px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .quadro {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pesquisa--larga {
+    flex: 1;
+    width: auto;
+  }
+}

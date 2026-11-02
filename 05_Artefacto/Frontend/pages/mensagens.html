@@ -11,19 +11,56 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="../css/tokens.css">
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/layout.css">
-  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/pages/mensagens.css">
 
-  <script type="module" src="../js/main.js"></script>
+  <script type="module" src="../js/comum.js"></script>
+  <script type="module" src="../js/pages/mensagens.js"></script>
 </head>
 <body>
   <div class="app">
     <aside class="sidebar" data-sidebar data-ativo="mensagens"></aside>
 
-    <main class="conteudo">
-      <h1 class="titulo-pagina">Mensagens</h1>
-      <p class="cartao em-construcao">Este ecrã ainda está em construção.</p>
+    <main class="conteudo conteudo--mensagens">
+      <h1 class="sr-only">Mensagens</h1>
+
+      <div class="chat">
+        <section class="chat__conversas" aria-label="Conversas">
+          <form class="chat__pesquisa" role="search" data-pesquisa>
+            <img src="../assets/icons/search.svg" alt="" width="22" height="22">
+            <label class="sr-only" for="pesquisa">Pesquisar conversas</label>
+            <input id="pesquisa" type="search" placeholder="Pesquisar conversas...">
+          </form>
+          <ul class="conversas" data-conversas></ul>
+        </section>
+
+        <section class="chat__janela" aria-labelledby="conversa-nome">
+          <header class="chat__cabecalho">
+            <span data-conversa-avatar></span>
+            <div>
+              <h2 class="chat__nome" id="conversa-nome" data-conversa-nome></h2>
+              <p class="chat__info" data-conversa-info></p>
+            </div>
+          </header>
+
+          <ol class="mensagens" data-mensagens aria-live="polite"></ol>
+
+          <form class="compositor" data-compositor>
+            <div class="compositor__campo">
+              <label class="botao-anexar" title="Anexar ficheiro">
+                <img src="../assets/icons/paperclip.svg" alt="" width="28" height="28">
+                <span class="sr-only">Anexar ficheiro</span>
+                <input type="file" data-anexo hidden>
+              </label>
+              <label class="sr-only" for="mensagem">Mensagem</label>
+              <input id="mensagem" name="mensagem" type="text" autocomplete="off" placeholder="Escreve uma mensagem...">
+            </div>
+            <button class="botao-enviar" type="submit" aria-label="Enviar mensagem">
+              <img src="../assets/icons/send.svg" alt="" width="30" height="30">
+            </button>
+          </form>
+        </section>
+      </div>
     </main>
   </div>
 </body>

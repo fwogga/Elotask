@@ -5,26 +5,12 @@ import {
   getTarefasRecentes,
   getProximasReunioes,
 } from "../api/client.js";
-
-const icone = (nome, tamanho) =>
-  `<img src="../assets/icons/${nome}" alt="" width="${tamanho}" height="${tamanho}">`;
-
-// Escapa texto vindo da API antes de o meter no HTML (evita injeção de código)
-const esc = (texto) =>
-  String(texto).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-
-const classeCor = (cor) => (cor ? ` icone-bloco--${cor}` : "");
-
-const ESTADOS = {
-  em_andamento: { rotulo: "Em andamento", classe: "sucesso" },
-  planeamento: { rotulo: "Planeamento", classe: "erro" },
-  concluido: { rotulo: "Concluído", classe: "sucesso" },
-};
+import { cartaoProjeto, esc, diaRelativo, intervalo, icone, porId } from "../comum.js";
 
 const PRIORIDADES = {
-  alta: { rotulo: "Alta", classe: "erro" },
-  media: { rotulo: "Média", classe: "aviso" },
-  baixa: { rotulo: "Baixa", classe: "sucesso" },
+  alta: { rotulo: "Alta", classe: "erro", cor: "vermelho", icone: "task-edit.svg" },
+  media: { rotulo: "Média", classe: "aviso", cor: "laranja", icone: "task-chat.svg" },
+  baixa: { rotulo: "Baixa", classe: "sucesso", cor: "primaria", icone: "task-code.svg" },
 };
 
 function renderEstatisticas(resumo) {
@@ -37,7 +23,7 @@ function renderEstatisticas(resumo) {
 
   return itens.map((e) => `
     <li class="cartao estatistica">
-      <span class="icone-bloco${classeCor(e.cor)}">${icone(e.icone, 28)}</span>
+      <span class="icone-bloco${e.cor ? ` icone-bloco--${e.cor}` : ""}">${icone(e.icone, 28)}</span>
       <div>
         <p class="estatistica__rotulo">${e.rotulo}</p>
         <p class="estatistica__valor">${esc(e.valor)}</p>
@@ -45,56 +31,36 @@ function renderEstatisticas(resumo) {
     </li>`).join("");
 }
 
-function renderProjetos(projetos) {
-  return projetos.map((p) => {
-    const estado = ESTADOS[p.estado] ?? ESTADOS.em_andamento;
-    const progresso = Number(p.progresso) || 0;
+function renderTarefas(tarefas, projetos) {
+  if (!tarefas.length) return '<li class="vazio">Não tens tarefas pendentes.</li>';
 
+  return tarefas.map((t) => {
+    const p = PRIORIDADES[t.prioridade] ?? PRIORIDADES.media;
     return `
     <li>
-      <a class="cartao projeto" href="projetos.html?id=${encodeURIComponent(p.id)}">
-        <div class="projeto__cabecalho">
-          <span class="icone-bloco${classeCor(p.cor)}">${icone(p.icone, 28)}</span>
-          <h3 class="projeto__nome">${esc(p.nome)}</h3>
+      <a class="tarefa" href="tarefas.html?tarefa=${t.id}">
+        <span class="icone-bloco icone-bloco--${p.cor}">${icone(p.icone, 22)}</span>
+        <div class="tarefa__texto">
+          <p class="tarefa__titulo">${esc(t.titulo)}</p>
+          <p class="tarefa__projeto">${esc(projetos.get(t.projetoId)?.nome ?? "")}</p>
         </div>
-        <span class="etiqueta etiqueta--ponto etiqueta--${estado.classe}">${estado.rotulo}</span>
-        <div class="progresso">
-          <div class="progresso__trilho" role="progressbar" aria-valuenow="${progresso}" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso de ${esc(p.nome)}">
-            <div class="progresso__barra" style="width: ${progresso}%"></div>
-          </div>
-          <span>${progresso}%</span>
-        </div>
-        <p class="projeto__rodape">${icone("user.svg", 18)} ${esc(p.tarefasPendentes)} tarefas pendentes</p>
+        <span class="etiqueta etiqueta--${p.classe}">${p.rotulo}</span>
+        <p class="tarefa__prazo">${diaRelativo(t.prazo)}</p>
       </a>
     </li>`;
   }).join("");
 }
 
-function renderTarefas(tarefas) {
-  return tarefas.map((t) => {
-    const prioridade = PRIORIDADES[t.prioridade] ?? PRIORIDADES.media;
-
-    return `
-    <li class="tarefa">
-      <span class="icone-bloco${classeCor(t.cor)}">${icone(t.icone, 22)}</span>
-      <div class="tarefa__texto">
-        <p class="tarefa__titulo">${esc(t.titulo)}</p>
-        <p class="tarefa__projeto">${esc(t.projeto)}</p>
-      </div>
-      <span class="etiqueta etiqueta--${prioridade.classe}">${prioridade.rotulo}</span>
-      <p class="tarefa__prazo">${esc(t.prazo)}</p>
-    </li>`;
-  }).join("");
-}
-
 function renderReunioes(reunioes) {
+  if (!reunioes.length) return '<li class="vazio">Sem reuniões marcadas.</li>';
+
   return reunioes.map((r) => `
     <li>
-      <a class="reuniao" href="reunioes.html?id=${encodeURIComponent(r.id)}">
+      <a class="reuniao" href="reunioes.html">
         <span class="icone-bloco">${icone("meeting.svg", 26)}</span>
         <div class="reuniao__texto">
           <p class="reuniao__titulo">${esc(r.titulo)}</p>
-          <p class="reuniao__quando">${esc(r.quando)}</p>
+          <p class="reuniao__quando">${intervalo(r.inicio, r.fim)}</p>
         </div>
         ${icone("chevron-right.svg", 18)}
       </a>
@@ -112,8 +78,8 @@ async function iniciar() {
 
   document.querySelector("[data-primeiro-nome]").textContent = utilizador.nome.split(" ")[0];
   document.querySelector("[data-estatisticas]").innerHTML = renderEstatisticas(resumo);
-  document.querySelector("[data-projetos]").innerHTML = renderProjetos(projetos);
-  document.querySelector("[data-tarefas]").innerHTML = renderTarefas(tarefas);
+  document.querySelector("[data-projetos]").innerHTML = projetos.map(cartaoProjeto).join("");
+  document.querySelector("[data-tarefas]").innerHTML = renderTarefas(tarefas, porId(projetos));
   document.querySelector("[data-reunioes]").innerHTML = renderReunioes(reunioes);
 }
 

@@ -1,0 +1,388 @@
+/* Ecrã Calendário */
+
+.conteudo--calendario {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 351px;
+  gap: 35px;
+  align-items: start;
+  padding: 28px 16px 40px 29px;
+}
+
+.calendario__titulo {
+  font-size: 38px;
+  color: var(--texto-forte);
+}
+
+.calendario__barra {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-6);
+  margin-top: 22px;
+}
+
+.calendario__navegacao {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.calendario__seta {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.calendario__seta:hover {
+  background: var(--fundo-ativo);
+}
+
+.calendario__periodo {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-semibold);
+  color: var(--texto-forte);
+}
+
+.calendario__hoje {
+  height: 48px;
+  padding: 0 26px;
+  border: 1px solid #eae1f4;
+  border-radius: var(--raio-controlo);
+  background: var(--fundo-superficie);
+  font-size: 17px;
+  font-weight: var(--peso-semibold);
+  color: var(--texto-forte);
+  cursor: pointer;
+}
+
+.calendario__hoje:hover {
+  background: var(--fundo-ativo);
+}
+
+.segmentado {
+  display: flex;
+  padding: 3px;
+  border: 1px solid #eae1f4;
+  border-radius: var(--raio-controlo);
+  background: var(--fundo-superficie);
+}
+
+.segmentado button {
+  width: 114px;
+  height: 42px;
+  border: 0;
+  border-radius: 11px;
+  background: none;
+  font-size: var(--texto-sm);
+  color: #8d6cae;
+  cursor: pointer;
+}
+
+.segmentado button[aria-pressed="true"] {
+  background: #f0e4fc;
+  font-weight: var(--peso-medio);
+  color: #8830e0;
+}
+
+.calendario__corpo {
+  margin-top: 30px;
+}
+
+/* --- Grelha (mês e semana) ----------------------------------------------- */
+
+.grelha {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border: 1px solid #efe7f7;
+  border-radius: var(--raio-cartao);
+  background: var(--fundo-superficie);
+  box-shadow: var(--sombra-cartao);
+  overflow: hidden;
+}
+
+.grelha__dia-semana {
+  padding: 15px 0 16px;
+  border-bottom: 1px solid var(--divisoria);
+  text-align: center;
+  font-size: 17px;
+  font-weight: var(--peso-medio);
+  color: var(--texto-corpo);
+}
+
+.grelha__dia-semana + .grelha__dia-semana,
+.celula:not(:nth-child(7n + 1)) {
+  border-left: 1px solid var(--divisoria);
+}
+
+.celula {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 128px;
+  padding: 14px 8px 10px;
+  border-top: 1px solid var(--divisoria);
+}
+
+.grelha > .celula:nth-child(-n + 14) {
+  border-top: 0;
+}
+
+.grelha--semana .celula {
+  min-height: 420px;
+}
+
+.celula__numero {
+  padding-left: 6px;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--texto-corpo);
+}
+
+.celula--fora .celula__numero {
+  color: #bfafcf;
+}
+
+.celula--hoje .celula__numero {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-left: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--cor-primaria);
+  color: var(--texto-inverso);
+}
+
+/* --- Eventos ------------------------------------------------------------- */
+
+.evento {
+  --cor-evento: #9039e6;
+  --fundo-evento: #f3eafc;
+  --ponto-evento: #a967ec;
+  --hora-evento: #a681cc;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 6px 10px 8px;
+  border-radius: 10px;
+  background: var(--fundo-evento);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--cor-evento);
+}
+
+.evento:hover {
+  filter: brightness(0.97);
+}
+
+.evento__titulo {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Até duas linhas de título; o resto fica com "…" */
+.evento__titulo span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  min-width: 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+
+.evento__titulo::before {
+  content: "";
+  flex-shrink: 0;
+  align-self: center;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ponto-evento);
+}
+
+.evento__hora {
+  padding-left: 17px;
+  font-size: 14px;
+  font-weight: var(--peso-regular);
+  color: var(--hora-evento);
+}
+
+/* Prazos de tarefas, por prioridade */
+.evento--prazo {
+  --cor-evento: #6d3ad9;
+  --fundo-evento: #f2ecfe;
+  --ponto-evento: #8b5cf6;
+  --hora-evento: #9b8ad0;
+}
+
+.evento--media {
+  --cor-evento: #ea580c;
+  --fundo-evento: #ffebdd;
+  --ponto-evento: #f97316;
+  --hora-evento: #f2a072;
+}
+
+.evento--alta {
+  --cor-evento: #dc3030;
+  --fundo-evento: #ffe2e2;
+  --ponto-evento: #ef4444;
+  --hora-evento: #e88585;
+}
+
+.celula__mais {
+  padding-left: 6px;
+  font-size: 13px;
+  color: var(--texto-secundario);
+}
+
+/* --- Vista em lista ------------------------------------------------------ */
+
+.agenda {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-6);
+  padding: 24px 28px;
+}
+
+.agenda__dia h3 {
+  margin-bottom: 12px;
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-medio);
+  color: var(--texto-forte);
+}
+
+.agenda__eventos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.agenda .evento {
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 14px 16px;
+  font-size: var(--texto-md);
+}
+
+/* --- Próximos eventos (painel à direita) -------------------------------- */
+
+.proximos {
+  position: sticky;
+  top: 28px;
+  border: 1px solid #efe7f7;
+  border-radius: var(--raio-icone);
+  background: var(--fundo-superficie);
+  box-shadow: var(--sombra-cartao);
+}
+
+.proximos__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 19px 14px 20px;
+  border-bottom: 1px solid var(--divisoria);
+}
+
+.proximos__cabecalho h2 {
+  font-size: 21px;
+  font-weight: var(--peso-bold);
+  color: var(--texto-forte);
+}
+
+.proximos__agendar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 36px;
+  border: 1px solid #eae1f4;
+  border-radius: 10px;
+}
+
+.proximos__agendar:hover {
+  background: var(--fundo-ativo);
+}
+
+.proximos__lista {
+  padding: 4px 21px 24px 22px;
+}
+
+.proximos__dia {
+  margin: 24px 0 16px;
+  font-size: 19px;
+  font-weight: var(--peso-medio);
+  color: var(--texto-forte);
+}
+
+.proximo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  min-height: 88px;
+  margin-bottom: 12px;
+  padding: 14px 40px 14px 26px;
+  border: 1px solid #f1eaf9;
+  border-radius: 12px;
+  background: var(--fundo-pagina);
+  overflow: hidden;
+}
+
+.proximo:hover {
+  background: var(--fundo-ativo);
+}
+
+.proximo::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: #ae6fed;
+}
+
+.proximo--prazo::before {
+  background: #8b5cf6;
+}
+
+.proximo::after {
+  content: "";
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  background: url("../../assets/icons/chevron-right-sm.svg") no-repeat center;
+}
+
+.proximo__titulo {
+  font-size: 17px;
+  font-weight: var(--peso-medio);
+  color: #4d1684;
+}
+
+.proximo__hora {
+  font-size: var(--texto-xs);
+  color: #977bb2;
+}
+
+@media (max-width: 1300px) {
+  .conteudo--calendario {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .proximos {
+    position: static;
+  }
+
+  .calendario__barra {
+    flex-wrap: wrap;
+  }
+}

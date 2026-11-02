@@ -1,0 +1,290 @@
+/* Ecrãs Reuniões e Agendar reunião */
+
+.conteudo--reunioes {
+  padding: 33px 35px 40px 31px;
+}
+
+/* --- Lista de reuniões --------------------------------------------------- */
+
+.lista-reunioes {
+  margin-top: 28px;
+  border-color: #efe7f7;
+  border-radius: var(--raio-icone);
+}
+
+.lista-reunioes > li + li {
+  border-top: 1px solid var(--divisoria);
+}
+
+.reuniao-linha {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr) minmax(0, 260px) auto;
+  align-items: center;
+  gap: 28px;
+  min-height: 148px;
+  padding: 0 44px 0 32px;
+}
+
+.reuniao-linha__icone {
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  border-radius: var(--raio-icone);
+  background: #f4ebfd;
+}
+
+.reuniao-linha__titulo {
+  font-size: 22px;
+  font-weight: var(--peso-semibold);
+  color: var(--texto-forte);
+}
+
+.reuniao-linha__quando {
+  margin-top: 11px;
+  font-size: 19px;
+  color: #9678b4;
+}
+
+.reuniao-linha__local {
+  margin-top: 6px;
+  font-size: var(--texto-sm);
+  color: #9678b4;
+  overflow-wrap: anywhere;
+}
+
+.reuniao-linha__local a {
+  color: var(--cor-primaria);
+}
+
+.reuniao-linha__local a:hover {
+  text-decoration: underline;
+}
+
+.reuniao-linha__projeto,
+.reuniao-linha__participantes {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  font-size: 19px;
+  color: #956ebc;
+}
+
+.reuniao-linha__participantes {
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.reuniao-linha .pilha-avatares .avatar {
+  width: 44px;
+  height: 44px;
+  font-size: 14px;
+  border-width: 2.5px;
+}
+
+.reuniao-linha .pilha-avatares > * + * {
+  margin-left: -12px;
+}
+
+.avatar--mais {
+  background: #f4ebfd;
+  color: #8830e0;
+  font-size: var(--texto-xs);
+}
+
+/* --- Agendar reunião ----------------------------------------------------- */
+
+.dialogo--largo .dialogo__titulo {
+  margin-bottom: 0;
+}
+
+.dialogo--largo {
+  width: min(1100px, calc(100vw - 32px));
+}
+
+.agendar__nota,
+.agendar__instrucao {
+  font-size: var(--texto-sm);
+  color: #9678b4;
+}
+
+.agendar__instrucao {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--esp-4);
+  margin-top: 6px;
+  font-size: var(--texto-md);
+}
+
+.agendar__horas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.campo__com-icone {
+  position: relative;
+}
+
+.formulario .campo__com-icone input {
+  padding-right: 56px;
+}
+
+.campo__com-icone img {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Participantes: etiquetas com avatar + "Adicionar" */
+.campo__rotulo--com-contagem {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--esp-4);
+  width: 100%;
+}
+
+.campo__contagem {
+  font-size: var(--texto-xs);
+  color: #9678b4;
+}
+
+.participantes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 7px 12px;
+  border: 1.5px solid var(--borda-campo);
+  border-radius: 10px;
+}
+
+.participantes[aria-invalid="true"] {
+  border-color: var(--estado-erro);
+}
+
+.participantes__escolhidos {
+  display: contents;
+}
+
+.participante {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px 0 4px;
+  border-radius: 20px;
+  background: var(--fundo-coluna);
+  font-size: var(--texto-sm);
+  color: var(--texto-forte);
+}
+
+.participante .avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+  border: 1.5px solid var(--fundo-superficie);
+}
+
+.participante__papel {
+  font-size: 13px;
+  color: #9678b4;
+}
+
+.participante__remover {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.participante__remover:hover {
+  background: var(--borda-campo);
+}
+
+.participantes__adicionar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+/* select sem aspeto de caixa, para parecer o link "+ Adicionar participantes" do Figma */
+.campo .participantes__adicionar select {
+  min-height: 40px;
+  padding: 0 0 0 27px;
+  border: 0;
+  background: none;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: #8c33e6;
+  cursor: pointer;
+}
+
+.participantes__adicionar img {
+  position: absolute;
+  left: 0;
+  pointer-events: none;
+}
+
+.agendar__acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+  padding-top: 22px;
+  border-top: 1px solid #efe7f7;
+}
+
+.agendar__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: var(--texto-sm);
+  color: #9678b4;
+}
+
+.agendar__duracao {
+  font-size: 14px;
+}
+
+.agendar__acoes .botao {
+  min-height: 53px;
+  border-radius: 10px;
+}
+
+.agendar__acoes .botao--secundario {
+  width: 146px;
+}
+
+@media (max-width: 1200px) {
+  .reuniao-linha {
+    grid-template-columns: 68px minmax(0, 1fr);
+    padding: 24px;
+    row-gap: 12px;
+  }
+
+  .reuniao-linha__projeto,
+  .reuniao-linha__participantes {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 760px) {
+  .agendar__acoes {
+    flex-wrap: wrap;
+  }
+
+  .agendar__info {
+    flex-basis: 100%;
+  }
+}

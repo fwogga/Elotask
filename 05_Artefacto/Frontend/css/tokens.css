@@ -16,8 +16,15 @@
   --fundo-pesquisa: #f5eefc;
   --fundo-icone: #f2e8fc;
 
+  --fundo-ativo: #f4ecfd;
+  --fundo-coluna: #f5eefc;
+
   --borda: #ede5f5;
+  --borda-campo: #e8dbf4;
+  --divisoria: #f2ebf8;
   --progresso-trilho: #ede6f3;
+
+  --cor-roxo: #9644e8;
 
   --sidebar-gradiente-inicio: #2d1575;
   --sidebar-gradiente-fim: #df67ee;
@@ -37,6 +44,17 @@
   --icone-violeta: #f1e6ff;
   --icone-vermelho: #f0475b;
   --icone-laranja: #ff8a1f;
+
+  /* Cores dos avatares (uma por membro da equipa) */
+  --avatar-violeta: #9b3ce8;
+  --avatar-menta: #1fb67a;
+  --avatar-laranja: #ff8a1f;
+
+  /* Ícones de ficheiros na página Documentos */
+  --ficheiro-pdf: #f23b4a;
+  --ficheiro-doc: #ac6ced;
+  --ficheiro-ppt: #ff8a2b;
+  --ficheiro-xls: #25a95f;
 
   /* --- Tipografia ------------------------------------------------------- */
   --fonte: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;

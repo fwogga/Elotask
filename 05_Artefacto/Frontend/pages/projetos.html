@@ -11,19 +11,107 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="../css/tokens.css">
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/layout.css">
-  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/pages/projetos.css">
 
-  <script type="module" src="../js/main.js"></script>
+  <script type="module" src="../js/comum.js"></script>
+  <script type="module" src="../js/pages/projetos.js"></script>
 </head>
 <body>
   <div class="app">
     <aside class="sidebar" data-sidebar data-ativo="projetos"></aside>
 
-    <main class="conteudo">
-      <h1 class="titulo-pagina">Projetos</h1>
-      <p class="cartao em-construcao">Este ecrã ainda está em construção.</p>
+    <main class="conteudo conteudo--projetos">
+      <!-- Sem ?id= na URL: lista de projetos -->
+      <section data-vista="lista" hidden>
+        <header class="cabecalho-pagina">
+          <h1 class="titulo-pagina">Projetos</h1>
+        </header>
+        <ul class="grelha-4 projetos-lista" data-lista-projetos></ul>
+      </section>
+
+      <!-- Com ?id=: visão geral de um projeto -->
+      <section data-vista="detalhe" hidden>
+        <header class="projeto-topo">
+          <a class="botao-voltar" href="projetos.html" aria-label="Voltar aos projetos">
+            <img src="../assets/icons/arrow-left.svg" alt="" width="28" height="28">
+          </a>
+          <h1 class="titulo-pagina" data-nome></h1>
+        </header>
+
+        <div class="projeto-meta">
+          <span class="etiqueta etiqueta--sucesso projeto-meta__estado" data-estado>
+            <img src="../assets/icons/user-sucesso.svg" alt="" width="20" height="20">
+            <span data-estado-texto></span>
+          </span>
+          <span class="projeto-meta__divisor" aria-hidden="true"></span>
+          <span class="projeto-meta__datas">
+            <img src="../assets/icons/calendar-plain.svg" alt="" width="24" height="24">
+            <span data-datas></span>
+          </span>
+        </div>
+
+        <div class="separadores" role="tablist" aria-label="Secções do projeto">
+          <button class="separador" type="button" role="tab" id="tab-geral" aria-controls="painel-geral" aria-selected="true">Visão geral</button>
+          <button class="separador" type="button" role="tab" id="tab-tarefas" aria-controls="painel-tarefas" aria-selected="false" tabindex="-1">Tarefas</button>
+          <button class="separador" type="button" role="tab" id="tab-documentos" aria-controls="painel-documentos" aria-selected="false" tabindex="-1">Documentos</button>
+          <button class="separador" type="button" role="tab" id="tab-reunioes" aria-controls="painel-reunioes" aria-selected="false" tabindex="-1">Reuniões</button>
+          <button class="separador" type="button" role="tab" id="tab-membros" aria-controls="painel-membros" aria-selected="false" tabindex="-1">Membros</button>
+        </div>
+
+        <div class="painel painel--geral" role="tabpanel" id="painel-geral" aria-labelledby="tab-geral">
+          <article class="cartao projeto-bloco">
+            <h2 class="projeto-bloco__titulo">
+              <img src="../assets/icons/doc-lines.svg" alt="" width="30" height="30"> Descrição
+            </h2>
+            <p class="projeto-bloco__texto" data-descricao></p>
+            <h2 class="projeto-bloco__titulo projeto-bloco__titulo--espaco">
+              <img src="../assets/icons/target.svg" alt="" width="30" height="30"> Objetivos
+            </h2>
+            <ul class="objetivos" data-objetivos></ul>
+          </article>
+
+          <div class="projeto-lateral">
+            <article class="cartao projeto-bloco projeto-bloco--compacto">
+              <h2 class="projeto-bloco__titulo">
+                <img src="../assets/icons/users.svg" alt="" width="30" height="30"> Membros da equipa
+              </h2>
+              <ul class="membros" data-membros-resumo></ul>
+            </article>
+            <article class="cartao projeto-bloco projeto-bloco--compacto">
+              <h2 class="projeto-bloco__titulo">
+                <img src="../assets/icons/chart.svg" alt="" width="30" height="30"> Progresso do projeto
+              </h2>
+              <div class="progresso progresso--grande" data-progresso></div>
+            </article>
+          </div>
+        </div>
+
+        <div class="painel" role="tabpanel" id="painel-tarefas" aria-labelledby="tab-tarefas" hidden>
+          <div class="painel__acoes">
+            <a class="link" data-link-quadro href="tarefas.html">Abrir no quadro de tarefas</a>
+          </div>
+          <ul class="cartao lista lista-linhas" data-tarefas></ul>
+        </div>
+
+        <div class="painel" role="tabpanel" id="painel-documentos" aria-labelledby="tab-documentos" hidden>
+          <div class="painel__acoes">
+            <a class="link" href="documentos.html">Ver todos os documentos</a>
+          </div>
+          <ul class="cartao lista lista-linhas" data-documentos></ul>
+        </div>
+
+        <div class="painel" role="tabpanel" id="painel-reunioes" aria-labelledby="tab-reunioes" hidden>
+          <div class="painel__acoes">
+            <a class="link" data-link-agendar href="reunioes.html?agendar=1">Agendar reunião</a>
+          </div>
+          <ul class="cartao lista lista-linhas" data-reunioes></ul>
+        </div>
+
+        <div class="painel" role="tabpanel" id="painel-membros" aria-labelledby="tab-membros" hidden>
+          <ul class="cartao lista membros membros--painel" data-membros></ul>
+        </div>
+      </section>
     </main>
   </div>
 </body>

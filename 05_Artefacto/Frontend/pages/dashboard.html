@@ -11,80 +11,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="../css/tokens.css">
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/layout.css">
-  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/app.css">
   <link rel="stylesheet" href="../css/pages/dashboard.css">
+
+  <script type="module" src="../js/comum.js"></script>
+  <script type="module" src="../js/pages/dashboard.js"></script>
 </head>
 <body>
   <div class="app">
-    <aside class="sidebar" aria-label="Navegação principal">
-      <a class="sidebar__marca" href="dashboard.html">
-        <img class="sidebar__logo" src="../assets/img/logo-elotask.png" alt="" width="43" height="45">
-        <span>EloTask</span>
-      </a>
-
-      <nav>
-        <ul class="sidebar__nav">
-          <li>
-            <a class="nav-item" href="dashboard.html" aria-current="page">
-              <img class="nav-item__icone" src="../assets/icons/nav-inicio.svg" alt="" width="28" height="28">
-              <span>Início</span>
-            </a>
-          </li>
-          <li>
-            <a class="nav-item" href="tarefas.html">
-              <img class="nav-item__icone" src="../assets/icons/nav-tarefas.svg" alt="" width="28" height="28">
-              <span>Tarefas</span>
-            </a>
-          </li>
-          <li>
-            <a class="nav-item" href="projetos.html">
-              <img class="nav-item__icone" src="../assets/icons/nav-projetos.svg" alt="" width="28" height="28">
-              <span>Projetos</span>
-            </a>
-          </li>
-          <li>
-            <a class="nav-item" href="calendario.html">
-              <img class="nav-item__icone" src="../assets/icons/nav-calendario.svg" alt="" width="28" height="28">
-              <span>Calendário</span>
-            </a>
-          </li>
-          <li>
-            <a class="nav-item" href="mensagens.html">
-              <img class="nav-item__icone" src="../assets/icons/nav-mensagens.svg" alt="" width="28" height="28">
-              <span>Mensagens</span>
-              <span class="nav-item__badge" aria-hidden="true"></span>
-              <span class="sr-only">(mensagens não lidas)</span>
-            </a>
-          </li>
-          <li>
-            <a class="nav-item" href="documentos.html">
-              <img class="nav-item__icone" src="../assets/icons/nav-documentos.svg" alt="" width="28" height="28">
-              <span>Documentos</span>
-            </a>
-          </li>
-          <li>
-            <a class="nav-item" href="reunioes.html">
-              <img class="nav-item__icone" src="../assets/icons/nav-reunioes.svg" alt="" width="28" height="28">
-              <span>Reuniões</span>
-            </a>
-          </li>
-          <li>
-            <a class="nav-item" href="turnos.html">
-              <img class="nav-item__icone" src="../assets/icons/nav-turnos.svg" alt="" width="28" height="28">
-              <span>Turnos</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
-
-      <button class="sidebar__utilizador" type="button" aria-haspopup="menu">
-        <span class="avatar" aria-hidden="true">CB</span>
-        <span>Cássia Baptista</span>
-        <img src="../assets/icons/chevron-down.svg" alt="" width="16" height="20">
-      </button>
-    </aside>
+    <aside class="sidebar" data-sidebar data-ativo="inicio"></aside>
 
     <main class="conteudo">
       <header class="barra-topo">
@@ -99,50 +34,39 @@
       </header>
 
       <section class="saudacao">
-        <h1 class="saudacao__titulo">Olá, Cássia! 👋</h1>
+        <h1 class="titulo-pagina">Olá, <span data-primeiro-nome></span>! 👋</h1>
         <p class="saudacao__subtitulo">Aqui está um resumo do teu trabalho.</p>
       </section>
 
       <section aria-label="Resumo">
-        <ul class="grelha-4 estatisticas">
-          <li class="cartao estatistica">
-            <span class="icone-bloco icone-bloco--menta">
-              <img src="../assets/icons/stat-projetos.svg" alt="" width="28" height="28">
-            </span>
-            <div>
-              <p class="estatistica__rotulo">Projetos Ativos</p>
-              <p class="estatistica__valor">4</p>
-            </div>
-          </li>
-          <li class="cartao estatistica">
-            <span class="icone-bloco icone-bloco--coral">
-              <img src="../assets/icons/stat-tarefas.svg" alt="" width="28" height="28">
-            </span>
-            <div>
-              <p class="estatistica__rotulo">Tarefas Pendentes</p>
-              <p class="estatistica__valor">12</p>
-            </div>
-          </li>
-          <li class="cartao estatistica">
-            <span class="icone-bloco">
-              <img src="../assets/icons/stat-reunioes.svg" alt="" width="28" height="28">
-            </span>
-            <div>
-              <p class="estatistica__rotulo">Reuniões Hoje</p>
-              <p class="estatistica__valor">2</p>
-            </div>
-          </li>
-          <li class="cartao estatistica">
-            <span class="icone-bloco icone-bloco--menta">
-              <img src="../assets/icons/stat-membros.svg" alt="" width="28" height="28">
-            </span>
-            <div>
-              <p class="estatistica__rotulo">Membros da Equipa</p>
-              <p class="estatistica__valor">8</p>
-            </div>
-          </li>
-        </ul>
+        <ul class="grelha-4 estatisticas" data-estatisticas></ul>
       </section>
+
+      <section class="seccao">
+        <div class="seccao__cabecalho">
+          <h2 class="seccao__titulo">Os teus projetos</h2>
+          <a class="link" href="projetos.html">Ver todos</a>
+        </div>
+        <ul class="grelha-4" data-projetos></ul>
+      </section>
+
+      <div class="dashboard-fundo">
+        <section class="seccao">
+          <div class="seccao__cabecalho">
+            <h2 class="seccao__titulo">Tarefas recentes</h2>
+            <a class="link" href="tarefas.html">Ver todas</a>
+          </div>
+          <ul class="cartao lista" data-tarefas></ul>
+        </section>
+
+        <section class="seccao">
+          <div class="seccao__cabecalho">
+            <h2 class="seccao__titulo">Próximas reuniões</h2>
+            <a class="link" href="reunioes.html">Ver todas</a>
+          </div>
+          <ul class="cartao lista reunioes" data-reunioes></ul>
+        </section>
+      </div>
     </main>
   </div>
 </body>

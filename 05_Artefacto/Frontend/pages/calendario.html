@@ -11,19 +11,50 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="../css/tokens.css">
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/layout.css">
-  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/pages/calendario.css">
 
-  <script type="module" src="../js/main.js"></script>
+  <script type="module" src="../js/comum.js"></script>
+  <script type="module" src="../js/pages/calendario.js"></script>
 </head>
 <body>
   <div class="app">
     <aside class="sidebar" data-sidebar data-ativo="calendario"></aside>
 
-    <main class="conteudo">
-      <h1 class="titulo-pagina">Calendário</h1>
-      <p class="cartao em-construcao">Este ecrã ainda está em construção.</p>
+    <main class="conteudo conteudo--calendario">
+      <div class="calendario">
+        <h1 class="titulo-pagina calendario__titulo">Calendário</h1>
+
+        <div class="calendario__barra">
+          <div class="calendario__navegacao">
+            <button class="botao-icone calendario__seta" type="button" data-anterior aria-label="Anterior">
+              <img src="../assets/icons/chevron-left.svg" alt="" width="20" height="20">
+            </button>
+            <button class="botao-icone calendario__seta" type="button" data-seguinte aria-label="Seguinte">
+              <img src="../assets/icons/chevron-right-escuro.svg" alt="" width="20" height="20">
+            </button>
+            <h2 class="calendario__periodo" data-periodo aria-live="polite"></h2>
+          </div>
+          <button class="calendario__hoje" type="button" data-hoje>Hoje</button>
+          <div class="segmentado" role="group" aria-label="Vista">
+            <button type="button" data-vista="semana" aria-pressed="false">Semana</button>
+            <button type="button" data-vista="mes" aria-pressed="true">Mês</button>
+            <button type="button" data-vista="lista" aria-pressed="false">Lista</button>
+          </div>
+        </div>
+
+        <div class="calendario__corpo" data-corpo></div>
+      </div>
+
+      <aside class="proximos" aria-labelledby="proximos-titulo">
+        <header class="proximos__cabecalho">
+          <h2 id="proximos-titulo">Próximos eventos</h2>
+          <a class="proximos__agendar" href="reunioes.html?agendar=1" title="Agendar reunião" aria-label="Agendar reunião">
+            <img src="../assets/icons/calendar-sm.svg" alt="" width="20" height="20">
+          </a>
+        </header>
+        <div class="proximos__lista" data-proximos></div>
+      </aside>
     </main>
   </div>
 </body>

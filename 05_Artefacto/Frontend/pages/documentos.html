@@ -11,20 +11,85 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="../css/tokens.css">
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/layout.css">
-  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/pages/documentos.css">
 
-  <script type="module" src="../js/main.js"></script>
+  <script type="module" src="../js/comum.js"></script>
+  <script type="module" src="../js/pages/documentos.js"></script>
 </head>
 <body>
   <div class="app">
     <aside class="sidebar" data-sidebar data-ativo="documentos"></aside>
 
-    <main class="conteudo">
-      <h1 class="titulo-pagina">Documentos</h1>
-      <p class="cartao em-construcao">Este ecrã ainda está em construção.</p>
+    <main class="conteudo conteudo--documentos">
+      <header class="cabecalho-pagina">
+        <h1 class="titulo-pagina">Documentos</h1>
+        <form class="pesquisa pesquisa--contorno pesquisa--documentos" role="search" data-pesquisa>
+          <img src="../assets/icons/search.svg" alt="" width="22" height="22">
+          <label class="sr-only" for="pesquisa">Pesquisar documentos</label>
+          <input id="pesquisa" type="search" placeholder="Pesquisar documentos...">
+        </form>
+        <button class="botao botao--compacto" type="button" data-carregar>
+          <img src="../assets/icons/plus.svg" alt="" width="24" height="24">
+          Carregar
+        </button>
+        <input type="file" data-ficheiro multiple hidden>
+      </header>
+
+      <div class="separadores" role="tablist" aria-label="Filtrar documentos">
+        <button class="separador" type="button" role="tab" id="tab-todos" aria-controls="tabela-documentos" aria-selected="true" data-separador="todos">Todos</button>
+        <button class="separador" type="button" role="tab" id="tab-projetos" aria-controls="tabela-documentos" aria-selected="false" tabindex="-1" data-separador="projetos">Projetos</button>
+        <button class="separador" type="button" role="tab" id="tab-pessoais" aria-controls="tabela-documentos" aria-selected="false" tabindex="-1" data-separador="pessoais">Pessoais</button>
+        <button class="separador" type="button" role="tab" id="tab-recentes" aria-controls="tabela-documentos" aria-selected="false" tabindex="-1" data-separador="recentes">Recentes</button>
+      </div>
+
+      <div class="cartao tabela-documentos" id="tabela-documentos" role="tabpanel" aria-labelledby="tab-todos">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Nome</th>
+              <th scope="col">Projeto</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Última modificação</th>
+              <th scope="col"><span class="sr-only">Ações</span></th>
+            </tr>
+          </thead>
+          <tbody data-linhas></tbody>
+        </table>
+      </div>
     </main>
   </div>
+
+  <dialog class="dialogo dialogo--pequeno" data-dialogo-carregar aria-labelledby="carregar-titulo">
+    <form class="formulario" method="dialog" data-form-carregar>
+      <h2 class="dialogo__titulo formulario__total" id="carregar-titulo">Carregar documento</h2>
+      <p class="formulario__total dialogo__texto" data-ficheiros-escolhidos></p>
+      <div class="campo formulario__total">
+        <label for="carregar-projeto">Guardar em</label>
+        <select id="carregar-projeto" name="projetoId">
+          <option value="">Pessoais (só eu vejo)</option>
+        </select>
+      </div>
+      <div class="dialogo__acoes formulario__total">
+        <button class="botao botao--secundario" type="button" data-cancelar>Cancelar</button>
+        <button class="botao" type="submit">Carregar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="dialogo dialogo--pequeno" data-dialogo-nome aria-labelledby="nome-titulo">
+    <form class="formulario" method="dialog" novalidate data-form-nome>
+      <h2 class="dialogo__titulo formulario__total" id="nome-titulo">Mudar nome</h2>
+      <div class="campo formulario__total">
+        <label for="novo-nome">Nome do ficheiro</label>
+        <input id="novo-nome" name="nome" type="text" aria-describedby="erro-novo-nome">
+        <p class="campo__erro" id="erro-novo-nome"></p>
+      </div>
+      <div class="dialogo__acoes formulario__total">
+        <button class="botao botao--secundario" type="button" data-cancelar>Cancelar</button>
+        <button class="botao" type="submit">Guardar</button>
+      </div>
+    </form>
+  </dialog>
 </body>
 </html>
