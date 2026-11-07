@@ -7,6 +7,7 @@ import membrosEquipaRoutes from "./src/routes/membrosEquipaRoutes.js";
 import projetosRoutes from "./src/routes/projetosRoutes.js";
 import membrosProjetoRoutes from "./src/routes/membrosProjetoRoutes.js";
 import tarefasRoutes from "./src/routes/tarefasRoutes.js";
+import responsaveisTarefaRoutes from "./src/routes/responsaveisTarefaRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
