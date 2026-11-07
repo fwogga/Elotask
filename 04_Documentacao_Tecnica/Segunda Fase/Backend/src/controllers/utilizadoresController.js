@@ -444,3 +444,207 @@ export async function eliminarUtilizador(req, res) {
     });
   }
 }
+
+
+// GET /utilizadores/meu-perfil
+// Consultar o perfil do utilizador autenticado
+
+export async function obterMeuPerfil(req, res) {
+  try {
+    const id = Number(req.utilizador.id);
+
+    const [utilizadores] = await pool.query(
+      `SELECT
+        id_utilizador,
+        nome,
+        email,
+        tipo_utilizador,
+        telefone,
+        foto_perfil,
+        cargo,
+        estado,
+        data_criacao
+      FROM utilizadores
+      WHERE id_utilizador = ?`,
+      [id]
+    );
+
+    if (utilizadores.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Perfil não encontrado."
+      });
+    }
+
+    return res.status(200).json({
+      sucesso: true,
+      dados: utilizadores[0]
+    });
+
+  } catch (error) {
+    console.error("Erro ao consultar o próprio perfil:", error.message);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao consultar o perfil."
+    });
+  }
+}
+
+
+// PATCH /utilizadores/meu-perfil
+// Atualizar os dados pessoais do utilizador autenticado
+
+export async function atualizarMeuPerfil(req, res) {
+  try {
+    const id = Number(req.utilizador.id);
+
+    const dados = req.body;
+
+    if (
+      !dados ||
+      typeof dados !== "object" ||
+      Array.isArray(dados)
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Os dados enviados são inválidos."
+      });
+    }
+
+    const camposPermitidos = [
+      "nome",
+      "email",
+      "telefone",
+      "foto_perfil"
+    ];
+
+    const camposRecebidos = Object.keys(dados);
+
+    if (camposRecebidos.length === 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Indica pelo menos um campo para atualizar."
+      });
+    }
+
+    const campoInvalido = camposRecebidos.some(
+      campo => !camposPermitidos.includes(campo)
+    );
+
+    if (campoInvalido) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Só podes alterar nome, email, telefone e fotografia."
+      });
+    }
+
+    const atualizacoes = {};
+
+    for (const campo of camposRecebidos) {
+      const valor = dados[campo];
+
+      if (campo === "nome") {
+        if (typeof valor !== "string" || !valor.trim()) {
+          return res.status(400).json({
+            sucesso: false,
+            mensagem: "O nome é obrigatório."
+          });
+        }
+
+        atualizacoes.nome = valor.trim();
+      }
+
+      if (campo === "email") {
+        if (
+          typeof valor !== "string" ||
+          !valor.trim() ||
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor.trim())
+        ) {
+          return res.status(400).json({
+            sucesso: false,
+            mensagem: "Indica um endereço de email válido."
+          });
+        }
+
+        atualizacoes.email = valor.trim().toLowerCase();
+      }
+
+      if (campo === "telefone") {
+        if (valor !== null && typeof valor !== "string") {
+          return res.status(400).json({
+            sucesso: false,
+            mensagem: "O telefone deve ser texto ou null."
+          });
+        }
+
+        atualizacoes.telefone =
+          typeof valor === "string" ? valor.trim() || null : null;
+      }
+
+      if (campo === "foto_perfil") {
+        if (valor !== null && typeof valor !== "string") {
+          return res.status(400).json({
+            sucesso: false,
+            mensagem: "A fotografia de perfil é inválida."
+          });
+        }
+
+        atualizacoes.foto_perfil =
+          typeof valor === "string" ? valor.trim() || null : null;
+      }
+    }
+
+    // Verificar se o novo email já pertence a outro utilizador
+    if (atualizacoes.email) {
+      const [emails] = await pool.query(
+        `SELECT id_utilizador
+         FROM utilizadores
+         WHERE email = ?
+         AND id_utilizador <> ?`,
+        [atualizacoes.email, id]
+      );
+
+      if (emails.length > 0) {
+        return res.status(409).json({
+          sucesso: false,
+          mensagem: "Esse email já pertence a outro utilizador."
+        });
+      }
+    }
+
+    const campos = Object.keys(atualizacoes);
+    const valores = Object.values(atualizacoes);
+
+    const clausulas = campos.map(
+      campo => `\`${campo}\` = ?`
+    );
+
+    await pool.query(
+      `UPDATE utilizadores
+       SET ${clausulas.join(", ")}
+       WHERE id_utilizador = ?`,
+      [...valores, id]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "O teu perfil foi atualizado com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao atualizar o próprio perfil:", error.message);
+
+    if (error.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({
+        sucesso: false,
+        mensagem: "Esse email já pertence a outro utilizador."
+      });
+    }
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao atualizar o perfil."
+    });
+  }
+}

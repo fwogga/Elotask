@@ -5,7 +5,9 @@ import {
   obterUtilizadorPorId,
   criarUtilizador,
   atualizarUtilizador,
-  eliminarUtilizador
+  eliminarUtilizador,
+  obterMeuPerfil,
+  atualizarMeuPerfil
 } from "../controllers/utilizadoresController.js";
 
 import {
@@ -15,10 +17,24 @@ import {
 
 const router = Router();
 
+// Todas as rotas exigem autenticação
+router.use(autenticarToken);
+
+// Consultar o próprio perfil — todos os utilizadores autenticados
+router.get(
+  "/meu-perfil",
+  obterMeuPerfil
+);
+
+// Atualizar o próprio perfil — todos os utilizadores autenticados
+router.patch(
+  "/meu-perfil",
+  atualizarMeuPerfil
+);
+
 // Consultar todos os utilizadores — apenas administrador
 router.get(
   "/",
-  autenticarToken,
   autorizarPerfil("admin"),
   listarUtilizadores
 );
@@ -26,7 +42,6 @@ router.get(
 // Consultar um utilizador pelo ID — apenas administrador
 router.get(
   "/:id",
-  autenticarToken,
   autorizarPerfil("admin"),
   obterUtilizadorPorId
 );
@@ -34,7 +49,6 @@ router.get(
 // Criar um utilizador — apenas administrador
 router.post(
   "/",
-  autenticarToken,
   autorizarPerfil("admin"),
   criarUtilizador
 );
@@ -42,7 +56,6 @@ router.post(
 // Atualizar um utilizador — apenas administrador
 router.patch(
   "/:id",
-  autenticarToken,
   autorizarPerfil("admin"),
   atualizarUtilizador
 );
@@ -50,7 +63,6 @@ router.patch(
 // Desativar um utilizador — apenas administrador
 router.delete(
   "/:id",
-  autenticarToken,
   autorizarPerfil("admin"),
   eliminarUtilizador
 );
