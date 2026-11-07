@@ -295,3 +295,67 @@ export async function removerMembroProjeto(req, res) {
     });
   }
 }
+
+// GET /projetos/:id/membros/inativos
+export async function listarMembrosInativosProjeto(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Validar o ID do projeto
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do projeto inválido."
+      });
+    }
+
+    // Verificar se o projeto existe
+    const [projetos] = await pool.query(
+      `SELECT id_projeto, nome
+       FROM projetos
+       WHERE id_projeto = ?`,
+      [id]
+    );
+
+    if (projetos.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Projeto não encontrado."
+      });
+    }
+
+    // Consultar os membros inativos
+    const [membros] = await pool.query(
+      `SELECT
+        u.id_utilizador,
+        u.nome,
+        u.email,
+        u.tipo_utilizador,
+        u.estado AS estado_utilizador,
+        pm.funcao,
+        pm.data_adicao
+       FROM projeto_membros pm
+       INNER JOIN utilizadores u
+         ON pm.id_utilizador = u.id_utilizador
+       WHERE pm.id_projeto = ?
+         AND pm.estado = 'inativo'
+       ORDER BY u.nome ASC`,
+      [id]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      projeto: projetos[0],
+      total_membros_inativos: membros.length,
+      membros
+    });
+
+  } catch (error) {
+    console.error("Erro ao listar membros inativos:", error);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao consultar os membros inativos do projeto."
+    });
+  }
+}

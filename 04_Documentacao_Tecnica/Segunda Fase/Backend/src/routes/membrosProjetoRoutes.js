@@ -4,7 +4,8 @@ import {
   adicionarMembroProjeto,
   listarMembrosProjeto,
   atualizarFuncaoMembroProjeto,
-  removerMembroProjeto
+  removerMembroProjeto,
+  listarMembrosInativosProjeto
 } from "../controllers/membrosProjetoController.js";
 
 import {
@@ -44,6 +45,14 @@ router.delete(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   removerMembroProjeto
+);
+
+// Listar membros inativos do projeto
+router.get(
+  "/:id/membros/inativos",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  listarMembrosInativosProjeto
 );
 
 export default router;
