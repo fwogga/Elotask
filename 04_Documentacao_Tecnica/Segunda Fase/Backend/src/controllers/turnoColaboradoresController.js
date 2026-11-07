@@ -22,13 +22,21 @@ export async function atribuirColaboradorTurno(req, res) {
       });
     }
 
-    // 2. Obter uma ligação individual à base de dados
+    // Obter uma ligação individual à base de dados
     conexao = await pool.getConnection();
 
-    // 3. Iniciar a transação
+    // Iniciar a transação
     await conexao.beginTransaction();
 
-    // 4. Bloquear o registo do colaborador
+    // Bloquear as operações de turnos durante esta transação
+    await conexao.query(
+        `SELECT id
+        FROM controlo_concorrencia_turnos
+        WHERE id = 1
+        FOR UPDATE`
+    );
+
+    // Bloquear o registo do colaborador
     // Impede duas atribuições simultâneas para o mesmo colaborador
     const [utilizadores] = await conexao.query(
       `SELECT id_utilizador, nome
@@ -49,7 +57,7 @@ export async function atribuirColaboradorTurno(req, res) {
       });
     }
 
-    // 5. Bloquear e verificar o turno
+    // Bloquear e verificar o turno
     const [turnos] = await conexao.query(
       `SELECT id_turno, nome, data_turno, hora_inicio, hora_fim
        FROM turnos
@@ -70,7 +78,7 @@ export async function atribuirColaboradorTurno(req, res) {
 
     const turnoAtual = turnos[0];
 
-    // 6. Verificar se o colaborador já tem outro turno sobreposto
+    // Verificar se o colaborador já tem outro turno sobreposto
     const [turnosSobrepostos] = await conexao.query(
       `SELECT
          t.id_turno,
@@ -123,7 +131,7 @@ export async function atribuirColaboradorTurno(req, res) {
       });
     }
 
-    // 7. Verificar se já existe uma atribuição
+    // Verificar se já existe uma atribuição
     const [atribuicoes] = await conexao.query(
       `SELECT id_turno, id_utilizador, estado
        FROM turno_colaboradores
@@ -135,7 +143,7 @@ export async function atribuirColaboradorTurno(req, res) {
 
     if (atribuicoes.length > 0) {
 
-      // 8. Não permitir duplicar uma atribuição ativa
+      // Não permitir duplicar uma atribuição ativa
       if (atribuicoes[0].estado !== 'cancelado') {
         await conexao.rollback();
 
@@ -145,7 +153,7 @@ export async function atribuirColaboradorTurno(req, res) {
         });
       }
 
-      // 9. Reativar uma atribuição cancelada
+      // Reativar uma atribuição cancelada
       await conexao.query(
         `UPDATE turno_colaboradores
          SET estado = 'atribuido',
@@ -163,7 +171,7 @@ export async function atribuirColaboradorTurno(req, res) {
       });
     }
 
-    // 10. Criar uma nova atribuição
+    // Criar uma nova atribuição
     await conexao.query(
       `INSERT INTO turno_colaboradores
        (id_turno, id_utilizador, estado, data_atribuicao)
@@ -171,7 +179,7 @@ export async function atribuirColaboradorTurno(req, res) {
       [id_turno, id_utilizador]
     );
 
-    // 11. Confirmar a transação
+    // Confirmar a transação
     await conexao.commit();
 
     return res.status(201).json({

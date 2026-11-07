@@ -159,6 +159,8 @@ export async function obterTurnoPorId(req, res) {
 // Atualizar turno
 
 export async function atualizarTurno(req, res) {
+  let conexao;
+
   try {
     const { id_turno } = req.params;
     const { nome, hora_inicio, hora_fim, data_turno, descricao } = req.body;
@@ -171,6 +173,13 @@ export async function atualizarTurno(req, res) {
       });
     }
 
+    if (!Number.isInteger(Number(id_turno)) || Number(id_turno) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "O identificador do turno é inválido."
+      });
+    }
+
     if (nome.length > 100) {
       return res.status(400).json({
         sucesso: false,
@@ -178,7 +187,7 @@ export async function atualizarTurno(req, res) {
       });
     }
 
-    // Validar o formato da data e das horas
+    // Validar a data e as horas
     if (!validarData(data_turno)) {
       return res.status(400).json({
         sucesso: false,
@@ -200,25 +209,42 @@ export async function atualizarTurno(req, res) {
       });
     }
 
-    // Verificar se o turno existe e está ativo
-    const [turnos] = await pool.query(
+    // Obter uma ligação individual à base de dados
+    conexao = await pool.getConnection();
+
+    // Iniciar a transação
+    await conexao.beginTransaction();
+
+    // Obter o bloqueio central das operações de turnos
+    await conexao.query(
+      `SELECT id
+       FROM controlo_concorrencia_turnos
+       WHERE id = 1
+       FOR UPDATE`
+    );
+
+    // 6. Verificar se o turno existe e está ativo
+    const [turnos] = await conexao.query(
       `SELECT id_turno
        FROM turnos
        WHERE id_turno = ?
-       AND estado_registo = 'ativo'`,
+       AND estado_registo = 'ativo'
+       FOR UPDATE`,
       [id_turno]
     );
 
     if (turnos.length === 0) {
+      await conexao.rollback();
+
       return res.status(404).json({
         sucesso: false,
         mensagem: "Turno não encontrado ou inativo."
       });
     }
 
-    // Verificar se a alteração cria conflitos
-    // com outros turnos dos colaboradores já atribuídos
-    const [turnosSobrepostos] = await pool.query(
+    // Verificar se existem colaboradores atribuídos
+    // a este turno e se algum tem outro turno sobreposto
+    const [turnosSobrepostos] = await conexao.query(
       `SELECT
          tc.id_utilizador,
          t.id_turno,
@@ -268,15 +294,17 @@ export async function atualizarTurno(req, res) {
     );
 
     if (turnosSobrepostos.length > 0) {
+      await conexao.rollback();
+
       return res.status(409).json({
         sucesso: false,
-        mensagem: "Não é possível alterar o turno porque um ou mais colaboradores já estão atribuídos a outro turno nesse horário.",
+        mensagem: "Não é possível alterar o turno porque existe um conflito de horário com outro turno de um dos colaboradores atribuídos.",
         turno_conflito: turnosSobrepostos[0]
       });
     }
 
     // Atualizar o turno
-    await pool.query(
+    await conexao.query(
       `UPDATE turnos
        SET nome = ?,
            hora_inicio = ?,
@@ -295,21 +323,40 @@ export async function atualizarTurno(req, res) {
       ]
     );
 
+    // Confirmar a transação
+    await conexao.commit();
+
     return res.status(200).json({
       sucesso: true,
       mensagem: "Turno atualizado com sucesso."
     });
 
   } catch (error) {
+
+    // Cancelar a transação em caso de erro
+    if (conexao) {
+      try {
+        await conexao.rollback();
+      } catch (erroRollback) {
+        console.error("Erro ao cancelar a transação:", erroRollback);
+      }
+    }
+
     console.error("Erro ao atualizar turno:", error);
 
     return res.status(500).json({
       sucesso: false,
       mensagem: "Erro interno ao atualizar o turno."
     });
+
+  } finally {
+
+    // Libertar a ligação à base de dados
+    if (conexao) {
+      conexao.release();
+    }
   }
 }
-
 
 
 // Eliminar turno logicamente
