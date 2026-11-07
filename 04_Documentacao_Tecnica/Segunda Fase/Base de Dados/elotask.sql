@@ -1638,6 +1638,42 @@ ALTER TABLE pedidos_ausencia
 ADD COLUMN estado_registo ENUM('ativo', 'inativo')
 NOT NULL DEFAULT 'ativo';
 
+CREATE TABLE pedidos_troca_turno (
+    id_pedido INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_solicitante INT UNSIGNED NOT NULL,
+    id_destinatario INT UNSIGNED NOT NULL,
+    id_turno_solicitante INT UNSIGNED NOT NULL,
+    id_turno_destinatario INT UNSIGNED NOT NULL,
+
+    motivo VARCHAR(255),
+
+    estado ENUM(
+        'pendente',
+        'aceite',
+        'recusado',
+        'aprovado',
+        'rejeitado',
+        'cancelado'
+    ) DEFAULT 'pendente',
+
+    data_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id_pedido),
+
+    FOREIGN KEY (id_solicitante)
+        REFERENCES utilizadores(id_utilizador),
+
+    FOREIGN KEY (id_destinatario)
+        REFERENCES utilizadores(id_utilizador),
+
+    FOREIGN KEY (id_turno_solicitante)
+        REFERENCES turnos(id_turno),
+
+    FOREIGN KEY (id_turno_destinatario)
+        REFERENCES turnos(id_turno)
+
+) ENGINE=InnoDB;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
