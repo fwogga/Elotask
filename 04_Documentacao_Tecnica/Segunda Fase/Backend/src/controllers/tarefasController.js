@@ -1,5 +1,15 @@
 import pool from "../config/database.js";
 
+// Validar datas no formato AAAA-MM-DD
+const validarData = (data) => {
+  return (
+    typeof data === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(data) &&
+    !Number.isNaN(Date.parse(`${data}T00:00:00Z`)) &&
+    new Date(`${data}T00:00:00Z`).toISOString().slice(0, 10) === data
+  );
+};
+
 // POST /projetos/:id_projeto/tarefas
 export async function criarTarefa(req, res) {
   try {
@@ -48,16 +58,6 @@ export async function criarTarefa(req, res) {
         mensagem: "Prioridade inválida."
       });
     }
-
-    // Validar as datas
-    const validarData = (data) => {
-      return (
-        typeof data === "string" &&
-        /^\d{4}-\d{2}-\d{2}$/.test(data) &&
-        !Number.isNaN(Date.parse(`${data}T00:00:00Z`)) &&
-        new Date(`${data}T00:00:00Z`).toISOString().slice(0, 10) === data
-      );
-    };
 
     if (data_inicio && !validarData(data_inicio)) {
       return res.status(400).json({
