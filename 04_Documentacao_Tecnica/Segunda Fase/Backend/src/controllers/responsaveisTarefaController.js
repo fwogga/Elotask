@@ -236,3 +236,64 @@ export async function removerResponsavelTarefa(req, res) {
     });
   }
 }
+
+export async function obterResponsavelTarefa(req, res) {
+  try {
+    const { id_projeto, id_tarefa, id_utilizador } = req.params;
+
+    // Validar os IDs
+    if (
+      !Number.isInteger(Number(id_projeto)) ||
+      Number(id_projeto) <= 0 ||
+      !Number.isInteger(Number(id_tarefa)) ||
+      Number(id_tarefa) <= 0 ||
+      !Number.isInteger(Number(id_utilizador)) ||
+      Number(id_utilizador) <= 0
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Os IDs fornecidos são inválidos."
+      });
+    }
+
+    // Consultar o responsável específico
+    const [responsaveis] = await pool.query(
+      `SELECT
+        u.id_utilizador,
+        u.nome,
+        u.email,
+        u.tipo_utilizador,
+        tr.data_atribuicao
+       FROM tarefa_responsaveis tr
+       INNER JOIN tarefas t
+         ON tr.id_tarefa = t.id_tarefa
+       INNER JOIN utilizadores u
+         ON tr.id_utilizador = u.id_utilizador
+       WHERE t.id_tarefa = ?
+         AND t.id_projeto = ?
+         AND t.estado_registo = 'ativo'
+         AND tr.id_utilizador = ?`,
+      [id_tarefa, id_projeto, id_utilizador]
+    );
+
+    if (responsaveis.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Responsável não encontrado nesta tarefa."
+      });
+    }
+
+    return res.status(200).json({
+      sucesso: true,
+      responsavel: responsaveis[0]
+    });
+
+  } catch (error) {
+    console.error("Erro ao consultar responsável:", error);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao consultar o responsável da tarefa."
+    });
+  }
+}
