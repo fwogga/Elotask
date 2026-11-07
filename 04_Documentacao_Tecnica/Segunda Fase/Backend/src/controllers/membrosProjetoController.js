@@ -359,3 +359,105 @@ export async function listarMembrosInativosProjeto(req, res) {
     });
   }
 }
+
+// PUT /projetos/:id/membros/:id_utilizador/reativar
+export async function reativarMembroProjeto(req, res) {
+  try {
+    const { id, id_utilizador } = req.params;
+
+    // Validar o ID do projeto
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do projeto inválido."
+      });
+    }
+
+    // Validar o ID do utilizador
+    if (
+      !Number.isInteger(Number(id_utilizador)) ||
+      Number(id_utilizador) <= 0
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do utilizador inválido."
+      });
+    }
+
+    // Verificar se o projeto existe
+    const [projetos] = await pool.query(
+      `SELECT id_projeto
+       FROM projetos
+       WHERE id_projeto = ?`,
+      [id]
+    );
+
+    if (projetos.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Projeto não encontrado."
+      });
+    }
+
+    // Verificar se o utilizador existe e está ativo
+    const [utilizadores] = await pool.query(
+      `SELECT id_utilizador
+       FROM utilizadores
+       WHERE id_utilizador = ?
+         AND estado = 'ativo'`,
+      [id_utilizador]
+    );
+
+    if (utilizadores.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Utilizador não encontrado ou inativo."
+      });
+    }
+
+    // Verificar se existe uma associação inativa
+    const [associacoes] = await pool.query(
+      `SELECT estado
+       FROM projeto_membros
+       WHERE id_projeto = ?
+         AND id_utilizador = ?`,
+      [id, id_utilizador]
+    );
+
+    if (associacoes.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Este utilizador nunca foi associado ao projeto."
+      });
+    }
+
+    if (associacoes[0].estado === "ativo") {
+      return res.status(409).json({
+        sucesso: false,
+        mensagem: "Este utilizador já está ativo no projeto."
+      });
+    }
+
+    // Reativar a associação
+    await pool.query(
+      `UPDATE projeto_membros
+       SET estado = 'ativo'
+       WHERE id_projeto = ?
+         AND id_utilizador = ?`,
+      [id, id_utilizador]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Membro reativado no projeto com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao reativar membro do projeto:", error);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao reativar membro do projeto."
+    });
+  }
+}

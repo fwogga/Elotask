@@ -5,9 +5,9 @@ import {
   listarMembrosProjeto,
   atualizarFuncaoMembroProjeto,
   removerMembroProjeto,
-  listarMembrosInativosProjeto
+  listarMembrosInativosProjeto,
+  reativarMembroProjeto
 } from "../controllers/membrosProjetoController.js";
-
 import {
   autenticarToken,
   autorizarPerfil,
@@ -53,6 +53,14 @@ router.get(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   listarMembrosInativosProjeto
+);
+
+// Reativar membro do projeto
+router.put(
+  "/:id/membros/:id_utilizador/reativar",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  reativarMembroProjeto
 );
 
 export default router;
