@@ -2,7 +2,8 @@ import express from "express";
 
 import {
   atribuirResponsavelTarefa,
-  listarResponsaveisTarefa
+  listarResponsaveisTarefa,
+  removerResponsavelTarefa
 } from "../controllers/responsaveisTarefaController.js";
 
 import {
@@ -23,6 +24,13 @@ router.get(
   "/:id_projeto/tarefas/:id_tarefa/responsaveis",
   autenticarToken,
   listarResponsaveisTarefa
+);
+
+router.delete(
+  "/:id_projeto/tarefas/:id_tarefa/responsaveis/:id_utilizador",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  removerResponsavelTarefa
 );
 
 export default router;
