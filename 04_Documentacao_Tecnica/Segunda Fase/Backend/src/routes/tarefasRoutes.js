@@ -3,7 +3,8 @@ import express from "express";
 import {
   criarTarefa,
   listarTarefasProjeto,
-  atualizarTarefa
+  atualizarTarefa,
+  atualizarEstadoTarefa
 } from "../controllers/tarefasController.js";
 
 import {
@@ -34,6 +35,13 @@ router.put(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   atualizarTarefa
+);
+
+// Atualizar estado da tarefa
+router.put(
+  "/:id_projeto/tarefas/:id_tarefa/estado",
+  autenticarToken,
+  atualizarEstadoTarefa
 );
 
 export default router;
