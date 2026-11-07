@@ -592,3 +592,67 @@ export async function reativarTarefa(req, res) {
     });
   }
 }
+
+// GET /projetos/:id_projeto/tarefas/:id_tarefa
+export async function obterTarefaPorId(req, res) {
+  try {
+    const { id_projeto, id_tarefa } = req.params;
+
+    // Validar os IDs
+    if (
+      !Number.isInteger(Number(id_projeto)) ||
+      Number(id_projeto) <= 0 ||
+      !Number.isInteger(Number(id_tarefa)) ||
+      Number(id_tarefa) <= 0
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do projeto ou da tarefa inválido."
+      });
+    }
+
+    // Consultar a tarefa específica
+    const [tarefas] = await pool.query(
+      `SELECT
+        t.id_tarefa,
+        t.id_projeto,
+        t.id_criador,
+        t.titulo,
+        t.descricao,
+        t.prioridade,
+        t.estado,
+        t.data_criacao,
+        t.data_inicio,
+        t.prazo,
+        t.data_conclusao,
+        u.nome AS nome_criador
+      FROM tarefas t
+      INNER JOIN utilizadores u
+        ON t.id_criador = u.id_utilizador
+      WHERE t.id_tarefa = ?
+        AND t.id_projeto = ?
+        AND t.estado_registo = 'ativo'`,
+      [id_tarefa, id_projeto]
+    );
+
+    if (tarefas.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Tarefa não encontrada neste projeto."
+      });
+    }
+
+    return res.status(200).json({
+      sucesso: true,
+      tarefa: tarefas[0]
+    });
+
+  } catch (error) {
+    console.error("Erro ao consultar tarefa:", error);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao consultar a tarefa."
+    });
+  }
+}

@@ -7,7 +7,8 @@ import {
   atualizarEstadoTarefa,
   eliminarTarefa,
   listarTarefasInativas,
-  reativarTarefa
+  reativarTarefa,
+  obterTarefaPorId
 } from "../controllers/tarefasController.js";
 
 import {
@@ -69,6 +70,13 @@ router.put(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   reativarTarefa
+);
+
+// Consultar tarefa em específico
+router.get(
+  "/:id_projeto/tarefas/:id_tarefa",
+  autenticarToken,
+  obterTarefaPorId
 );
 
 export default router;
