@@ -129,6 +129,7 @@ export async function criarTarefa(req, res) {
   }
 }
 
+// GET /projetos/:id_projetos/tarefas
 export async function listarTarefasProjeto(req, res) {
   try {
     const { id_projeto } = req.params;
@@ -190,6 +191,137 @@ export async function listarTarefasProjeto(req, res) {
     return res.status(500).json({
       sucesso: false,
       mensagem: "Erro ao consultar as tarefas."
+    });
+  }
+}
+
+// PUT /projetos/:id_projetos/tarefas/:id_tarefa
+export async function atualizarTarefa(req, res) {
+  try {
+    const { id_projeto, id_tarefa } = req.params;
+
+    const {
+      titulo,
+      descricao,
+      prioridade,
+      data_inicio,
+      prazo
+    } = req.body;
+
+    // Validar os IDs
+    if (
+      !Number.isInteger(Number(id_projeto)) ||
+      Number(id_projeto) <= 0 ||
+      !Number.isInteger(Number(id_tarefa)) ||
+      Number(id_tarefa) <= 0
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do projeto ou da tarefa inválido."
+      });
+    }
+
+    // Validar o título
+    if (!titulo || typeof titulo !== "string" || !titulo.trim()) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "O título da tarefa é obrigatório."
+      });
+    }
+
+    if (titulo.trim().length > 200) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "O título não pode ultrapassar 200 caracteres."
+      });
+    }
+
+    // Validar a prioridade
+    const prioridadesPermitidas = [
+      "baixa",
+      "media",
+      "alta",
+      "urgente"
+    ];
+
+    if (!prioridadesPermitidas.includes(prioridade)) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Prioridade inválida."
+      });
+    }
+
+    // Validar as datas
+    if (data_inicio && !validarData(data_inicio)) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "A data de início é inválida."
+      });
+    }
+
+    if (prazo && !validarData(prazo)) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "O prazo é inválido."
+      });
+    }
+
+    if (data_inicio && prazo && prazo < data_inicio) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "O prazo não pode ser anterior à data de início."
+      });
+    }
+
+    // Verificar se a tarefa pertence ao projeto
+    const [tarefas] = await pool.query(
+      `SELECT id_tarefa
+       FROM tarefas
+       WHERE id_tarefa = ?
+         AND id_projeto = ?
+         AND estado_registo = 'ativo'`,
+      [id_tarefa, id_projeto]
+    );
+
+    if (tarefas.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Tarefa não encontrada neste projeto."
+      });
+    }
+
+    // Atualizar a tarefa
+    await pool.query(
+      `UPDATE tarefas
+       SET titulo = ?,
+           descricao = ?,
+           prioridade = ?,
+           data_inicio = ?,
+           prazo = ?
+       WHERE id_tarefa = ?
+         AND id_projeto = ?`,
+      [
+        titulo.trim(),
+        descricao || null,
+        prioridade,
+        data_inicio || null,
+        prazo || null,
+        id_tarefa,
+        id_projeto
+      ]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Tarefa atualizada com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao atualizar tarefa:", error);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao atualizar a tarefa."
     });
   }
 }

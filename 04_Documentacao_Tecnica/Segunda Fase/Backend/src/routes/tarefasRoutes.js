@@ -2,7 +2,8 @@ import express from "express";
 
 import {
   criarTarefa,
-  listarTarefasProjeto
+  listarTarefasProjeto,
+  atualizarTarefa
 } from "../controllers/tarefasController.js";
 
 import {
@@ -25,6 +26,14 @@ router.get(
   "/:id_projeto/tarefas",
   autenticarToken,
   listarTarefasProjeto
+);
+
+// Atualizar tarefa
+router.put(
+  "/:id_projeto/tarefas/:id_tarefa",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  atualizarTarefa
 );
 
 export default router;
