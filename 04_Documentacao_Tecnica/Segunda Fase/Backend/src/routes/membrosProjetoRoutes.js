@@ -3,12 +3,13 @@ import express from "express";
 import {
   adicionarMembroProjeto,
   listarMembrosProjeto,
-  atualizarFuncaoMembroProjeto
+  atualizarFuncaoMembroProjeto,
+  removerMembroProjeto
 } from "../controllers/membrosProjetoController.js";
 
 import {
   autenticarToken,
-  autorizarPerfil
+  autorizarPerfil,
 } from "../middlewares/autenticacaoMiddleware.js";
 
 const router = express.Router();
@@ -35,6 +36,14 @@ router.put(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   atualizarFuncaoMembroProjeto
+);
+
+// Remover membro do projeto 
+router.delete(
+  "/:id/membros/:id_utilizador",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  removerMembroProjeto
 );
 
 export default router;
