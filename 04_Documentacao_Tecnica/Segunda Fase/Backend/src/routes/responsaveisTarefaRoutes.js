@@ -1,7 +1,8 @@
 import express from "express";
 
 import {
-  atribuirResponsavelTarefa
+  atribuirResponsavelTarefa,
+  listarResponsaveisTarefa
 } from "../controllers/responsaveisTarefaController.js";
 
 import {
@@ -16,6 +17,12 @@ router.post(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   atribuirResponsavelTarefa
+);
+
+router.get(
+  "/:id_projeto/tarefas/:id_tarefa/responsaveis",
+  autenticarToken,
+  listarResponsaveisTarefa
 );
 
 export default router;

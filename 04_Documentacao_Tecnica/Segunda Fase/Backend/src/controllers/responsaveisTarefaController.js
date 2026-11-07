@@ -95,3 +95,69 @@ export async function atribuirResponsavelTarefa(req, res) {
     });
   }
 }
+
+export async function listarResponsaveisTarefa(req, res) {
+  try {
+    const { id_projeto, id_tarefa } = req.params;
+
+    // Validar os IDs
+    if (
+      !Number.isInteger(Number(id_projeto)) ||
+      Number(id_projeto) <= 0 ||
+      !Number.isInteger(Number(id_tarefa)) ||
+      Number(id_tarefa) <= 0
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do projeto ou da tarefa inválido."
+      });
+    }
+
+    // Verificar se a tarefa existe e está ativa
+    const [tarefas] = await pool.query(
+      `SELECT id_tarefa
+       FROM tarefas
+       WHERE id_tarefa = ?
+         AND id_projeto = ?
+         AND estado_registo = 'ativo'`,
+      [id_tarefa, id_projeto]
+    );
+
+    if (tarefas.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Tarefa não encontrada neste projeto."
+      });
+    }
+
+    // Consultar os responsáveis
+    const [responsaveis] = await pool.query(
+      `SELECT
+        u.id_utilizador,
+        u.nome,
+        u.email,
+        u.tipo_utilizador,
+        tr.data_atribuicao
+       FROM tarefa_responsaveis tr
+       INNER JOIN utilizadores u
+         ON tr.id_utilizador = u.id_utilizador
+       WHERE tr.id_tarefa = ?
+       ORDER BY tr.data_atribuicao ASC`,
+      [id_tarefa]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      total: responsaveis.length,
+      responsaveis
+    });
+
+  } catch (error) {
+    console.error("Erro ao listar responsáveis:", error);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao consultar os responsáveis da tarefa."
+    });
+  }
+}
