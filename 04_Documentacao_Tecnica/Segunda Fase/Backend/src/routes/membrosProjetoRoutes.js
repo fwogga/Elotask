@@ -2,7 +2,8 @@ import express from "express";
 
 import {
   adicionarMembroProjeto,
-  listarMembrosProjeto
+  listarMembrosProjeto,
+  atualizarFuncaoMembroProjeto
 } from "../controllers/membrosProjetoController.js";
 
 import {
@@ -26,6 +27,14 @@ router.get(
   autenticarToken,
   autorizarPerfil("admin", "gestor", "colaborador"),
   listarMembrosProjeto
+);
+
+// Atualizar função do membro do projeto
+router.put(
+  "/:id/membros/:id_utilizador",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  atualizarFuncaoMembroProjeto
 );
 
 export default router;

@@ -156,3 +156,77 @@ export async function listarMembrosProjeto(req, res) {
     });
   }
 }
+
+// PUT /projetos/:id/membros/:id_utilizador
+export async function atualizarFuncaoMembroProjeto(req, res) {
+  try {
+    const { id, id_utilizador } = req.params;
+    const { funcao } = req.body;
+
+    // Validar o ID do projeto
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do projeto inválido."
+      });
+    }
+
+    // Validar o ID do utilizador
+    if (
+      !Number.isInteger(Number(id_utilizador)) ||
+      Number(id_utilizador) <= 0
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do utilizador inválido."
+      });
+    }
+
+    // Validar a função
+    if (typeof funcao !== "string" || !funcao.trim()) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "A função do membro é obrigatória."
+      });
+    }
+
+    // Verificar se o membro pertence ao projeto e está ativo
+    const [associacoes] = await pool.query(
+      `SELECT id_projeto, id_utilizador
+       FROM projeto_membros
+       WHERE id_projeto = ?
+         AND id_utilizador = ?
+         AND estado = 'ativo'`,
+      [id, id_utilizador]
+    );
+
+    if (associacoes.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Membro não encontrado neste projeto ou associação inativa."
+      });
+    }
+
+    // Atualizar a função do membro
+    await pool.query(
+      `UPDATE projeto_membros
+       SET funcao = ?
+       WHERE id_projeto = ?
+         AND id_utilizador = ?`,
+      [funcao.trim(), id, id_utilizador]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Função do membro atualizada com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao atualizar função do membro:", error);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao atualizar a função do membro."
+    });
+  }
+}
