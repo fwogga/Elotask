@@ -1,5 +1,6 @@
 import pool from "../config/database.js";
 
+// POST /projetos/:id_projeto/tarefas
 export async function criarTarefa(req, res) {
   try {
     const { id_projeto } = req.params;
@@ -124,6 +125,71 @@ export async function criarTarefa(req, res) {
     return res.status(500).json({
       sucesso: false,
       mensagem: "Erro ao criar tarefa."
+    });
+  }
+}
+
+export async function listarTarefasProjeto(req, res) {
+  try {
+    const { id_projeto } = req.params;
+
+    // Validar o ID do projeto
+    if (!Number.isInteger(Number(id_projeto)) || Number(id_projeto) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do projeto inválido."
+      });
+    }
+
+    // Verificar se o projeto existe
+    const [projetos] = await pool.query(
+      "SELECT id_projeto FROM projetos WHERE id_projeto = ?",
+      [id_projeto]
+    );
+
+    if (projetos.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Projeto não encontrado."
+      });
+    }
+
+    // Consultar as tarefas ativas do projeto
+    const [tarefas] = await pool.query(
+      `SELECT
+        t.id_tarefa,
+        t.id_projeto,
+        t.titulo,
+        t.descricao,
+        t.prioridade,
+        t.estado,
+        t.data_criacao,
+        t.data_inicio,
+        t.prazo,
+        t.data_conclusao,
+        t.id_criador,
+        u.nome AS nome_criador
+      FROM tarefas t
+      INNER JOIN utilizadores u
+        ON t.id_criador = u.id_utilizador
+      WHERE t.id_projeto = ?
+        AND t.estado_registo = 'ativo'
+      ORDER BY t.data_criacao DESC`,
+      [id_projeto]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      total: tarefas.length,
+      tarefas
+    });
+
+  } catch (error) {
+    console.error("Erro ao listar tarefas:", error);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao consultar as tarefas."
     });
   }
 }
