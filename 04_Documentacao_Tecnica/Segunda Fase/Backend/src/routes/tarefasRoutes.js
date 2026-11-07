@@ -5,7 +5,8 @@ import {
   listarTarefasProjeto,
   atualizarTarefa,
   atualizarEstadoTarefa,
-  eliminarTarefa
+  eliminarTarefa,
+  listarTarefasInativas
 } from "../controllers/tarefasController.js";
 
 import {
@@ -51,6 +52,14 @@ router.delete(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   eliminarTarefa
+);
+
+// Listar tarefas inativas
+router.get(
+  "/:id_projeto/tarefas/inativas",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  listarTarefasInativas
 );
 
 export default router;
