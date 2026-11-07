@@ -405,3 +405,62 @@ export async function atualizarEstadoTarefa(req, res) {
     });
   }
 }
+
+// DELETE /projetos/:id_projetos/tarefas/:id_tarefa
+export async function eliminarTarefa(req, res) {
+  try {
+    const { id_projeto, id_tarefa } = req.params;
+
+    // Validar os IDs
+    if (
+      !Number.isInteger(Number(id_projeto)) ||
+      Number(id_projeto) <= 0 ||
+      !Number.isInteger(Number(id_tarefa)) ||
+      Number(id_tarefa) <= 0
+    ) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "ID do projeto ou da tarefa inválido."
+      });
+    }
+
+    // Verificar se a tarefa existe e está ativa
+    const [tarefas] = await pool.query(
+      `SELECT id_tarefa
+       FROM tarefas
+       WHERE id_tarefa = ?
+         AND id_projeto = ?
+         AND estado_registo = 'ativo'`,
+      [id_tarefa, id_projeto]
+    );
+
+    if (tarefas.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Tarefa não encontrada neste projeto."
+      });
+    }
+
+    // Eliminar logicamente a tarefa
+    await pool.query(
+      `UPDATE tarefas
+       SET estado_registo = 'inativo'
+       WHERE id_tarefa = ?
+         AND id_projeto = ?`,
+      [id_tarefa, id_projeto]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Tarefa eliminada com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao eliminar tarefa:", error);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao eliminar a tarefa."
+    });
+  }
+}

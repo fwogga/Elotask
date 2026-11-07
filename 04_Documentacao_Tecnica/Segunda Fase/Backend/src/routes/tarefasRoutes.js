@@ -4,7 +4,8 @@ import {
   criarTarefa,
   listarTarefasProjeto,
   atualizarTarefa,
-  atualizarEstadoTarefa
+  atualizarEstadoTarefa,
+  eliminarTarefa
 } from "../controllers/tarefasController.js";
 
 import {
@@ -42,6 +43,14 @@ router.put(
   "/:id_projeto/tarefas/:id_tarefa/estado",
   autenticarToken,
   atualizarEstadoTarefa
+);
+
+// Eliminar tarefa
+router.delete(
+  "/:id_projeto/tarefas/:id_tarefa",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  eliminarTarefa
 );
 
 export default router;
