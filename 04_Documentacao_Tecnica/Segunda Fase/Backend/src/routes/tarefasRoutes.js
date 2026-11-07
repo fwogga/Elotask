@@ -6,7 +6,8 @@ import {
   atualizarTarefa,
   atualizarEstadoTarefa,
   eliminarTarefa,
-  listarTarefasInativas
+  listarTarefasInativas,
+  reativarTarefa
 } from "../controllers/tarefasController.js";
 
 import {
@@ -60,6 +61,14 @@ router.get(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   listarTarefasInativas
+);
+
+// Reativar tarefa
+router.put(
+  "/:id_projeto/tarefas/:id_tarefa/reativar",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  reativarTarefa
 );
 
 export default router;
