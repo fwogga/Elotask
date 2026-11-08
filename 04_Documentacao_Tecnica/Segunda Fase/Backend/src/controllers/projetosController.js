@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { registrarAlteracao } from "./historicoController.js";
 
 // POST /projetos
 export async function criarProjeto(req, res) {
@@ -61,6 +62,13 @@ export async function criarProjeto(req, res) {
         data_fim || null
       ]
     );
+
+    await registrarAlteracao({
+        id_utilizador: id_criador,
+        id_projeto: resultado.insertId,
+        tipo_alteracao: "criacao_projeto",
+        descricao: `Criou o projeto "${nome.trim()}".`
+    });
 
     return res.status(201).json({
       sucesso: true,
@@ -286,6 +294,13 @@ export async function atualizarProjeto(req, res) {
       ]
     );
 
+    await registrarAlteracao({
+        id_utilizador: req.utilizador.id,
+        id_projeto: Number(id),
+        tipo_alteracao: "atualizacao_projeto",
+        descricao: `Atualizou os dados do projeto "${nome.trim()}".`
+    });
+
     return res.status(200).json({
       sucesso: true,
       mensagem: "Projeto atualizado com sucesso."
@@ -346,6 +361,13 @@ export async function atualizarEstadoProjeto(req, res) {
       "UPDATE projetos SET estado = ? WHERE id_projeto = ?",
       [estado, id]
     );
+
+    await registrarAlteracao({
+      id_utilizador: req.utilizador.id,
+      id_projeto: Number(id),
+      tipo_alteracao: "alteracao_estado_projeto",
+      descricao: `Alterou o estado do projeto para "${estado}".`
+    });
 
     return res.status(200).json({
       sucesso: true,

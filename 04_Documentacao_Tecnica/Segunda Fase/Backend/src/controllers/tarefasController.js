@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { registrarAlteracao } from "./historicoController.js";
 
 // Validar datas no formato AAAA-MM-DD
 const validarData = (data) => {
@@ -112,6 +113,14 @@ export async function criarTarefa(req, res) {
         prazo || null
       ]
     );
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: resultado.insertId,
+  tipo_alteracao: "criacao_tarefa",
+  descricao: `Criou a tarefa "${titulo.trim()}".`
+    });
 
     return res.status(201).json({
       sucesso: true,
@@ -311,6 +320,14 @@ export async function atualizarTarefa(req, res) {
       ]
     );
 
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: Number(id_tarefa),
+  tipo_alteracao: "atualizacao_tarefa",
+  descricao: `Atualizou os dados da tarefa "${titulo.trim()}".`
+    });
+
     return res.status(200).json({
       sucesso: true,
       mensagem: "Tarefa atualizada com sucesso."
@@ -390,6 +407,14 @@ export async function atualizarEstadoTarefa(req, res) {
       [estado, estado, id_tarefa, id_projeto]
     );
 
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: Number(id_tarefa),
+  tipo_alteracao: "alteracao_estado_tarefa",
+  descricao: `Alterou o estado da tarefa para "${estado}".`
+    });
+
     return res.status(200).json({
       sucesso: true,
       mensagem: "Estado da tarefa atualizado com sucesso.",
@@ -449,6 +474,14 @@ export async function eliminarTarefa(req, res) {
          AND id_projeto = ?`,
       [id_tarefa, id_projeto]
     );
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: Number(id_tarefa),
+  tipo_alteracao: "eliminacao_tarefa",
+  descricao: `Eliminou logicamente a tarefa com o ID ${id_tarefa}.`
+});
 
     return res.status(200).json({
       sucesso: true,
@@ -577,6 +610,14 @@ export async function reativarTarefa(req, res) {
          AND id_projeto = ?`,
       [id_tarefa, id_projeto]
     );
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: Number(id_tarefa),
+  tipo_alteracao: "reativacao_tarefa",
+  descricao: `Reativou a tarefa com o ID ${id_tarefa}.`
+    });
 
     return res.status(200).json({
       sucesso: true,
