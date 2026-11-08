@@ -39,6 +39,7 @@ export async function criarEvento(req, res) {
       mensagem: "Evento criado com sucesso.",
       id_evento: resultado.insertId
     });
+
   } catch (error) {
     console.error("Erro ao criar evento:", error);
     return res.status(500).json({
@@ -47,6 +48,7 @@ export async function criarEvento(req, res) {
     });
   }
 }
+
 
 // Consultar calendário: eventos, tarefas e turnos
 export async function consultarCalendario(req, res) {
@@ -68,6 +70,7 @@ export async function consultarCalendario(req, res) {
       });
     }
 
+    // Eventos manuais ativos
     const [eventos] = await pool.query(
       `SELECT
          id_evento AS id,
@@ -78,12 +81,14 @@ export async function consultarCalendario(req, res) {
          tipo_evento AS tipo,
          'evento' AS origem
        FROM eventos_calendario
-       WHERE data_inicio < DATE_ADD(?, INTERVAL 1 DAY)
+       WHERE estado_registo = 'ativo'
+         AND data_inicio < DATE_ADD(?, INTERVAL 1 DAY)
          AND data_fim >= ?
        ORDER BY data_inicio`,
       [data_fim, data_inicio]
     );
 
+    // Tarefas atribuídas ao utilizador
     const [tarefas] = await pool.query(
       `SELECT DISTINCT
          t.id_tarefa AS id,
@@ -106,6 +111,7 @@ export async function consultarCalendario(req, res) {
       [id_utilizador, data_inicio, data_fim, data_inicio, data_fim]
     );
 
+    // Turnos atribuídos ou confirmados pelo utilizador
     const [turnos] = await pool.query(
       `SELECT
          tu.id_turno AS id,
@@ -126,6 +132,7 @@ export async function consultarCalendario(req, res) {
       [id_utilizador, data_inicio, data_fim]
     );
 
+    // Juntar os resultados e ordenar cronologicamente
     const calendario = [...eventos, ...tarefas, ...turnos].sort(
       (a, b) => new Date(a.data_inicio) - new Date(b.data_inicio)
     );
@@ -135,6 +142,7 @@ export async function consultarCalendario(req, res) {
       total: calendario.length,
       calendario
     });
+
   } catch (error) {
     console.error("Erro ao consultar calendário:", error);
     return res.status(500).json({
@@ -144,13 +152,17 @@ export async function consultarCalendario(req, res) {
   }
 }
 
-// Consultar um evento específico
+
+// Consultar um evento específico (apenas ativos)
 export async function obterEvento(req, res) {
   try {
     const { id } = req.params;
 
     const [eventos] = await pool.query(
-      `SELECT * FROM eventos_calendario WHERE id_evento = ?`,
+      `SELECT *
+       FROM eventos_calendario
+       WHERE id_evento = ?
+         AND estado_registo = 'ativo'`,
       [id]
     );
 
@@ -165,6 +177,7 @@ export async function obterEvento(req, res) {
       sucesso: true,
       evento: eventos[0]
     });
+
   } catch (error) {
     console.error("Erro ao consultar evento:", error);
     return res.status(500).json({
@@ -174,7 +187,8 @@ export async function obterEvento(req, res) {
   }
 }
 
-// Atualizar um evento
+
+// Atualizar um evento ativo
 export async function atualizarEvento(req, res) {
   try {
     const { id } = req.params;
@@ -198,9 +212,13 @@ export async function atualizarEvento(req, res) {
 
     const [resultado] = await pool.query(
       `UPDATE eventos_calendario
-       SET titulo = ?, descricao = ?, data_inicio = ?,
-           data_fim = ?, tipo_evento = ?
+       SET titulo = ?,
+           descricao = ?,
+           data_inicio = ?,
+           data_fim = ?,
+           tipo_evento = ?
        WHERE id_evento = ?
+         AND estado_registo = 'ativo'
          AND (id_criador = ? OR ? IN ('admin', 'gestor'))`,
       [
         titulo,
@@ -225,6 +243,7 @@ export async function atualizarEvento(req, res) {
       sucesso: true,
       mensagem: "Evento atualizado com sucesso."
     });
+
   } catch (error) {
     console.error("Erro ao atualizar evento:", error);
     return res.status(500).json({
@@ -234,7 +253,8 @@ export async function atualizarEvento(req, res) {
   }
 }
 
-// Eliminar um evento
+
+// Eliminar logicamente um evento
 export async function eliminarEvento(req, res) {
   try {
     const { id } = req.params;
@@ -242,8 +262,10 @@ export async function eliminarEvento(req, res) {
     const perfil = req.utilizador.perfil;
 
     const [resultado] = await pool.query(
-      `DELETE FROM eventos_calendario
+      `UPDATE eventos_calendario
+       SET estado_registo = 'inativo'
        WHERE id_evento = ?
+         AND estado_registo = 'ativo'
          AND (id_criador = ? OR ? IN ('admin', 'gestor'))`,
       [id, id_utilizador, perfil]
     );
@@ -259,11 +281,73 @@ export async function eliminarEvento(req, res) {
       sucesso: true,
       mensagem: "Evento eliminado com sucesso."
     });
+
   } catch (error) {
     console.error("Erro ao eliminar evento:", error);
     return res.status(500).json({
       sucesso: false,
       mensagem: "Erro ao eliminar evento."
+    });
+  }
+}
+
+
+// Listar eventos inativos (admin e gestor)
+export async function listarEventosInativos(req, res) {
+  try {
+    const [eventos] = await pool.query(
+      `SELECT *
+       FROM eventos_calendario
+       WHERE estado_registo = 'inativo'
+       ORDER BY data_inicio DESC`
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      total: eventos.length,
+      eventos
+    });
+
+  } catch (error) {
+    console.error("Erro ao listar eventos inativos:", error);
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao listar eventos inativos."
+    });
+  }
+}
+
+
+// Reativar um evento (admin e gestor)
+export async function reativarEvento(req, res) {
+  try {
+    const { id } = req.params;
+
+    const [resultado] = await pool.query(
+      `UPDATE eventos_calendario
+       SET estado_registo = 'ativo'
+       WHERE id_evento = ?
+         AND estado_registo = 'inativo'`,
+      [id]
+    );
+
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Evento não encontrado ou já se encontra ativo."
+      });
+    }
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Evento reativado com sucesso."
+    });
+
+  } catch (error) {
+    console.error("Erro ao reativar evento:", error);
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao reativar evento."
     });
   }
 }

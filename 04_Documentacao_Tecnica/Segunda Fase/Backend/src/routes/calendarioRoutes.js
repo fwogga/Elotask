@@ -5,28 +5,47 @@ import {
   consultarCalendario,
   obterEvento,
   atualizarEvento,
-  eliminarEvento
+  eliminarEvento,
+  listarEventosInativos,
+  reativarEvento
 } from "../controllers/calendarioController.js";
 
-import { autenticarToken } from "../middlewares/autenticacaoMiddleware.js";
+import {
+  autenticarToken,
+  autorizarPerfil
+} from "../middlewares/autenticacaoMiddleware.js";
 
 const router = Router();
 
 router.use(autenticarToken);
 
-// Consultar os eventos, tarefas e turnos do calendário
+// Consultar calendário
 router.get("/", consultarCalendario);
 
-// Criar um evento
+// Eventos inativos (antes da rota com :id)
+router.get(
+  "/eventos/inativos",
+  autorizarPerfil("admin", "gestor"),
+  listarEventosInativos
+);
+
+// Criar evento
 router.post("/eventos", criarEvento);
 
-// Consultar um evento específico
+// Consultar evento
 router.get("/eventos/:id", obterEvento);
 
-// Atualizar um evento
+// Atualizar evento
 router.put("/eventos/:id", atualizarEvento);
 
-// Eliminar um evento
+// Eliminar evento logicamente
 router.delete("/eventos/:id", eliminarEvento);
+
+// Reativar evento
+router.patch(
+  "/eventos/:id/reativar",
+  autorizarPerfil("admin", "gestor"),
+  reativarEvento
+);
 
 export default router;

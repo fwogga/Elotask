@@ -14,7 +14,7 @@ import turnosRoutes from "./src/routes/turnosRoutes.js";
 import turnoColaboradoresRoutes from "./src/routes/turnoColaboradoresRoutes.js";
 import pedidosAusenciaRoutes from "./src/routes/pedidosAusenciaRoutes.js";
 import pedidosTrocaTurnoRoutes from "./src/routes/pedidosTrocaTurnoRoutes.js";
-import calendarioRoutes from "./routes/calendarioRoutes.js";
+import calendarioRoutes from "./src/routes/calendarioRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
