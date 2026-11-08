@@ -14,6 +14,7 @@ import turnosRoutes from "./src/routes/turnosRoutes.js";
 import turnoColaboradoresRoutes from "./src/routes/turnoColaboradoresRoutes.js";
 import pedidosAusenciaRoutes from "./src/routes/pedidosAusenciaRoutes.js";
 import pedidosTrocaTurnoRoutes from "./src/routes/pedidosTrocaTurnoRoutes.js";
+import calendarioRoutes from "./routes/calendarioRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,6 +41,7 @@ app.use("/turnos", turnosRoutes);
 app.use("/turnos", turnoColaboradoresRoutes);
 app.use("/pedidos-ausencia", pedidosAusenciaRoutes);
 app.use("/pedidos-troca-turno", pedidosTrocaTurnoRoutes);
+app.use("/calendario", calendarioRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor a correr na porta ${PORT}`);
