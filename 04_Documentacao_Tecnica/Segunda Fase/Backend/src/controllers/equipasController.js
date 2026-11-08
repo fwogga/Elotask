@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { registrarAlteracao } from "./historicoController.js";
 
 // GET /equipas (ativas)
 export async function listarEquipas(req, res) {
@@ -55,6 +56,12 @@ export async function criarEquipa(req, res) {
        VALUES (?, ?, ?)`,
       [nome.trim(), descricao?.trim() || null, idCriador]
     );
+
+    await registrarAlteracao({
+  id_utilizador: idCriador,
+  tipo_alteracao: "criacao_equipa",
+  descricao: `Criou a equipa "${nome.trim()}".`
+    });
 
     return res.status(201).json({
       sucesso: true,
@@ -125,6 +132,12 @@ export async function atualizarEquipa(req, res) {
       ]
     );
 
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: "atualizacao_equipa",
+  descricao: `Atualizou os dados da equipa "${nome.trim()}" (ID: ${id}).`
+    });
+
     return res.status(200).json({
       sucesso: true,
       mensagem: "Equipa atualizada com sucesso."
@@ -176,6 +189,12 @@ export async function eliminarEquipa(req, res) {
        WHERE id_equipa = ?`,
       [id]
     );
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: "eliminacao_equipa",
+  descricao: `Desativou a equipa com o ID ${id}.`
+    });
 
     return res.status(200).json({
       sucesso: true,
@@ -261,6 +280,12 @@ export async function reativarEquipa(req, res) {
        WHERE id_equipa = ?`,
       [id]
     );
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: "reativacao_equipa",
+  descricao: `Reativou a equipa com o ID ${id}.`
+    });
 
     return res.status(200).json({
       sucesso: true,

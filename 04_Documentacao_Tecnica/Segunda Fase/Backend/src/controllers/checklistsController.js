@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { registrarAlteracao } from "./historicoController.js";
 
 export async function criarChecklist(req, res) {
   try {
@@ -56,6 +57,14 @@ export async function criarChecklist(req, res) {
        VALUES (?, ?)`,
       [id_tarefa, titulo.trim()]
     );
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: Number(id_tarefa),
+  tipo_alteracao: "criacao_checklist",
+  descricao: `Criou a checklist "${titulo.trim()}" na tarefa ${id_tarefa}.`
+    });
 
     return res.status(201).json({
       sucesso: true,
@@ -213,6 +222,14 @@ export async function atualizarChecklist(req, res) {
       });
     }
 
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: Number(id_tarefa),
+  tipo_alteracao: "atualizacao_checklist",
+  descricao: `Atualizou a checklist ${id_checklist} para "${titulo.trim()}".`
+    });
+
     return res.status(200).json({
       sucesso: true,
       mensagem: "Checklist atualizada com sucesso."
@@ -250,6 +267,14 @@ export async function eliminarChecklist(req, res) {
         mensagem: "Checklist não encontrada ou já inativa."
       });
     }
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: Number(id_tarefa),
+  tipo_alteracao: "eliminacao_checklist",
+  descricao: `Eliminou logicamente a checklist ${id_checklist}.`
+    });
 
     return res.status(200).json({
       sucesso: true,
@@ -320,6 +345,14 @@ export async function reativarChecklist(req, res) {
         mensagem: "Checklist inativa não encontrada."
       });
     }
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: Number(id_tarefa),
+  tipo_alteracao: "reativacao_checklist",
+  descricao: `Reativou a checklist ${id_checklist}.`
+});
 
     return res.status(200).json({
       sucesso: true,

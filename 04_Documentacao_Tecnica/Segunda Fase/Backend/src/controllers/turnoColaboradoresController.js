@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { registrarAlteracao } from "./historicoController.js";
 
 // Atribuir colaborador a um turno
 
@@ -165,6 +166,12 @@ export async function atribuirColaboradorTurno(req, res) {
 
       await conexao.commit();
 
+      await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: "reativacao_atribuicao_turno",
+  descricao: `Reativou a atribuição do utilizador ${id_utilizador} ao turno ${id_turno}.`
+    });
+
       return res.status(200).json({
         sucesso: true,
         mensagem: "A atribuição do colaborador foi reativada com sucesso."
@@ -181,6 +188,12 @@ export async function atribuirColaboradorTurno(req, res) {
 
     // Confirmar a transação
     await conexao.commit();
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: "atribuicao_colaborador_turno",
+  descricao: `Atribuiu o utilizador ${id_utilizador} ao turno ${id_turno}.`
+    });
 
     return res.status(201).json({
       sucesso: true,
@@ -315,6 +328,14 @@ export async function atualizarEstadoAtribuicao(req, res) {
         mensagem: "Atribuição não encontrada ou já cancelada."
       });
     }
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: estado === "confirmado"
+    ? "confirmacao_atribuicao_turno"
+    : "cancelamento_atribuicao_turno",
+  descricao: `Alterou o estado da atribuição do utilizador ${id_utilizador} ao turno ${id_turno} para "${estado}".`
+    });
 
     return res.status(200).json({
       sucesso: true,

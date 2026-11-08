@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { registrarAlteracao } from "./historicoController.js";
 
 // Criar item numa checklist
 export async function criarItemChecklist(req, res) {
@@ -55,6 +56,14 @@ export async function criarItemChecklist(req, res) {
        VALUES (?, ?, ?)`,
       [id_checklist, descricao.trim(), ordem || 1]
     );
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: Number(id_tarefa),
+  tipo_alteracao: "criacao_item_checklist",
+  descricao: `Adicionou o item "${descricao.trim()}" à checklist ${id_checklist}.`
+    });
 
     return res.status(201).json({
       sucesso: true,
@@ -199,6 +208,14 @@ export async function atualizarItemChecklist(req, res) {
       valores
     );
 
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: Number(id_tarefa),
+  tipo_alteracao: "atualizacao_item_checklist",
+  descricao: `Atualizou o item ${id_item} da checklist ${id_checklist}.`
+    });
+
     return res.status(200).json({
       sucesso: true,
       mensagem: "Item atualizado com sucesso."
@@ -254,6 +271,14 @@ export async function atualizarEstadoItemChecklist(req, res) {
       });
     }
 
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: Number(id_tarefa),
+  tipo_alteracao: "alteracao_estado_item_checklist",
+  descricao: `Alterou o estado do item ${id_item} da checklist ${id_checklist} para "${estado}".`
+    });
+
     return res.status(200).json({
       sucesso: true,
       mensagem: "Estado do item atualizado com sucesso."
@@ -296,6 +321,14 @@ export async function eliminarItemChecklist(req, res) {
         mensagem: "Item não encontrado ou já inativo."
       });
     }
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: Number(id_tarefa),
+  tipo_alteracao: "eliminacao_item_checklist",
+  descricao: `Eliminou logicamente o item ${id_item} da checklist ${id_checklist}.`
+    });
 
     return res.status(200).json({
       sucesso: true,
@@ -375,6 +408,14 @@ export async function reativarItemChecklist(req, res) {
         mensagem: "Item inativo não encontrado."
       });
     }
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  id_projeto: Number(id_projeto),
+  id_tarefa: Number(id_tarefa),
+  tipo_alteracao: "reativacao_item_checklist",
+  descricao: `Reativou o item ${id_item} da checklist ${id_checklist}.`
+    });
 
     return res.status(200).json({
       sucesso: true,

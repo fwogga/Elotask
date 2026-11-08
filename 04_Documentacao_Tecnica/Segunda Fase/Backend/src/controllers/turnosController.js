@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { registrarAlteracao } from "./historicoController.js";
 
 // Validar formato da data (AAAA-MM-DD)
 function validarData(data) {
@@ -73,6 +74,12 @@ export async function criarTurno(req, res) {
         descricao?.trim() || null
       ]
     );
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: "criacao_turno",
+  descricao: `Criou o turno "${nome.trim()}" para o dia ${data_turno}.`
+    });
 
     return res.status(201).json({
       sucesso: true,
@@ -326,6 +333,12 @@ export async function atualizarTurno(req, res) {
     // Confirmar a transação
     await conexao.commit();
 
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: "atualizacao_turno",
+  descricao: `Atualizou o turno ${id_turno} (${nome}) para o dia ${data_turno}.`
+    });
+
     return res.status(200).json({
       sucesso: true,
       mensagem: "Turno atualizado com sucesso."
@@ -378,6 +391,12 @@ export async function eliminarTurno(req, res) {
         mensagem: "Turno não encontrado ou já inativo."
       });
     }
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: "eliminacao_turno",
+  descricao: `Eliminou logicamente o turno ${id_turno}.`
+    });
 
     return res.status(200).json({
       sucesso: true,
@@ -442,6 +461,12 @@ export async function reativarTurno(req, res) {
         mensagem: "Turno inativo não encontrado."
       });
     }
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: "reativacao_turno",
+  descricao: `Reativou o turno ${id_turno}.`
+    });
 
     return res.status(200).json({
       sucesso: true,

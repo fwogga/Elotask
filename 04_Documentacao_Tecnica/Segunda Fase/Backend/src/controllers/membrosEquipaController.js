@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { registrarAlteracao } from "./historicoController.js";
 
 // POST equipas/:id/membros
 export async function adicionarMembroEquipa(req, res) {
@@ -77,6 +78,12 @@ export async function adicionarMembroEquipa(req, res) {
        VALUES (?, ?, ?)`,
       [id, id_utilizador, funcao || null]
     );
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: "adicao_membro_equipa",
+  descricao: `Adicionou o utilizador ${id_utilizador} à equipa ${id}.`
+    });
 
     return res.status(201).json({
       sucesso: true,
@@ -208,6 +215,12 @@ export async function removerMembroEquipa(req, res) {
       [id, id_utilizador]
     );
 
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: "remocao_membro_equipa",
+  descricao: `Removeu o utilizador ${id_utilizador} da equipa ${id}.`
+    });
+
     return res.status(200).json({
       sucesso: true,
       mensagem: "Membro removido da equipa com sucesso."
@@ -302,6 +315,12 @@ export async function reativarMembroEquipa(req, res) {
          AND id_utilizador = ?`,
       [id, id_utilizador]
     );
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: "reativacao_membro_equipa",
+  descricao: `Reativou o utilizador ${id_utilizador} na equipa ${id}.`
+    });
 
     return res.status(200).json({
       sucesso: true,
@@ -440,6 +459,12 @@ export async function atualizarFuncaoMembro(req, res) {
          AND id_utilizador = ?`,
       [funcao.trim(), id, id_utilizador]
     );
+
+    await registrarAlteracao({
+  id_utilizador: req.utilizador.id,
+  tipo_alteracao: "atualizacao_funcao_membro",
+  descricao: `Alterou a função do utilizador ${id_utilizador} na equipa ${id} para "${funcao.trim()}".`
+    });
 
     return res.status(200).json({
       sucesso: true,
