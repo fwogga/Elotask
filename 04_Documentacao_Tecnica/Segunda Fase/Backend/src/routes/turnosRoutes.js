@@ -7,7 +7,9 @@ import {
   atualizarTurno,
   eliminarTurno,
   listarTurnosInativos,
-  reativarTurno
+  reativarTurno,
+  definirDisponibilidade,
+  obterDisponibilidade
 } from "../controllers/turnosController.js";
 
 import {
@@ -69,6 +71,22 @@ router.put(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   reativarTurno
+);
+
+// Definir disponibilidade de um colaborador
+router.put(
+  "/disponibilidade/:id_utilizador",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  definirDisponibilidade
+);
+
+// Consultar disponibilidade de um colaborador
+router.get(
+  "/disponibilidade/:id_utilizador",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  obterDisponibilidade
 );
 
 export default router;

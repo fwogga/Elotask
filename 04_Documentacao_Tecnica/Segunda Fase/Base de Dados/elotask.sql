@@ -1684,6 +1684,32 @@ ALTER TABLE eventos_calendario
 ADD COLUMN estado_registo ENUM('ativo', 'inativo')
 NOT NULL DEFAULT 'ativo';
 
+CREATE TABLE disponibilidades_colaborador (
+    id_disponibilidade INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_utilizador INT UNSIGNED NOT NULL,
+    dia_semana ENUM(
+        'segunda',
+        'terca',
+        'quarta',
+        'quinta',
+        'sexta',
+        'sabado',
+        'domingo'
+    ) NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fim TIME NOT NULL,
+
+    PRIMARY KEY (id_disponibilidade),
+
+    CONSTRAINT fk_disponibilidade_utilizador
+        FOREIGN KEY (id_utilizador)
+        REFERENCES utilizadores(id_utilizador)
+        ON DELETE CASCADE
+);
+
+ALTER TABLE turnos
+ADD COLUMN numero_colaboradores INT UNSIGNED NOT NULL DEFAULT 1;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

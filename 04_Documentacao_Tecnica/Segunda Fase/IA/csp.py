@@ -1,90 +1,267 @@
-variaveis = ["A", "B", "C"]
-
-dominios = {
-    "A": ["Ana", "Joao", "Maria"],
-    "B": ["Ana", "Joao"],
-    "C": ["Joao", "Maria"]
-}
+from datetime import datetime
 
 
-# 1. Verificar se o colaborador pode ocupar o turno
-def verificar_restricao(turno, colaborador, atribuicao):
+# 1. Obter o intervalo de horas de um turno
+def obter_intervalo_turno(turno):
 
-    for outro_turno in atribuicao:
+    data = turno["data_turno"]
+    hora_inicio = str(turno["hora_inicio"])[:5]
+    hora_fim = str(turno["hora_fim"])[:5]
 
-        if atribuicao[outro_turno] == colaborador:
-            return False
+    inicio = datetime.strptime(
+        data + " " + hora_inicio,
+        "%Y-%m-%d %H:%M"
+    )
+
+    fim = datetime.strptime(
+        data + " " + hora_fim,
+        "%Y-%m-%d %H:%M"
+    )
+
+    # Se terminar no dia seguinte
+    if fim <= inicio:
+        from datetime import timedelta
+        fim = fim + timedelta(days=1)
+
+    return inicio, fim
+
+
+# 2. Verificar se dois turnos se sobrepõem
+def turnos_sobrepostos(turno1, turno2):
+
+    inicio1, fim1 = obter_intervalo_turno(turno1)
+    inicio2, fim2 = obter_intervalo_turno(turno2)
+
+    if inicio1 < fim2 and inicio2 < fim1:
+        return True
+
+    return False
+
+
+# 3. Criar uma variável para cada vaga dos turnos
+def construir_variaveis(turnos):
+
+    variaveis = []
+    turnos_por_variavel = {}
+
+    for turno in turnos:
+
+        id_turno = turno["id_turno"]
+        numero = int(turno.get("numero_colaboradores", 1))
+
+        for vaga in range(1, numero + 1):
+
+            variavel = "Turno_" + str(id_turno) + "_Vaga_" + str(vaga)
+
+            variaveis.append(variavel)
+            turnos_por_variavel[variavel] = turno
+
+    return variaveis, turnos_por_variavel
+
+
+# 4. Verificar se o colaborador está disponível
+def verificar_disponibilidade(colaborador, turno):
+
+    dias_semana = [
+        "segunda", "terca", "quarta",
+        "quinta", "sexta", "sabado", "domingo"
+    ]
+
+    data = datetime.strptime(
+        turno["data_turno"],
+        "%Y-%m-%d"
+    )
+
+    dia_turno = dias_semana[data.weekday()]
+
+    hora_inicio = str(turno["hora_inicio"])[:5]
+    hora_fim = str(turno["hora_fim"])[:5]
+
+    for disponibilidade in colaborador["disponibilidade"]:
+
+        if disponibilidade["dia_semana"] == dia_turno:
+
+            inicio_disponibilidade = disponibilidade["hora_inicio"][:5]
+            fim_disponibilidade = disponibilidade["hora_fim"][:5]
+
+            if (
+                hora_inicio >= inicio_disponibilidade
+                and hora_fim <= fim_disponibilidade
+            ):
+                return True
+
+    return False
+
+
+# 5. Verificar se existe uma ausência aprovada
+def verificar_ausencia(colaborador, turno, ausencias):
+
+    id_colaborador = colaborador.get(
+        "id_utilizador",
+        colaborador.get("id")
+    )
+
+    for ausencia in ausencias:
+
+        if ausencia["id_utilizador"] == id_colaborador:
+
+            if ausencia["estado"] == "aprovado":
+
+                if (
+                    ausencia["data_inicio"] <= turno["data_turno"]
+                    and ausencia["data_fim"] >= turno["data_turno"]
+                ):
+                    return True
+
+    return False
+
+
+# 6. Construir os domínios de cada vaga
+def construir_dominios(colaboradores, variaveis,
+                       turnos_por_variavel, ausencias):
+
+    dominios = {}
+
+    for variavel in variaveis:
+
+        turno = turnos_por_variavel[variavel]
+
+        dominios[variavel] = []
+
+        for colaborador in colaboradores:
+
+            disponivel = verificar_disponibilidade(
+                colaborador,
+                turno
+            )
+
+            tem_ausencia = verificar_ausencia(
+                colaborador,
+                turno,
+                ausencias
+            )
+
+            if disponivel and not tem_ausencia:
+
+                id_colaborador = colaborador.get(
+                    "id_utilizador",
+                    colaborador.get("id")
+                )
+
+                dominios[variavel].append(id_colaborador)
+
+    return dominios
+
+
+# 7. Verificar as restrições de uma atribuição
+def verificar_restricao(variavel, colaborador,
+                        atribuicao, turnos_por_variavel):
+
+    turno_atual = turnos_por_variavel[variavel]
+
+    for outra_variavel in atribuicao:
+
+        outro_colaborador = atribuicao[outra_variavel]
+
+        outro_turno = turnos_por_variavel[outra_variavel]
+
+        if colaborador == outro_colaborador:
+
+            if turnos_sobrepostos(turno_atual, outro_turno):
+                return False
 
     return True
 
 
-# 2. Aplicar Forward Checking
-def forward_checking(turno, colaborador, atribuicao, dominios_atuais):
+# 8. Aplicar Forward Checking
+def forward_checking(variavel, colaborador,
+                     atribuicao, dominios_atuais,
+                     turnos_por_variavel):
 
     novos_dominios = {}
 
-    for outro_turno in dominios_atuais:
-        novos_dominios[outro_turno] = dominios_atuais[outro_turno].copy()
+    for outra_variavel in dominios_atuais:
 
-    for outro_turno in novos_dominios:
+        novos_dominios[outra_variavel] = (
+            dominios_atuais[outra_variavel].copy()
+        )
 
-        if outro_turno == turno:
+    turno_atual = turnos_por_variavel[variavel]
+
+    for outra_variavel in novos_dominios:
+
+        if outra_variavel == variavel:
             continue
 
-        if outro_turno in atribuicao:
+        if outra_variavel in atribuicao:
             continue
 
-        if colaborador in novos_dominios[outro_turno]:
-            novos_dominios[outro_turno].remove(colaborador)
+        outro_turno = turnos_por_variavel[outra_variavel]
 
-        if len(novos_dominios[outro_turno]) == 0:
-            return None
+        if turnos_sobrepostos(turno_atual, outro_turno):
+
+            if colaborador in novos_dominios[outra_variavel]:
+
+                novos_dominios[outra_variavel].remove(colaborador)
+
+            if len(novos_dominios[outra_variavel]) == 0:
+                return None
 
     return novos_dominios
 
 
-# 3. Escolher o turno com menos possibilidades (MRV)
-def escolher_variavel(atribuicao, dominios_atuais):
+# 9. Escolher a variável com menos possibilidades (MRV)
+def escolher_variavel(variaveis, atribuicao, dominios_atuais):
 
-    turno_escolhido = None
+    variavel_escolhida = None
     menor_quantidade = None
 
-    for turno in variaveis:
+    for variavel in variaveis:
 
-        if turno not in atribuicao:
+        if variavel not in atribuicao:
 
-            quantidade = len(dominios_atuais[turno])
+            quantidade = len(dominios_atuais[variavel])
 
-            if menor_quantidade is None or quantidade < menor_quantidade:
+            if (
+                menor_quantidade is None
+                or quantidade < menor_quantidade
+            ):
+
                 menor_quantidade = quantidade
-                turno_escolhido = turno
+                variavel_escolhida = variavel
 
-    return turno_escolhido
+    return variavel_escolhida
 
 
-def ordenar_valores_lcv(turno, atribuicao, dominios_atuais):
+# 10. Ordenar colaboradores pelo menor impacto (LCV)
+def ordenar_valores_lcv(variavel, atribuicao,
+                        dominios_atuais, turnos_por_variavel):
 
     impactos = {}
 
-    # Contar o impacto de cada colaborador
-    for colaborador in dominios_atuais[turno]:
+    turno_atual = turnos_por_variavel[variavel]
+
+    for colaborador in dominios_atuais[variavel]:
 
         quantidade = 0
 
-        for outro_turno in dominios_atuais:
+        for outra_variavel in dominios_atuais:
 
-            if outro_turno == turno:
+            if outra_variavel == variavel:
                 continue
 
-            if outro_turno in atribuicao:
+            if outra_variavel in atribuicao:
                 continue
 
-            if colaborador in dominios_atuais[outro_turno]:
-                quantidade = quantidade + 1
+            outro_turno = turnos_por_variavel[outra_variavel]
+
+            if turnos_sobrepostos(turno_atual, outro_turno):
+
+                if colaborador in dominios_atuais[outra_variavel]:
+                    quantidade += 1
 
         impactos[colaborador] = quantidade
 
-    # Ordenar os colaboradores pelo menor impacto
     colaboradores_ordenados = []
 
     while len(impactos) > 0:
@@ -94,7 +271,10 @@ def ordenar_valores_lcv(turno, atribuicao, dominios_atuais):
 
         for colaborador in impactos:
 
-            if menor_impacto is None or impactos[colaborador] < menor_impacto:
+            if (
+                menor_impacto is None
+                or impactos[colaborador] < menor_impacto
+            ):
 
                 menor_impacto = impactos[colaborador]
                 melhor_colaborador = colaborador
@@ -106,57 +286,85 @@ def ordenar_valores_lcv(turno, atribuicao, dominios_atuais):
     return colaboradores_ordenados
 
 
-
-# 4. Algoritmo Backtracking
-def backtracking(atribuicao, dominios_atuais):
+# 11. Algoritmo Backtracking
+def backtracking(variaveis, atribuicao, dominios_atuais,
+                 turnos_por_variavel):
 
     if len(atribuicao) == len(variaveis):
         return atribuicao.copy()
 
-    turno = escolher_variavel(atribuicao, dominios_atuais)
+    variavel = escolher_variavel(
+        variaveis,
+        atribuicao,
+        dominios_atuais
+    )
 
     colaboradores_ordenados = ordenar_valores_lcv(
-    turno,
-    atribuicao,
-    dominios_atuais
+        variavel,
+        atribuicao,
+        dominios_atuais,
+        turnos_por_variavel
     )
 
     for colaborador in colaboradores_ordenados:
 
-        if verificar_restricao(turno, colaborador, atribuicao):
+        if verificar_restricao(
+            variavel,
+            colaborador,
+            atribuicao,
+            turnos_por_variavel
+        ):
 
-            atribuicao[turno] = colaborador
+            atribuicao[variavel] = colaborador
 
             novos_dominios = forward_checking(
-                turno,
+                variavel,
                 colaborador,
                 atribuicao,
-                dominios_atuais
+                dominios_atuais,
+                turnos_por_variavel
             )
 
             if novos_dominios is not None:
 
-                resultado = backtracking(atribuicao, novos_dominios)
+                resultado = backtracking(
+                    variaveis,
+                    atribuicao,
+                    novos_dominios,
+                    turnos_por_variavel
+                )
 
                 if resultado is not None:
                     return resultado
 
-            del atribuicao[turno]
+            del atribuicao[variavel]
 
     return None
 
 
-# Executar o algoritmo
-atribuicao = {}
+# 12. Função principal para gerar a escala
+def resolver_escala(colaboradores, turnos, ausencias):
 
-solucao = backtracking(atribuicao, dominios)
+    variaveis, turnos_por_variavel = construir_variaveis(turnos)
 
-if solucao is not None:
+    dominios = construir_dominios(
+        colaboradores,
+        variaveis,
+        turnos_por_variavel,
+        ausencias
+    )
 
-    print("Escala encontrada:")
+    # Verificar se alguma vaga não tem colaboradores disponíveis
+    for variavel in dominios:
 
-    for turno in solucao:
-        print(turno, ":", solucao[turno])
+        if len(dominios[variavel]) == 0:
+            return None, turnos_por_variavel
 
-else:
-    print("Não existe solução.")
+    solucao = backtracking(
+        variaveis,
+        {},
+        dominios,
+        turnos_por_variavel
+    )
+
+    return solucao, turnos_por_variavel

@@ -17,7 +17,14 @@ function validarHora(hora) {
 // Criar turno
 export async function criarTurno(req, res) {
   try {
-    const { nome, hora_inicio, hora_fim, data_turno, descricao } = req.body;
+    const {
+  nome,
+  hora_inicio,
+  hora_fim,
+  data_turno,
+  descricao,
+  numero_colaboradores
+} = req.body;
 
     if (!nome || typeof nome !== "string" || !nome.trim()) {
       return res.status(400).json({
@@ -54,6 +61,13 @@ export async function criarTurno(req, res) {
       });
     }
 
+    if (!Number.isInteger(numero_colaboradores) || numero_colaboradores < 1) {
+  return res.status(400).json({
+    sucesso: false,
+    mensagem: "O número de colaboradores deve ser um inteiro igual ou superior a 1."
+  });
+}
+
     if (descricao !== undefined && descricao !== null &&
         typeof descricao !== "string") {
       return res.status(400).json({
@@ -63,17 +77,18 @@ export async function criarTurno(req, res) {
     }
 
     const [resultado] = await pool.query(
-      `INSERT INTO turnos
-       (nome, hora_inicio, hora_fim, data_turno, descricao)
-       VALUES (?, ?, ?, ?, ?)`,
-      [
-        nome.trim(),
-        hora_inicio,
-        hora_fim,
-        data_turno,
-        descricao?.trim() || null
-      ]
-    );
+  `INSERT INTO turnos
+   (nome, hora_inicio, hora_fim, data_turno, descricao, numero_colaboradores)
+   VALUES (?, ?, ?, ?, ?, ?)`,
+  [
+    nome.trim(),
+    hora_inicio,
+    hora_fim,
+    data_turno,
+    descricao?.trim() || null,
+    numero_colaboradores
+  ]
+);
 
     await registrarAlteracao({
   id_utilizador: req.utilizador.id,
@@ -103,7 +118,7 @@ export async function listarTurnos(req, res) {
   try {
     const [turnos] = await pool.query(
       `SELECT id_turno, nome, hora_inicio, hora_fim,
-              data_turno, descricao
+              data_turno, descricao, numero_colaboradores
        FROM turnos
        WHERE estado_registo = 'ativo'
        ORDER BY data_turno ASC, hora_inicio ASC`
@@ -133,7 +148,7 @@ export async function obterTurnoPorId(req, res) {
 
     const [turnos] = await pool.query(
       `SELECT id_turno, nome, hora_inicio, hora_fim,
-              data_turno, descricao
+              data_turno, descricao, numero_colaboradores
        FROM turnos
        WHERE id_turno = ?
        AND estado_registo = 'ativo'`,
@@ -170,7 +185,7 @@ export async function atualizarTurno(req, res) {
 
   try {
     const { id_turno } = req.params;
-    const { nome, hora_inicio, hora_fim, data_turno, descricao } = req.body;
+    const { nome, hora_inicio, hora_fim, data_turno, descricao, numero_colaboradores } = req.body;
 
     // Validar os dados obrigatórios
     if (!nome || !hora_inicio || !hora_fim || !data_turno) {
@@ -208,6 +223,16 @@ export async function atualizarTurno(req, res) {
         mensagem: "As horas devem estar no formato HH:MM."
       });
     }
+
+    if (
+  !Number.isInteger(numero_colaboradores) ||
+  numero_colaboradores < 1
+) {
+  return res.status(400).json({
+    sucesso: false,
+    mensagem: "O número de colaboradores deve ser um inteiro igual ou superior a 1."
+  });
+}
 
     if (hora_inicio === hora_fim) {
       return res.status(400).json({
@@ -312,23 +337,25 @@ export async function atualizarTurno(req, res) {
 
     // Atualizar o turno
     await conexao.query(
-      `UPDATE turnos
-       SET nome = ?,
-           hora_inicio = ?,
-           hora_fim = ?,
-           data_turno = ?,
-           descricao = ?
-       WHERE id_turno = ?
-       AND estado_registo = 'ativo'`,
-      [
-        nome,
-        hora_inicio,
-        hora_fim,
-        data_turno,
-        descricao || null,
-        id_turno
-      ]
-    );
+  `UPDATE turnos
+   SET nome = ?,
+       hora_inicio = ?,
+       hora_fim = ?,
+       data_turno = ?,
+       descricao = ?,
+       numero_colaboradores = ?
+   WHERE id_turno = ?
+   AND estado_registo = 'ativo'`,
+  [
+    nome,
+    hora_inicio,
+    hora_fim,
+    data_turno,
+    descricao || null,
+    numero_colaboradores,
+    id_turno
+  ]
+);
 
     // Confirmar a transação
     await conexao.commit();
@@ -419,7 +446,7 @@ export async function listarTurnosInativos(req, res) {
   try {
     const [turnos] = await pool.query(
       `SELECT id_turno, nome, hora_inicio, hora_fim,
-              data_turno, descricao
+              data_turno, descricao, numero_colaboradores
        FROM turnos
        WHERE estado_registo = 'inativo'
        ORDER BY data_turno DESC`
@@ -479,6 +506,186 @@ export async function reativarTurno(req, res) {
     return res.status(500).json({
       sucesso: false,
       mensagem: "Erro ao reativar turno."
+    });
+  }
+}
+
+
+// Definir ou atualizar a disponibilidade de um colaborador
+export async function definirDisponibilidade(req, res) {
+  let conexao;
+
+  try {
+    const { id_utilizador } = req.params;
+    const { disponibilidades } = req.body;
+
+    // Validar o identificador do colaborador
+    if (!Number.isInteger(Number(id_utilizador)) || Number(id_utilizador) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Identificador do colaborador inválido."
+      });
+    }
+
+    // Validar a lista de disponibilidades
+    if (!Array.isArray(disponibilidades)) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "A disponibilidade deve ser enviada numa lista."
+      });
+    }
+
+    const diasValidos = [
+      "segunda",
+      "terca",
+      "quarta",
+      "quinta",
+      "sexta",
+      "sabado",
+      "domingo"
+    ];
+
+    // Validar cada disponibilidade
+    for (const disponibilidade of disponibilidades) {
+
+      const { dia_semana, hora_inicio, hora_fim } = disponibilidade;
+
+      if (!diasValidos.includes(dia_semana)) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem: "Dia da semana inválido."
+        });
+      }
+
+      if (!validarHora(hora_inicio) || !validarHora(hora_fim)) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem: "Indica horas válidas no formato HH:MM."
+        });
+      }
+
+      if (hora_inicio >= hora_fim) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem: "A hora de fim deve ser posterior à hora de início."
+        });
+      }
+    }
+
+    conexao = await pool.getConnection();
+
+    await conexao.beginTransaction();
+
+    // Verificar se o colaborador existe
+    const [utilizadores] = await conexao.query(
+      `SELECT id_utilizador
+       FROM utilizadores
+       WHERE id_utilizador = ?
+       AND estado = 'ativo'`,
+      [id_utilizador]
+    );
+
+    if (utilizadores.length === 0) {
+      await conexao.rollback();
+
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Colaborador não encontrado ou inativo."
+      });
+    }
+
+    // Eliminar a disponibilidade anterior
+    await conexao.query(
+      `DELETE FROM disponibilidades_colaborador
+       WHERE id_utilizador = ?`,
+      [id_utilizador]
+    );
+
+    // Inserir a nova disponibilidade
+    for (const disponibilidade of disponibilidades) {
+
+      await conexao.query(
+        `INSERT INTO disponibilidades_colaborador
+         (id_utilizador, dia_semana, hora_inicio, hora_fim)
+         VALUES (?, ?, ?, ?)`,
+        [
+          id_utilizador,
+          disponibilidade.dia_semana,
+          disponibilidade.hora_inicio,
+          disponibilidade.hora_fim
+        ]
+      );
+    }
+
+    await conexao.commit();
+
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: "Disponibilidade atualizada com sucesso."
+    });
+
+  } catch (error) {
+    if (conexao) {
+      await conexao.rollback();
+    }
+
+    console.error("Erro ao definir disponibilidade:", error);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao definir disponibilidade."
+    });
+
+  } finally {
+    if (conexao) {
+      conexao.release();
+    }
+  }
+}
+
+
+// Consultar a disponibilidade de um colaborador
+export async function obterDisponibilidade(req, res) {
+  try {
+    const { id_utilizador } = req.params;
+
+    if (!Number.isInteger(Number(id_utilizador)) || Number(id_utilizador) <= 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Identificador do colaborador inválido."
+      });
+    }
+
+    const [disponibilidades] = await pool.query(
+      `SELECT id_disponibilidade, dia_semana,
+              hora_inicio, hora_fim
+       FROM disponibilidades_colaborador
+       WHERE id_utilizador = ?
+       ORDER BY FIELD(
+         dia_semana,
+         'segunda',
+         'terca',
+         'quarta',
+         'quinta',
+         'sexta',
+         'sabado',
+         'domingo'
+       ), hora_inicio ASC`,
+      [id_utilizador]
+    );
+
+    return res.status(200).json({
+      sucesso: true,
+      total: disponibilidades.length,
+      disponibilidades
+    });
+
+  } catch (error) {
+    console.error("Erro ao consultar disponibilidade:", error);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao consultar disponibilidade."
     });
   }
 }
