@@ -1,14 +1,13 @@
-variaveis = ["Turno A", "Turno B"]
+variaveis = ["A", "B", "C"]
 
 dominios = {
-    "Turno A": ["Ana", "Joao"],
-    "Turno B": ["Ana", "Maria"]
+    "A": ["Ana", "Joao", "Maria"],
+    "B": ["Ana", "Joao"],
+    "C": ["Joao", "Maria"]
 }
 
-atribuicao = {}
 
-atribuicao["Turno A"] = "Ana"
-
+# 1. Verificar se o colaborador pode ocupar o turno
 def verificar_restricao(turno, colaborador, atribuicao):
 
     for outro_turno in atribuicao:
@@ -18,78 +17,33 @@ def verificar_restricao(turno, colaborador, atribuicao):
 
     return True
 
-def backtracking(atribuicao, dominios_atuais):
 
-    # Verificar se todos os turnos foram preenchidos
-    if len(atribuicao) == len(variaveis):
-        return atribuicao
+# 2. Aplicar Forward Checking
+def forward_checking(turno, colaborador, atribuicao, dominios_atuais):
 
-    # Escolher o primeiro turno ainda não preenchido
-    turno = escolher_variavel(atribuicao, dominios_atuais)
-
-    # Experimentar os colaboradores disponíveis
-    for colaborador in dominios_atuais[turno]:
-
-        if verificar_restricao(turno, colaborador, atribuicao):
-
-            # Fazer a atribuição
-            atribuicao[turno] = colaborador
-
-            # Continuar a pesquisa
-
-            novos_dominios = forward_checking(
-                turno,
-                colaborador,
-                atribuicao
-                )
-            
-            if novos_dominios is not None:
-
-                resultado = backtracking(
-                atribuicao,
-                novos_dominios
-                )
-
-            if resultado is not None:
-                return resultado
-
-            # Se não existir solução, voltar atrás
-            del atribuicao[turno]
-
-    return None
-
-def forward_checking(turno, colaborador, atribuicao):
-
-    # Criar uma cópia dos domínios
     novos_dominios = {}
 
-    for outro_turno in dominios:
+    for outro_turno in dominios_atuais:
+        novos_dominios[outro_turno] = dominios_atuais[outro_turno].copy()
 
-        novos_dominios[outro_turno] = dominios[outro_turno].copy()
+    for outro_turno in novos_dominios:
 
-    # Percorrer os restantes turnos
-    for outro_turno in dominios:
-
-        # Ignorar o turno que acabámos de preencher
         if outro_turno == turno:
             continue
 
-        # Ignorar turnos que já foram preenchidos
         if outro_turno in atribuicao:
             continue
 
-        # Remover o colaborador dos domínios
         if colaborador in novos_dominios[outro_turno]:
-
             novos_dominios[outro_turno].remove(colaborador)
 
-        # Verificar se o domínio ficou vazio
         if len(novos_dominios[outro_turno]) == 0:
-
             return None
 
     return novos_dominios
 
+
+# 3. Escolher o turno com menos possibilidades (MRV)
 def escolher_variavel(atribuicao, dominios_atuais):
 
     turno_escolhido = None
@@ -106,6 +60,94 @@ def escolher_variavel(atribuicao, dominios_atuais):
                 turno_escolhido = turno
 
     return turno_escolhido
+
+
+def ordenar_valores_lcv(turno, atribuicao, dominios_atuais):
+
+    impactos = {}
+
+    # Contar o impacto de cada colaborador
+    for colaborador in dominios_atuais[turno]:
+
+        quantidade = 0
+
+        for outro_turno in dominios_atuais:
+
+            if outro_turno == turno:
+                continue
+
+            if outro_turno in atribuicao:
+                continue
+
+            if colaborador in dominios_atuais[outro_turno]:
+                quantidade = quantidade + 1
+
+        impactos[colaborador] = quantidade
+
+    # Ordenar os colaboradores pelo menor impacto
+    colaboradores_ordenados = []
+
+    while len(impactos) > 0:
+
+        melhor_colaborador = None
+        menor_impacto = None
+
+        for colaborador in impactos:
+
+            if menor_impacto is None or impactos[colaborador] < menor_impacto:
+
+                menor_impacto = impactos[colaborador]
+                melhor_colaborador = colaborador
+
+        colaboradores_ordenados.append(melhor_colaborador)
+
+        del impactos[melhor_colaborador]
+
+    return colaboradores_ordenados
+
+
+
+# 4. Algoritmo Backtracking
+def backtracking(atribuicao, dominios_atuais):
+
+    if len(atribuicao) == len(variaveis):
+        return atribuicao.copy()
+
+    turno = escolher_variavel(atribuicao, dominios_atuais)
+
+    colaboradores_ordenados = ordenar_valores_lcv(
+    turno,
+    atribuicao,
+    dominios_atuais
+    )
+
+    for colaborador in colaboradores_ordenados:
+
+        if verificar_restricao(turno, colaborador, atribuicao):
+
+            atribuicao[turno] = colaborador
+
+            novos_dominios = forward_checking(
+                turno,
+                colaborador,
+                atribuicao,
+                dominios_atuais
+            )
+
+            if novos_dominios is not None:
+
+                resultado = backtracking(atribuicao, novos_dominios)
+
+                if resultado is not None:
+                    return resultado
+
+            del atribuicao[turno]
+
+    return None
+
+
+# Executar o algoritmo
+atribuicao = {}
 
 solucao = backtracking(atribuicao, dominios)
 
