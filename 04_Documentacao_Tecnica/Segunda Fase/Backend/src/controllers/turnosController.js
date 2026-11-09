@@ -689,3 +689,283 @@ export async function obterDisponibilidade(req, res) {
     });
   }
 }
+
+
+// Gerar escala automaticamente através do serviço Python
+export async function gerarEscala(req, res) {
+  let conexao;
+
+  try {
+    const { data_inicio, data_fim } = req.body;
+
+    // 1. Validar as datas recebidas
+    if (!validarData(data_inicio) || !validarData(data_fim)) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Indica datas válidas no formato AAAA-MM-DD."
+      });
+    }
+
+    if (data_inicio > data_fim) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "A data de início não pode ser posterior à data de fim."
+      });
+    }
+
+    // 2. Obter os turnos ativos e ainda sem atribuições
+    const [turnos] = await pool.query(
+      `SELECT
+         t.id_turno,
+         t.nome,
+         DATE_FORMAT(t.data_turno, '%Y-%m-%d') AS data_turno,
+         TIME_FORMAT(t.hora_inicio, '%H:%i') AS hora_inicio,
+         TIME_FORMAT(t.hora_fim, '%H:%i') AS hora_fim,
+         t.numero_colaboradores
+       FROM turnos t
+       WHERE t.estado_registo = 'ativo'
+       AND t.data_turno BETWEEN ? AND ?
+       AND NOT EXISTS (
+         SELECT 1
+         FROM turno_colaboradores tc
+         WHERE tc.id_turno = t.id_turno
+         AND tc.estado IN ('atribuido', 'confirmado')
+       )
+       ORDER BY t.data_turno, t.hora_inicio`,
+      [data_inicio, data_fim]
+    );
+
+    if (turnos.length === 0) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Não existem turnos por atribuir no período selecionado."
+      });
+    }
+
+    // 3. Obter os colaboradores e respetivas disponibilidades
+    const [registos] = await pool.query(
+      `SELECT
+         u.id_utilizador,
+         u.nome,
+         d.dia_semana,
+         TIME_FORMAT(d.hora_inicio, '%H:%i') AS hora_inicio,
+         TIME_FORMAT(d.hora_fim, '%H:%i') AS hora_fim
+       FROM utilizadores u
+       LEFT JOIN disponibilidades_colaborador d
+         ON u.id_utilizador = d.id_utilizador
+       WHERE u.estado = 'ativo'
+       AND u.tipo_utilizador = 'colaborador'
+       ORDER BY u.id_utilizador, d.dia_semana`
+    );
+
+    // Agrupar as disponibilidades por colaborador
+    const colaboradoresPorId = new Map();
+
+    for (const registo of registos) {
+
+      if (!colaboradoresPorId.has(registo.id_utilizador)) {
+        colaboradoresPorId.set(registo.id_utilizador, {
+          id_utilizador: registo.id_utilizador,
+          nome: registo.nome,
+          disponibilidade: []
+        });
+      }
+
+      if (registo.dia_semana) {
+        colaboradoresPorId
+          .get(registo.id_utilizador)
+          .disponibilidade.push({
+            dia_semana: registo.dia_semana,
+            hora_inicio: registo.hora_inicio,
+            hora_fim: registo.hora_fim
+          });
+      }
+    }
+
+    const colaboradores = Array.from(
+      colaboradoresPorId.values()
+    );
+
+    if (colaboradores.length === 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Não existem colaboradores ativos."
+      });
+    }
+
+    // 4. Obter as ausências aprovadas no período
+    const [ausencias] = await pool.query(
+      `SELECT
+         id_utilizador,
+         DATE_FORMAT(data_inicio, '%Y-%m-%d') AS data_inicio,
+         DATE_FORMAT(data_fim, '%Y-%m-%d') AS data_fim,
+         estado
+       FROM pedidos_ausencia
+       WHERE estado = 'aprovado'
+       AND data_inicio <= ?
+       AND data_fim >= ?`,
+      [data_fim, data_inicio]
+    );
+
+    // 5. Obter turnos já atribuídos que possam gerar conflitos
+    // Incluímos um dia antes e um dia depois para considerar
+    // turnos que atravessam a meia-noite.
+    const [atribuicoesExistentes] = await pool.query(
+      `SELECT
+         tc.id_utilizador,
+         t.id_turno,
+         DATE_FORMAT(t.data_turno, '%Y-%m-%d') AS data_turno,
+         TIME_FORMAT(t.hora_inicio, '%H:%i') AS hora_inicio,
+         TIME_FORMAT(t.hora_fim, '%H:%i') AS hora_fim
+       FROM turno_colaboradores tc
+       INNER JOIN turnos t
+         ON tc.id_turno = t.id_turno
+       WHERE tc.estado IN ('atribuido', 'confirmado')
+       AND t.estado_registo = 'ativo'
+       AND t.data_turno BETWEEN
+           DATE_SUB(?, INTERVAL 1 DAY)
+           AND DATE_ADD(?, INTERVAL 1 DAY)`,
+      [data_inicio, data_fim]
+    );
+
+    const turnosAtribuidos = atribuicoesExistentes.map(registo => ({
+      id_utilizador: registo.id_utilizador,
+      turno: {
+        id_turno: registo.id_turno,
+        data_turno: registo.data_turno,
+        hora_inicio: registo.hora_inicio,
+        hora_fim: registo.hora_fim
+      }
+    }));
+
+    // 6. Enviar os dados para a API Python
+    const respostaIA = await fetch(
+      `${process.env.IA_API_URL || "http://127.0.0.1:8000"}/gerar-escala`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          colaboradores,
+          turnos,
+          ausencias,
+          turnos_atribuidos: turnosAtribuidos
+        })
+      }
+    );
+
+    if (!respostaIA.ok) {
+      console.error("Resposta inválida do serviço Python:", respostaIA.status);
+
+      return res.status(502).json({
+        sucesso: false,
+        mensagem: "O serviço de Inteligência Artificial não conseguiu processar o pedido."
+      });
+    }
+
+    const resultadoIA = await respostaIA.json();
+
+    // 7. Verificar se o algoritmo encontrou uma solução
+    if (!resultadoIA.sucesso) {
+      return res.status(409).json({
+        sucesso: false,
+        mensagem: resultadoIA.mensagem,
+        atribuicoes: []
+      });
+    }
+
+    // 8. Guardar as atribuições na base de dados
+    conexao = await pool.getConnection();
+
+    await conexao.beginTransaction();
+
+    // Bloquear os turnos para evitar alterações simultâneas
+    const idsTurnos = turnos.map(turno => turno.id_turno);
+
+    const [turnosBloqueados] = await conexao.query(
+      `SELECT id_turno
+       FROM turnos
+       WHERE id_turno IN (?)
+       AND estado_registo = 'ativo'
+       FOR UPDATE`,
+      [idsTurnos]
+    );
+
+    if (turnosBloqueados.length !== idsTurnos.length) {
+      await conexao.rollback();
+
+      return res.status(409).json({
+        sucesso: false,
+        mensagem: "Alguns turnos foram alterados durante a geração da escala. Atualiza os dados e tenta novamente."
+      });
+    }
+
+    // Confirmar que nenhum turno recebeu atribuições entretanto
+    const [atribuicoesNovas] = await conexao.query(
+      `SELECT id_turno
+       FROM turno_colaboradores
+       WHERE id_turno IN (?)
+       AND estado IN ('atribuido', 'confirmado')
+       LIMIT 1`,
+      [idsTurnos]
+    );
+
+    if (atribuicoesNovas.length > 0) {
+      await conexao.rollback();
+
+      return res.status(409).json({
+        sucesso: false,
+        mensagem: "Um ou mais turnos já receberam atribuições. Atualiza os dados e tenta novamente."
+      });
+    }
+
+    // Inserir as atribuições
+    for (const atribuicao of resultadoIA.atribuicoes) {
+
+      await conexao.query(
+        `INSERT INTO turno_colaboradores
+         (id_turno, id_utilizador, estado)
+         VALUES (?, ?, 'atribuido')`,
+        [
+          atribuicao.id_turno,
+          atribuicao.id_utilizador
+        ]
+      );
+    }
+
+    await conexao.commit();
+
+    return res.status(201).json({
+      sucesso: true,
+      mensagem: "Escala gerada e guardada com sucesso.",
+      total_atribuicoes: resultadoIA.total_atribuicoes,
+      atribuicoes: resultadoIA.atribuicoes
+    });
+
+  } catch (error) {
+
+    if (conexao) {
+      await conexao.rollback();
+    }
+
+    console.error("Erro ao gerar escala:", error);
+
+    if (error.cause || error.code === "ECONNREFUSED") {
+      return res.status(503).json({
+        sucesso: false,
+        mensagem: "Não foi possível contactar o serviço de Inteligência Artificial. Confirma se o servidor Python está ativo."
+      });
+    }
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao gerar a escala."
+    });
+
+  } finally {
+    if (conexao) {
+      conexao.release();
+    }
+  }
+}

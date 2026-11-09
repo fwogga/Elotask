@@ -116,9 +116,34 @@ def verificar_ausencia(colaborador, turno, ausencias):
     return False
 
 
+# Verificar se o colaborador já tem outro turno atribuído
+def verificar_turnos_atribuidos(colaborador, turno, turnos_atribuidos):
+
+    id_colaborador = colaborador.get(
+        "id_utilizador",
+        colaborador.get("id")
+    )
+
+    for atribuicao in turnos_atribuidos:
+
+        if atribuicao["id_utilizador"] == id_colaborador:
+
+            turno_existente = atribuicao["turno"]
+
+            if turnos_sobrepostos(turno, turno_existente):
+                return True
+
+    return False
+
+
 # 6. Construir os domínios de cada vaga
+
 def construir_dominios(colaboradores, variaveis,
-                       turnos_por_variavel, ausencias):
+                       turnos_por_variavel, ausencias,
+                       turnos_atribuidos=None):
+
+    if turnos_atribuidos is None:
+        turnos_atribuidos = []
 
     dominios = {}
 
@@ -141,7 +166,13 @@ def construir_dominios(colaboradores, variaveis,
                 ausencias
             )
 
-            if disponivel and not tem_ausencia:
+            tem_conflito = verificar_turnos_atribuidos(
+                colaborador,
+                turno,
+                turnos_atribuidos
+            )
+
+            if disponivel and not tem_ausencia and not tem_conflito:
 
                 id_colaborador = colaborador.get(
                     "id_utilizador",
@@ -152,25 +183,6 @@ def construir_dominios(colaboradores, variaveis,
 
     return dominios
 
-
-# 7. Verificar as restrições de uma atribuição
-def verificar_restricao(variavel, colaborador,
-                        atribuicao, turnos_por_variavel):
-
-    turno_atual = turnos_por_variavel[variavel]
-
-    for outra_variavel in atribuicao:
-
-        outro_colaborador = atribuicao[outra_variavel]
-
-        outro_turno = turnos_por_variavel[outra_variavel]
-
-        if colaborador == outro_colaborador:
-
-            if turnos_sobrepostos(turno_atual, outro_turno):
-                return False
-
-    return True
 
 
 # 8. Aplicar Forward Checking
@@ -343,7 +355,9 @@ def backtracking(variaveis, atribuicao, dominios_atuais,
 
 
 # 12. Função principal para gerar a escala
-def resolver_escala(colaboradores, turnos, ausencias):
+
+def resolver_escala(colaboradores, turnos, ausencias,
+                    turnos_atribuidos=None):
 
     variaveis, turnos_por_variavel = construir_variaveis(turnos)
 
@@ -351,7 +365,8 @@ def resolver_escala(colaboradores, turnos, ausencias):
         colaboradores,
         variaveis,
         turnos_por_variavel,
-        ausencias
+        ausencias,
+        turnos_atribuidos
     )
 
     # Verificar se alguma vaga não tem colaboradores disponíveis

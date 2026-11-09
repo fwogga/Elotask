@@ -33,6 +33,7 @@ def gerar_escala(dados: Dict[str, Any]):
     colaboradores = dados.get("colaboradores", [])
     turnos = dados.get("turnos", [])
     ausencias = dados.get("ausencias", [])
+    turnos_atribuidos = dados.get("turnos_atribuidos", [])
 
     # 2. Validar os dados recebidos
     if not colaboradores:
@@ -67,7 +68,8 @@ def gerar_escala(dados: Dict[str, Any]):
     solucao, turnos_por_variavel = resolver_escala(
         colaboradores,
         turnos,
-        ausencias
+        ausencias,
+        turnos_atribuidos
     )
 
     # 6. Verificar se foi encontrada uma solução

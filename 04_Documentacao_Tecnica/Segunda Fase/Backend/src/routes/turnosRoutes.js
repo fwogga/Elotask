@@ -9,7 +9,8 @@ import {
   listarTurnosInativos,
   reativarTurno,
   definirDisponibilidade,
-  obterDisponibilidade
+  obterDisponibilidade,
+  gerarEscala
 } from "../controllers/turnosController.js";
 
 import {
@@ -87,6 +88,14 @@ router.get(
   autenticarToken,
   autorizarPerfil("admin", "gestor"),
   obterDisponibilidade
+);
+
+// Gerar escala automaticamente
+router.post(
+  "/gerar-escala",
+  autenticarToken,
+  autorizarPerfil("admin", "gestor"),
+  gerarEscala
 );
 
 export default router;
