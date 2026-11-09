@@ -354,7 +354,27 @@ def backtracking(variaveis, atribuicao, dominios_atuais,
     return None
 
 
-# 12. Função principal para gerar a escala
+# 12. Verificar se a atribuição respeita as restrições
+def verificar_restricao(variavel, colaborador,
+                        atribuicao, turnos_por_variavel):
+
+    turno_atual = turnos_por_variavel[variavel]
+
+    for outra_variavel, outro_colaborador in atribuicao.items():
+
+        # O mesmo colaborador não pode ter turnos sobrepostos
+        if outro_colaborador == colaborador:
+
+            outro_turno = turnos_por_variavel[outra_variavel]
+
+            if turnos_sobrepostos(turno_atual, outro_turno):
+                return False
+
+    return True
+
+
+
+# 13. Função principal para gerar a escala
 
 def resolver_escala(colaboradores, turnos, ausencias,
                     turnos_atribuidos=None):
