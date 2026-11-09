@@ -25,13 +25,7 @@ def backtracking(atribuicao, dominios_atuais):
         return atribuicao
 
     # Escolher o primeiro turno ainda não preenchido
-    turno = None
-
-    for t in variaveis:
-
-        if t not in atribuicao:
-            turno = t
-            break
+    turno = escolher_variavel(atribuicao, dominios_atuais)
 
     # Experimentar os colaboradores disponíveis
     for colaborador in dominios_atuais[turno]:
@@ -95,6 +89,23 @@ def forward_checking(turno, colaborador, atribuicao):
             return None
 
     return novos_dominios
+
+def escolher_variavel(atribuicao, dominios_atuais):
+
+    turno_escolhido = None
+    menor_quantidade = None
+
+    for turno in variaveis:
+
+        if turno not in atribuicao:
+
+            quantidade = len(dominios_atuais[turno])
+
+            if menor_quantidade is None or quantidade < menor_quantidade:
+                menor_quantidade = quantidade
+                turno_escolhido = turno
+
+    return turno_escolhido
 
 solucao = backtracking(atribuicao, dominios)
 
