@@ -18,7 +18,7 @@ def verificar_restricao(turno, colaborador, atribuicao):
 
     return True
 
-def backtracking(atribuicao):
+def backtracking(atribuicao, dominios_atuais):
 
     # Verificar se todos os turnos foram preenchidos
     if len(atribuicao) == len(variaveis):
@@ -34,7 +34,7 @@ def backtracking(atribuicao):
             break
 
     # Experimentar os colaboradores disponíveis
-    for colaborador in dominios[turno]:
+    for colaborador in dominios_atuais[turno]:
 
         if verificar_restricao(turno, colaborador, atribuicao):
 
@@ -42,7 +42,19 @@ def backtracking(atribuicao):
             atribuicao[turno] = colaborador
 
             # Continuar a pesquisa
-            resultado = backtracking(atribuicao)
+
+            novos_dominios = forward_checking(
+                turno,
+                colaborador,
+                atribuicao
+                )
+            
+            if novos_dominios is not None:
+
+                resultado = backtracking(
+                atribuicao,
+                novos_dominios
+                )
 
             if resultado is not None:
                 return resultado
@@ -52,7 +64,39 @@ def backtracking(atribuicao):
 
     return None
 
-solucao = backtracking(atribuicao)
+def forward_checking(turno, colaborador, atribuicao):
+
+    # Criar uma cópia dos domínios
+    novos_dominios = {}
+
+    for outro_turno in dominios:
+
+        novos_dominios[outro_turno] = dominios[outro_turno].copy()
+
+    # Percorrer os restantes turnos
+    for outro_turno in dominios:
+
+        # Ignorar o turno que acabámos de preencher
+        if outro_turno == turno:
+            continue
+
+        # Ignorar turnos que já foram preenchidos
+        if outro_turno in atribuicao:
+            continue
+
+        # Remover o colaborador dos domínios
+        if colaborador in novos_dominios[outro_turno]:
+
+            novos_dominios[outro_turno].remove(colaborador)
+
+        # Verificar se o domínio ficou vazio
+        if len(novos_dominios[outro_turno]) == 0:
+
+            return None
+
+    return novos_dominios
+
+solucao = backtracking(atribuicao, dominios)
 
 if solucao is not None:
 
