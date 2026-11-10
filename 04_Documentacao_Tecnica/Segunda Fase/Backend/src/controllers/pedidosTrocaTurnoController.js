@@ -399,6 +399,17 @@ export async function decidirPedidoTroca(req, res) {
         [idPedido]
       );
 
+      await conexao.query(
+  `INSERT INTO historico_alteracoes
+   (id_utilizador, id_projeto, id_tarefa, tipo_alteracao, descricao)
+   VALUES (?, NULL, NULL, ?, ?)`,
+        [
+    idAprovador,
+    "rejeicao_pedido_troca_turno",
+    `Rejeitou o pedido de troca ${idPedido}, entre os turnos ${pedido.id_turno_solicitante} e ${pedido.id_turno_destinatario}.`
+        ]
+    );
+
       await conexao.commit();
 
       return res.status(200).json({
@@ -590,23 +601,24 @@ export async function decidirPedidoTroca(req, res) {
       ]
     );
 
-    // Trocar os colaboradores, preservando o estado das atribuições
+    // Trocar os colaboradores, preservando atribuições já existentes
     await conexao.query(
-      `INSERT INTO turno_colaboradores
-       (id_turno, id_utilizador, estado)
-       VALUES
-       (?, ?, ?),
-       (?, ?, ?)`,
-      [
-        idTurnoSolicitante,
-        idDestinatario,
-        atribuicaoDestinatario.estado,
+  `INSERT INTO turno_colaboradores
+   (id_turno, id_utilizador, estado)
+   VALUES
+   (?, ?, ?),
+   (?, ?, ?)
+   ON DUPLICATE KEY UPDATE estado = estado`,
+  [
+    idTurnoSolicitante,
+    idDestinatario,
+    atribuicaoDestinatario.estado,
 
-        idTurnoDestinatario,
-        idSolicitante,
-        atribuicaoSolicitante.estado
-      ]
-    );
+    idTurnoDestinatario,
+    idSolicitante,
+    atribuicaoSolicitante.estado
+  ]
+);
 
     // Atualizar o pedido
     await conexao.query(
@@ -615,6 +627,17 @@ export async function decidirPedidoTroca(req, res) {
        WHERE id_pedido = ?`,
       [idPedido]
     );
+
+    await conexao.query(
+  `INSERT INTO historico_alteracoes
+   (id_utilizador, id_projeto, id_tarefa, tipo_alteracao, descricao)
+   VALUES (?, NULL, NULL, ?, ?)`,
+  [
+    idAprovador,
+    "aprovacao_pedido_troca_turno",
+    `Aprovou o pedido de troca ${idPedido}: o utilizador ${idSolicitante} passou para o turno ${idTurnoDestinatario} e o utilizador ${idDestinatario} passou para o turno ${idTurnoSolicitante}.`
+  ]
+);
 
     await conexao.commit();
 
