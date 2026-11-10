@@ -1,184 +1,133 @@
+// Escolher equipa: lista de equipas, convites pendentes e entrada com código.
 import {
-  getConversas,
-  getMensagens,
-  getUtilizadores,
   getUtilizadorAtual,
-  marcarComoLida,
-  enviarMensagem,
+  getEquipas,
+  getConvites,
+  escolherEquipa,
+  responderConvite,
+  entrarComConvite,
 } from "../api/client.js";
-import { renderSidebar, esc, hora, horaMensagem, diaRelativo, chaveDia, tamanhoFicheiro, extensao, avatar, porId } from "../comum.js";
+import { esc, iniciais, aviso, confirmar } from "../comum.js";
 
-const estado = { conversas: [], pessoas: new Map(), eu: null, ativaId: null, filtro: "" };
+const $ = (seletor) => document.querySelector(seletor);
+const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 
-const lista = document.querySelector("[data-conversas]");
-const caixa = document.querySelector("[data-mensagens]");
-const compositor = document.querySelector("[data-compositor]");
-
-const TIPOS_ANEXO = { DOC: "doc", DOCX: "doc", PPT: "ppt", PPTX: "ppt", XLS: "xls", XLSX: "xls" };
-
-// --- Ajudas ---------------------------------------------------------------
-
-const outroMembro = (c) => estado.pessoas.get(c.membros.find((id) => id !== estado.eu.id));
-
-function nomeConversa(c) {
-  return c.tipo === "grupo" ? c.nome : outroMembro(c)?.nome ?? "Conversa";
+// "Equipa EloTask" → "EE"   |   "Investigação" → "IN"
+function sigla(nome) {
+  const palavras = nome.split(" ").filter(Boolean);
+  const letras = palavras.length > 1 ? palavras[0][0] + palavras[1][0] : nome.slice(0, 2);
+  return letras.toUpperCase();
 }
 
-function avatarConversa(c, tamanho = "xl") {
-  if (c.tipo === "grupo") {
-    return '<span class="avatar-grupo" aria-hidden="true"><img src="../assets/icons/equipa.svg" alt=""></span>';
-  }
-  return avatar(outroMembro(c), tamanho);
-}
+// --- Desenhar ---------------------------------------------------------------
 
-function previa(c) {
-  const m = c.ultima;
-  if (!m) return "Sem mensagens";
-  const texto = m.texto || `📎 ${m.anexo?.nome ?? "Anexo"}`;
-  if (c.tipo !== "grupo") return texto;
-  const autor = m.autorId === estado.eu.id ? "Tu" : estado.pessoas.get(m.autorId)?.nome.split(" ")[0];
-  return `${autor}: ${texto}`;
-}
-
-// --- Lista de conversas ----------------------------------------------------
-
-function renderLista() {
-  const visiveis = estado.conversas.filter((c) => nomeConversa(c).toLowerCase().includes(estado.filtro));
-
-  lista.innerHTML = visiveis.length ? visiveis.map((c) => `
-    <li>
-      <button class="conversa" type="button" data-conversa="${c.id}" aria-current="${c.id === estado.ativaId}">
-        ${avatarConversa(c)}
-        <span class="conversa__texto">
-          <span class="conversa__nome">${esc(nomeConversa(c))}</span>
-          <span class="conversa__hora">${c.ultima ? horaMensagem(c.ultima.enviadaEm) : ""}</span>
-          <span class="conversa__previa">${esc(previa(c))}</span>
-          ${c.naoLidas ? `<span class="conversa__badge">${c.naoLidas}<span class="sr-only"> por ler</span></span>` : ""}
-        </span>
-      </button>
-    </li>`).join("") : '<li class="vazio">Nenhuma conversa encontrada.</li>';
-}
-
-// --- Conversa aberta ------------------------------------------------------
-
-function htmlAnexo(anexo) {
-  const tipo = TIPOS_ANEXO[extensao(anexo.nome)];
-  const glifo = { doc: "glifo-docx.svg", ppt: "glifo-pptx.svg", xls: "glifo-xlsx.svg" }[tipo] ?? "glifo-pdf.svg";
-  return `
-    <div class="anexo">
-      <span class="anexo__icone${tipo ? ` anexo__icone--${tipo}` : ""}"><img src="../assets/icons/${glifo}" alt="" width="36" height="36"></span>
-      <div>
-        <p class="anexo__nome">${esc(anexo.nome)}</p>
-        <p class="anexo__tamanho">${tamanhoFicheiro(anexo.tamanho)}</p>
+function renderEquipas(equipas) {
+  $("[data-total]").textContent = `· ${plural(equipas.length, "equipa", "equipas")}`;
+  $("[data-equipas]").innerHTML = equipas.map((e) => `
+    <li class="cartao eq-item">
+      <span class="eq-avatar eq-avatar--${esc(e.cor)}" aria-hidden="true">${esc(sigla(e.nome))}</span>
+      <div class="eq-info">
+        <p class="eq-nome">${esc(e.nome)} <span class="eq-papel">${esc(e.papel)}</span></p>
+        <p class="eq-dados">${plural(e.membros, "membro", "membros")} · ${plural(e.projetos, "projeto", "projetos")}</p>
       </div>
-    </div>`;
+      ${e.ultima ? '<span class="eq-ultima">Última utilizada</span>' : ""}
+      <button class="botao botao--compacto eq-btn" type="button" data-entrar="${e.id}"
+              aria-label="Entrar na ${esc(e.nome)}">Entrar</button>
+    </li>`).join("");
 }
 
-function htmlMensagem(m) {
-  const autor = estado.pessoas.get(m.autorId);
-  return `
-    <li class="mensagem">
-      ${avatar(autor, "lg")}
-      <p class="mensagem__autor">${esc(autor?.nome ?? "")} <time class="mensagem__hora" datetime="${m.enviadaEm}">${hora(m.enviadaEm)}</time></p>
-      ${m.texto ? `<p class="mensagem__balao">${esc(m.texto)}</p>` : ""}
-      ${m.anexo ? htmlAnexo(m.anexo) : ""}
-    </li>`;
+function renderConvites(convites) {
+  const caixa = $("[data-convites]");
+  caixa.hidden = convites.length === 0;
+  if (!convites.length) return;
+
+  caixa.innerHTML = `
+    <span class="eq-pendente">${plural(convites.length, "convite pendente", "convites pendentes")}</span>
+    ${convites.map((c) => `
+      <div class="eq-convite">
+        <p class="eq-convite__equipa">${esc(c.equipa)}</p>
+        <p class="eq-bloco__texto">${esc(c.convidadoPor)} convidou-o para esta equipa.</p>
+        <div class="eq-convite__botoes">
+          <button class="botao botao--compacto eq-btn" type="button" data-aceitar="${c.id}">Aceitar</button>
+          <button class="botao botao--compacto botao--secundario eq-btn" type="button" data-recusar="${c.id}">Recusar</button>
+        </div>
+      </div>`).join("")}`;
 }
 
-async function renderConversa() {
-  const c = estado.conversas.find((x) => x.id === estado.ativaId);
-  const mensagens = await getMensagens(c.id);
-
-  document.querySelector("[data-conversa-avatar]").innerHTML = avatarConversa(c, "lg");
-  document.querySelector("[data-conversa-nome]").textContent = nomeConversa(c);
-  document.querySelector("[data-conversa-info]").textContent = c.tipo === "grupo"
-    ? `${c.membros.length} membros`
-    : outroMembro(c)?.funcao ?? "";
-
-  // Separador com o dia sempre que muda de dia
-  let diaAnterior = "";
-  caixa.innerHTML = mensagens.map((m) => {
-    const dia = chaveDia(m.enviadaEm);
-    const separador = dia !== diaAnterior ? `<li class="mensagens__dia">${diaRelativo(m.enviadaEm)}</li>` : "";
-    diaAnterior = dia;
-    return separador + htmlMensagem(m);
-  }).join("") || '<li class="vazio">Ainda não há mensagens. Diz olá!</li>';
-  caixa.scrollTop = caixa.scrollHeight;
+async function carregar() {
+  const [equipas, convites] = await Promise.all([getEquipas(), getConvites()]);
+  renderEquipas(equipas);
+  renderConvites(convites);
 }
 
-async function abrirConversa(id) {
-  estado.ativaId = id;
-  history.replaceState(null, "", `?c=${id}`);
+// --- Ações ------------------------------------------------------------------
 
-  const c = estado.conversas.find((x) => x.id === id);
-  if (c.naoLidas) {
-    await marcarComoLida(id);
-    c.naoLidas = 0;
-    renderSidebar(document.querySelector("[data-sidebar]"));
+async function tratarConvite(id, aceitar) {
+  await responderConvite(id, aceitar);
+  aviso(aceitar ? "Convite aceite." : "Convite recusado.");
+  await carregar();
+}
+
+async function submeterCodigo(e) {
+  e.preventDefault();
+  const msg = $("[data-msg-convite]");
+  const codigo = e.target.elements.codigo.value.trim();
+
+  if (!codigo) {
+    msg.textContent = "Introduza um código ou ligação de convite.";
+    msg.classList.add("eq-msg--erro");
+    return;
   }
-  renderLista();
-  await renderConversa();
+
+  try {
+    const equipa = await entrarComConvite(codigo);
+    e.target.reset();
+    msg.textContent = `Entrou na ${equipa.nome}.`;
+    msg.classList.remove("eq-msg--erro");
+    await carregar();
+  } catch {
+    msg.textContent = "Convite inválido ou expirado.";
+    msg.classList.add("eq-msg--erro");
+  }
 }
 
-async function enviar(dados) {
-  const mensagem = await enviarMensagem(estado.ativaId, dados);
-  const c = estado.conversas.find((x) => x.id === estado.ativaId);
-  c.ultima = mensagem;
-  estado.conversas.sort((a, b) => (b.ultima?.enviadaEm ?? "").localeCompare(a.ultima?.enviadaEm ?? ""));
-  renderLista();
-  await renderConversa();
-}
-
-// --- Arranque -------------------------------------------------------------
-
-function ligarEventos() {
-  lista.addEventListener("click", (e) => {
-    const botao = e.target.closest("[data-conversa]");
-    if (botao) abrirConversa(Number(botao.dataset.conversa));
-  });
-
-  document.querySelector("[data-pesquisa]").addEventListener("submit", (e) => e.preventDefault());
-  document.getElementById("pesquisa").addEventListener("input", (e) => {
-    estado.filtro = e.target.value.trim().toLowerCase();
-    renderLista();
-  });
-
-  compositor.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const texto = compositor.mensagem.value.trim();
-    if (!texto) return;
-    compositor.mensagem.value = "";
-    await enviar({ texto });
-    compositor.mensagem.focus();
-  });
-
-  // Nos mocks só guardamos o nome e o tamanho do ficheiro; com a API real é um upload
-  document.querySelector("[data-anexo]").addEventListener("change", async (e) => {
-    const ficheiro = e.target.files[0];
-    if (!ficheiro) return;
-    await enviar({ texto: compositor.mensagem.value.trim(), anexo: { nome: ficheiro.name, tamanho: ficheiro.size } });
-    compositor.mensagem.value = "";
-    e.target.value = "";
-  });
-}
+// --- Arranque ---------------------------------------------------------------
 
 async function iniciar() {
-  const [conversas, pessoas, eu] = await Promise.all([getConversas(), getUtilizadores(), getUtilizadorAtual()]);
-  estado.conversas = conversas;
-  estado.pessoas = porId(pessoas);
-  estado.eu = eu;
+  const utilizador = await getUtilizadorAtual();
+  $("[data-nome]").textContent = utilizador.nome;
+  $("[data-iniciais]").textContent = iniciais(utilizador.nome);
+  await carregar();
 
-  ligarEventos();
-  const pedida = Number(new URLSearchParams(location.search).get("c"));
-  const inicial = conversas.find((c) => c.id === pedida) ?? conversas[0];
-  if (inicial) await abrirConversa(inicial.id);
-  else renderLista();
+  $("[data-equipas]").addEventListener("click", async (e) => {
+    const botao = e.target.closest("[data-entrar]");
+    if (!botao) return;
+    await escolherEquipa(Number(botao.dataset.entrar));
+    location.href = "dashboard.html";
+  });
+
+  $("[data-convites]").addEventListener("click", (e) => {
+    const aceitar = e.target.closest("[data-aceitar]");
+    const recusar = e.target.closest("[data-recusar]");
+    if (aceitar) tratarConvite(Number(aceitar.dataset.aceitar), true);
+    if (recusar) tratarConvite(Number(recusar.dataset.recusar), false);
+  });
+
+  $("[data-form-convite]").addEventListener("submit", submeterCodigo);
+
+  // Pede confirmação antes de sair (usa a janela de comum.js)
+  $("[data-sair]").addEventListener("click", async (e) => {
+    e.preventDefault();
+    if (await confirmar("Tem a certeza de que quer terminar a sessão?", "Terminar sessão")) {
+      location.href = "login.html";
+    }
+  });
 }
 
 iniciar().catch((erro) => {
   console.error(erro);
-  document.querySelector(".conteudo").insertAdjacentHTML(
+  $("main").insertAdjacentHTML(
     "beforeend",
-    '<p class="erro-carregar" role="alert">Não foi possível carregar as mensagens. Tenta novamente.</p>'
+    '<p class="erro-carregar" role="alert">Não foi possível carregar os dados. Tente novamente.</p>'
   );
 });

@@ -46,7 +46,9 @@ function iniciarLogin() {
         palavra: form.palavra.value,
         manter: form.manter.checked,
       });
-      location.href = "dashboard.html";
+            location.href = "equipas.html";
+// comentando para discutir com o grupo
+      //location.href = "dashboard.html";
     });
   });
 }
