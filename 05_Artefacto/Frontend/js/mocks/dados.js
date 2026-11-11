@@ -20,10 +20,10 @@ function data(desloc) {
 export const utilizadorAtualId = 1;
 
 export const utilizadores = [
-  { id: 1, nome: "Cássia Baptista", email: "cassia.baptista@elotask.pt", funcao: "Gestora de Projeto", cor: "primaria" },
-  { id: 2, nome: "Marlinda Congo", email: "marlinda.congo@elotask.pt", funcao: "Desenvolvedora", cor: "violeta" },
-  { id: 3, nome: "Miguel Almeida", email: "miguel.almeida@elotask.pt", funcao: "Desenvolvedor", cor: "menta" },
-  { id: 4, nome: "Deuwer Rabelais", email: "deuwer.rabelais@elotask.pt", funcao: "Designer", cor: "laranja" },
+  { id: 1, nome: "Cássia Baptista", email: "cassia.baptista@elotask.pt", telefone: "+351 912 345 678", nascimento: "2000-02-14", funcao: "Gestora de Projeto", cor: "primaria" },
+  { id: 2, nome: "Marlinda Congo", email: "marlinda.congo@elotask.pt", telefone: "+351 913 456 789", nascimento: "1999-06-21", funcao: "Desenvolvedora", cor: "violeta" },
+  { id: 3, nome: "Miguel Almeida", email: "miguel.almeida@elotask.pt", telefone: "+351 914 567 890", nascimento: "1998-11-03", funcao: "Desenvolvedor", cor: "menta" },
+  { id: 4, nome: "Deuwer Rabelais", email: "deuwer.rabelais@elotask.pt", telefone: "+351 915 678 901", nascimento: "2000-09-30", funcao: "Designer", cor: "laranja" },
 ];
 
 // estado: "em_andamento" | "planeamento" | "concluido"
@@ -119,4 +119,14 @@ export const documentos = [
   { id: 4, nome: "Requisitos_Funcionais.pdf", projetoId: 4, tamanho: 1048576, modificadoEm: dia(-9, "14:30"), donoId: 1 },
   { id: 5, nome: "Plano_Trabalho.xlsx", projetoId: 1, tamanho: 262144, modificadoEm: dia(-13, "10:15"), donoId: 1 },
   { id: 6, nome: "Notas_Pessoais.docx", projetoId: null, tamanho: 65536, modificadoEm: dia(-2, "21:00"), donoId: 1 },
+];
+// papel: "Gestora" | "Membro"   cor: "violeta" | "rosa" | "escuro"
+export const equipas = [
+  { id: 1, nome: "Equipa EloTask", papel: "Gestora", membros: 8, projetos: 4, cor: "violeta", ultima: true },
+  { id: 2, nome: "Marketing Digital", papel: "Membro", membros: 6, projetos: 2, cor: "rosa" },
+  { id: 3, nome: "Investigação", papel: "Membro", membros: 3, projetos: 1, cor: "escuro" },
+];
+
+export const convites = [
+  { id: 1, equipa: "Equipa Design", convidadoPor: "Miguel Almeida" },
 ];

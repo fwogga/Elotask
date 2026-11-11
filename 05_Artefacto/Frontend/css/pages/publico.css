@@ -1,0 +1,459 @@
+/* ==========================================================================
+   publico.css — Páginas sem sidebar: início (landing) e escolha de equipa
+   ========================================================================== */
+
+/* --- 1. Estrutura da página ----------------------------------------------- */
+
+.pagina {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.pagina > main {
+  flex: 1;
+}
+
+
+/* --- 2. Cabeçalho --------------------------------------------------------- */
+
+.topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-4);
+  padding: var(--esp-4) 6vw;
+}
+
+.topo__marca {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-bold);
+  color: var(--texto-titulo);
+}
+
+.topo__marca img {
+  width: 32px;
+  height: auto;
+}
+
+.topo__acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+}
+
+.topo__link {
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  color: var(--texto-corpo);
+}
+
+.topo__link:hover {
+  text-decoration: underline;
+}
+
+.topo__utilizador {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.topo__avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--cor-primaria);
+  color: var(--texto-inverso);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-bold);
+}
+
+.topo__sair {
+  padding-left: var(--esp-3);
+  border-left: 1px solid var(--borda);
+  color: var(--cor-primaria);
+}
+
+
+/* --- 3. Botões ------------------------------------------------------------ */
+
+.btn {
+  display: inline-grid;
+  place-items: center;
+  height: 44px;
+  padding: 0 var(--esp-6);
+  border: 0;
+  border-radius: var(--raio-controlo);
+  background: var(--cor-primaria);
+  color: var(--texto-inverso);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semibold);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn:hover {
+  background: var(--cor-primaria-escura);
+}
+
+.btn--contorno {
+  background: var(--fundo-superficie);
+  border: 1.5px solid var(--cor-primaria);
+  color: var(--cor-primaria);
+}
+
+.btn--contorno:hover {
+  background: var(--fundo-icone);
+}
+
+.btn--claro {
+  background: #fff;
+  color: var(--cor-primaria);
+}
+
+.btn--claro:hover {
+  background: var(--fundo-icone);
+}
+
+.btn--pequeno {
+  height: 38px;
+  padding: 0 var(--esp-4);
+}
+
+.btn--bloco {
+  width: 100%;
+}
+
+
+/* --- 4. Início: secção principal ------------------------------------------ */
+
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--esp-8);
+  align-items: center;
+  padding: var(--esp-7) 6vw var(--esp-8);
+}
+
+.pilula {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: var(--raio-pilula);
+  background: var(--fundo-icone);
+  color: var(--texto-corpo);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+}
+
+.hero__titulo {
+  margin: var(--esp-5) 0 var(--esp-4);
+  font-size: clamp(34px, 5vw, 56px);
+  line-height: 1.1;
+  font-weight: var(--peso-bold);
+  color: var(--texto-titulo);
+}
+
+.hero__titulo span {
+  color: var(--cor-primaria);
+}
+
+.hero__texto {
+  max-width: 520px;
+  line-height: 1.6;
+  color: var(--texto-corpo);
+}
+
+.hero__botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-3);
+  margin: var(--esp-6) 0 var(--esp-4);
+}
+
+.hero__nota {
+  font-size: var(--texto-xs);
+  color: var(--texto-secundario);
+}
+
+.hero__nota a {
+  color: var(--cor-primaria);
+  text-decoration: underline;
+}
+
+.hero__imagem {
+  width: 100%;
+  height: auto;
+  border-radius: 24px;
+  box-shadow: 0 12px 32px rgba(80, 22, 137, 0.14);
+}
+
+
+/* --- 5. Início: funcionalidades e rodapé ---------------------------------- */
+
+.funcionalidades {
+  padding: var(--esp-8) 6vw;
+  background: var(--fundo-superficie);
+}
+
+.funcionalidades__titulo {
+  margin-bottom: var(--esp-6);
+  text-align: center;
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-bold);
+}
+
+.funcionalidades__lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--esp-4);
+}
+
+.funcao {
+  padding: var(--esp-5);
+}
+
+.funcao__icone {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: var(--esp-4);
+  border-radius: var(--raio-controlo);
+  background: var(--fundo-icone);
+  color: var(--cor-primaria);
+}
+
+.funcao h3 {
+  margin-bottom: var(--esp-2);
+  font-size: var(--texto-md);
+  font-weight: var(--peso-bold);
+}
+
+.funcao p {
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+  color: var(--texto-secundario);
+}
+
+.rodape {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--esp-4);
+  padding: var(--esp-5) 6vw;
+  background: var(--fundo-suave);
+  font-size: var(--texto-xs);
+  color: var(--texto-secundario);
+}
+
+
+/* --- 6. Escolher equipa: título e duas colunas ---------------------------- */
+
+.intro {
+  padding: var(--esp-4) 6vw var(--esp-6);
+}
+
+.intro__titulo {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-bold);
+}
+
+.intro__texto {
+  margin-top: var(--esp-2);
+  font-size: var(--texto-sm);
+  color: var(--texto-secundario);
+}
+
+.equipas {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: var(--esp-6);
+  align-items: start;
+  padding: 0 6vw var(--esp-8);
+}
+
+.rotulo {
+  margin-bottom: var(--esp-3);
+  font-size: 12px;
+  font-weight: var(--peso-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cor-primaria);
+}
+
+.rotulo span {
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--texto-secundario);
+}
+
+
+/* --- 7. Escolher equipa: cartão de cada equipa ---------------------------- */
+
+.equipa {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+  margin-bottom: var(--esp-3);
+  padding: var(--esp-4) var(--esp-5);
+}
+
+.equipa__avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  font-weight: var(--peso-bold);
+}
+
+.equipa__avatar--violeta { background: #7b61ff; color: #fff; }
+.equipa__avatar--rosa    { background: #ffb8dc; color: var(--texto-titulo); }
+.equipa__avatar--escuro  { background: #1d1745; color: #fff; }
+
+.equipa__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.equipa__nome {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+  font-weight: var(--peso-bold);
+}
+
+.equipa__dados {
+  margin-top: 2px;
+  font-size: var(--texto-xs);
+  color: var(--texto-secundario);
+}
+
+.papel {
+  padding: 2px 10px;
+  border-radius: var(--raio-pilula);
+  background: var(--fundo-icone);
+  color: var(--cor-primaria);
+  font-size: 12px;
+  font-weight: var(--peso-medio);
+}
+
+.marca-ultima {
+  padding: 3px 10px;
+  border-radius: var(--raio-pilula);
+  background: #ffe1ee;
+  color: #d6336c;
+  font-size: 12px;
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+}
+
+
+/* --- 8. Escolher equipa: coluna lateral ----------------------------------- */
+
+.lateral {
+  display: grid;
+  gap: var(--esp-4);
+}
+
+.lateral__bloco {
+  padding: var(--esp-5);
+}
+
+.lateral__titulo {
+  margin-bottom: var(--esp-2);
+  font-size: var(--texto-md);
+  font-weight: var(--peso-bold);
+}
+
+.lateral__texto {
+  font-size: var(--texto-xs);
+  line-height: 1.5;
+  color: var(--texto-secundario);
+}
+
+.convite__etiqueta {
+  display: inline-block;
+  margin-bottom: var(--esp-3);
+  padding: 3px 10px;
+  border-radius: var(--raio-pilula);
+  background: #ffe1ee;
+  color: #d6336c;
+  font-size: 12px;
+  font-weight: var(--peso-medio);
+}
+
+.convite__equipa {
+  font-weight: var(--peso-bold);
+}
+
+.convite__botoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--esp-3);
+  margin-top: var(--esp-4);
+}
+
+.campo-texto {
+  width: 100%;
+  height: 44px;
+  margin: var(--esp-3) 0;
+  padding: 0 var(--esp-4);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-controlo);
+  background: var(--fundo-pesquisa);
+  font-size: var(--texto-sm);
+}
+
+.campo-texto:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+  box-shadow: 0 0 0 3px rgba(142, 54, 230, 0.18);
+}
+
+.lateral__msg {
+  min-height: 1.3em;
+  margin-top: var(--esp-2);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--estado-sucesso);
+}
+
+.lateral__msg--erro {
+  color: var(--estado-erro);
+}
+
+.criar {
+  padding: var(--esp-5);
+  border-radius: var(--raio-cartao);
+  background: linear-gradient(180deg, var(--sidebar-gradiente-inicio), var(--sidebar-gradiente-fim));
+  color: var(--texto-inverso);
+}
+
+.criar .lateral__texto {
+  margin-bottom: var(--esp-4);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+
+/* --- 9. Responsivo -------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .hero,
+  .equipas {
+    grid-template-columns: 1fr;
+  }
+
+  .topo__link {
+    display: none;
+  }
+}

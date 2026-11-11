@@ -6,7 +6,9 @@ import * as seeds from "../mocks/dados.js";
 
 const USAR_MOCKS = true;
 const API_URL = "http://localhost:3000/api";
-const CHAVE = "elotask-mocks-v1";
+const CHAVE = "elotask-mocks-v2";
+// comentado para não usar dados antigos 
+//const CHAVE = "elotask-mocks-v1";
 
 async function pedido(rota, { metodo = "GET", corpo } = {}) {
   const resposta = await fetch(`${API_URL}${rota}`, {
@@ -34,6 +36,8 @@ function estadoInicial() {
     mensagens: seeds.mensagens,
     naoLidas: seeds.naoLidas,
     documentos: seeds.documentos,
+    equipas: seeds.equipas,
+    convites: seeds.convites,
   });
 }
 
@@ -285,4 +289,40 @@ export function apagarDocumento(id) {
   db.documentos = db.documentos.filter((d) => d.id !== id);
   guardar();
   return Promise.resolve(null);
+}
+// --- Equipas e convites ---------------------------------------------------
+
+export const getEquipas = () =>
+  USAR_MOCKS ? copia(db.equipas) : pedido("/equipas");
+
+export const getConvites = () =>
+  USAR_MOCKS ? copia(db.convites) : pedido("/convites");
+
+// Marca a equipa como "última utilizada"
+export function escolherEquipa(id) {
+  if (!USAR_MOCKS) return pedido(`/equipas/${id}/escolher`, { metodo: "POST" });
+  db.equipas.forEach((e) => { e.ultima = e.id === id; });
+  guardar();
+  return Promise.resolve(null);
+}
+
+export function responderConvite(id, aceitar) {
+  if (!USAR_MOCKS) return pedido(`/convites/${id}`, { metodo: "POST", corpo: { aceitar } });
+  const convite = db.convites.find((c) => c.id === id);
+  if (!convite) return naoEncontrado("Convite");
+  db.convites = db.convites.filter((c) => c.id !== id);
+  if (aceitar) {
+    db.equipas.push({ id: proximoId(db.equipas), nome: convite.equipa, papel: "Membro", membros: 1, projetos: 0, cor: "rosa" });
+  }
+  guardar();
+  return Promise.resolve(null);
+}
+
+// Com mocks qualquer código escrito junta a uma equipa de exemplo
+export function entrarComConvite(codigo) {
+  if (!USAR_MOCKS) return pedido("/convites/entrar", { metodo: "POST", corpo: { codigo } });
+  const equipa = { id: proximoId(db.equipas), nome: "Equipa Convidada", papel: "Membro", membros: 2, projetos: 0, cor: "rosa" };
+  db.equipas.push(equipa);
+  guardar();
+  return copia(equipa);
 }

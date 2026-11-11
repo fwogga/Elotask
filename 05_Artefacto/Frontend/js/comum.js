@@ -210,11 +210,11 @@ export async function renderSidebar(el) {
     <nav>
       <ul class="sidebar__nav">${itens}</ul>
     </nav>
-    <button class="sidebar__utilizador" type="button" aria-haspopup="menu">
+        <a class="sidebar__utilizador" href="perfil.html">
       <span class="avatar" aria-hidden="true">${iniciais(utilizador.nome)}</span>
-      <span>${utilizador.nome}</span>
+      <span>${esc(utilizador.nome)}</span>
       <img src="${asset("icons/chevron-down.svg")}" alt="" width="16" height="20">
-    </button>`;
+    </a>`;
 }
 
 // Desenha a sidebar em qualquer página que a tenha

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil · EloTask</title>
+  <link rel="icon" href="../assets/img/logo-elotask.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/pages/perfil.css">
+
+  <script type="module" src="../js/comum.js"></script>
+  <script type="module" src="../js/pages/perfil.js"></script>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" data-sidebar data-ativo="perfil"></aside>
+
+    <main class="conteudo" data-conteudo>
+      <header class="cabecalho-pagina">
+        <h1 class="titulo-pagina">Perfil</h1>
+      </header>
+
+      <section class="cartao perfil" aria-label="Dados do perfil">
+        <div class="perfil__topo">
+          <span class="avatar perfil__avatar" aria-hidden="true" data-iniciais></span>
+          <div>
+            <h2 class="perfil__nome" data-nome></h2>
+            <p class="perfil__funcao" data-funcao></p>
+            <p class="perfil__email">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+              <span data-email></span>
+            </p>
+            <div class="perfil__acoes">
+              <button class="botao botao--compacto botao--secundario perfil__editar" type="button" data-editar>Editar perfil</button>
+              <button class="botao botao--compacto botao--secundario" type="button" data-alterar-senha>Alterar palavra-passe</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="separadores" role="tablist" aria-label="Secções do perfil">
+          <button class="separador" type="button" role="tab" id="tab-info" aria-controls="painel-info" aria-selected="true">Informação pessoal</button>
+          <button class="separador" type="button" role="tab" id="tab-notif" aria-controls="painel-notif" aria-selected="false">Notificações</button>
+          <button class="separador" type="button" role="tab" id="tab-seg" aria-controls="painel-seg" aria-selected="false">Segurança</button>
+        </div>
+
+        <div role="tabpanel" id="painel-info" aria-labelledby="tab-info">
+          <dl class="dados" data-dados></dl>
+        </div>
+        <div role="tabpanel" id="painel-notif" aria-labelledby="tab-notif" hidden>
+          <p class="vazio">As preferências de notificações vão aparecer aqui.</p>
+        </div>
+        <div role="tabpanel" id="painel-seg" aria-labelledby="tab-seg" hidden>
+          <p class="vazio">As opções de segurança vão aparecer aqui.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

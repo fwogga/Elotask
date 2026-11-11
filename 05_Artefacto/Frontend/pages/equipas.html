@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>As minhas equipas · EloTask</title>
+  <link rel="icon" href="../assets/img/logo-elotask.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/pages/equipas.css">
+
+  <script type="module" src="../js/pages/equipas.js"></script>
+</head>
+<body>
+  <header class="eq-topo">
+    <a class="eq-marca" href="../index.html">
+      <img src="../assets/img/logo-elotask.png" alt="" width="32" height="34">
+      <span>EloTask</span>
+    </a>
+    <div class="eq-utilizador">
+      <span class="avatar avatar--sm" aria-hidden="true" data-iniciais></span>
+      <span data-nome></span>
+      <a class="eq-sair" href="login.html" data-sair>Terminar sessão</a>
+    </div>
+  </header>
+
+  <main class="eq-pagina">
+    <h1 class="titulo-pagina">As minhas equipas</h1>
+    <p class="eq-subtitulo">
+      Escolha a equipa com a qual quer trabalhar agora. Pode mudar de equipa a qualquer
+      momento através do menu da barra lateral.
+    </p>
+
+    <div class="eq-grelha">
+      <section aria-labelledby="t-equipas">
+        <h2 class="eq-rotulo" id="t-equipas">Escolha uma equipa <span data-total></span></h2>
+        <ul data-equipas></ul>
+      </section>
+
+      <div class="eq-lateral">
+        <section class="cartao eq-bloco" data-convites hidden aria-label="Convites pendentes"></section>
+
+        <section class="cartao eq-bloco" aria-labelledby="t-convite">
+          <h2 class="eq-bloco__titulo" id="t-convite">Entrar com convite</h2>
+          <p class="eq-bloco__texto">
+            Tem um código ou uma ligação de convite? Introduza-o para se juntar a uma equipa.
+          </p>
+          <form data-form-convite novalidate>
+            <label class="sr-only" for="codigo">Código ou ligação de convite</label>
+            <input class="eq-campo" id="codigo" name="codigo" type="text"
+                   placeholder="Código ou ligação de convite" autocomplete="off">
+            <button class="botao botao--compacto botao--secundario eq-btn eq-btn--bloco" type="submit">Entrar na equipa</button>
+            <p class="eq-msg" data-msg-convite role="status"></p>
+          </form>
+        </section>
+
+        <section class="eq-criar" aria-labelledby="t-criar">
+          <h2 class="eq-bloco__titulo" id="t-criar">+ Criar uma nova equipa</h2>
+          <p class="eq-bloco__texto">
+            Comece do zero: dê um nome à equipa e convide os seus colegas para trabalharem consigo.
+          </p>
+          <button class="botao botao--compacto eq-btn eq-btn--claro eq-btn--bloco" type="button" data-criar-equipa>Criar equipa</button>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
