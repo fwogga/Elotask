@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chamada · EloTask</title>
+  <link rel="icon" href="../assets/img/logo-elotask.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/pages/chamada.css">
+
+  <script type="module" src="../js/pages/chamada.js"></script>
+</head>
+<body class="chamada-pagina">
+
+  <!-- Ecrã da chamada (data-fase muda: a-chamar → ligada) -->
+  <main class="chamada" data-chamada data-fase="a-chamar">
+    <header class="chamada__topo">
+      <div>
+        <h1 class="chamada__titulo" data-titulo></h1>
+        <p class="chamada__estado" data-estado role="status" aria-live="polite"></p>
+      </div>
+      <span class="chamada__tempo" data-tempo hidden></span>
+    </header>
+
+    <section class="chamada__palco" data-palco aria-label="Participantes"></section>
+
+    <!-- Controlos: aria-pressed="true" = ligado/destacado (no microfone e na câmara = desligado) -->
+    <div class="chamada__controlos" role="toolbar" aria-label="Controlos da chamada">
+      <button class="ctrl" type="button" data-acao="mic" aria-pressed="false" aria-label="Silenciar microfone">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/><path class="barra" d="M3 3l18 18"/></svg>
+        <span class="ctrl__rotulo">Microfone</span>
+      </button>
+
+      <button class="ctrl" type="button" data-acao="camara" aria-pressed="true" aria-label="Ligar vídeo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 7-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/><path class="barra" d="M3 3l18 18"/></svg>
+        <span class="ctrl__rotulo">Vídeo</span>
+      </button>
+
+      <button class="ctrl" type="button" data-acao="ecra" aria-pressed="false" aria-label="Partilhar ecrã">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        <span class="ctrl__rotulo">Partilhar</span>
+      </button>
+
+      <button class="ctrl ctrl--terminar" type="button" data-acao="terminar" aria-label="Terminar chamada">
+        <svg class="ctrl__desligar" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span class="ctrl__rotulo">Terminar</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- Ecrã final (aparece depois de terminar) -->
+  <section class="chamada-fim" data-fim hidden aria-labelledby="fim-titulo">
+    <h1 class="chamada-fim__titulo" id="fim-titulo">Chamada terminada</h1>
+    <p class="chamada-fim__texto" data-fim-texto></p>
+    <div class="chamada-fim__acoes">
+      <a class="botao botao--compacto botao--secundario" href="mensagens.html">Voltar às mensagens</a>
+      <button class="botao botao--compacto" type="button" data-ligar-novamente>Ligar novamente</button>
+    </div>
+  </section>
+
+</body>
+</html>

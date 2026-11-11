@@ -1,9 +1,7 @@
 /* Estilos partilhados por todas as páginas. As cores e tamanhos vêm de tokens.css,
    que tem de ser carregado antes deste ficheiro. */
 
-/* ==========================================================================
-   1. Base: reset e estilos globais
-   ========================================================================== */
+/* 1. Base: reset e estilos globais*/
 
 *,
 *::before,

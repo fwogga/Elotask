@@ -1,0 +1,146 @@
+/* Chamadas de voz e vídeo. Usa tokens.css e app.css. */
+
+.chamada-pagina {
+  min-height: 100vh;
+  background: #1a1228;
+  color: #fff;
+}
+
+.chamada,
+.chamada-fim {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: var(--esp-6) 5vw var(--esp-6);
+}
+
+.chamada[hidden],
+.chamada-fim[hidden] { display: none; }
+
+/* --- Topo ------------------------------------------------------------------ */
+.chamada__topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--esp-4);
+}
+
+.chamada__titulo { font-size: var(--texto-2xl); font-weight: var(--peso-bold); }
+.chamada__estado { margin-top: 2px; font-size: var(--texto-sm); color: rgba(255, 255, 255, 0.7); }
+
+.chamada__tempo {
+  padding: 6px 16px;
+  border-radius: var(--raio-pilula);
+  background: rgba(255, 255, 255, 0.12);
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.chamada__tempo[hidden] { display: none; }
+
+/* --- Palco (participantes) ------------------------------------------------- */
+.chamada__palco {
+  flex: 1;
+  display: grid;
+  gap: var(--esp-4);
+  align-content: center;
+  justify-items: center;
+  padding: var(--esp-6) 0;
+}
+
+/* Voz: avatares grandes ao centro; vídeo: mosaico */
+.chamada__palco[data-tipo="voz"] { grid-template-columns: repeat(auto-fit, minmax(180px, 220px)); justify-content: center; }
+.chamada__palco[data-tipo="video"] { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); align-content: stretch; }
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-3);
+  width: 100%;
+  min-height: 200px;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chamada__palco[data-tipo="video"] .tile { background: linear-gradient(160deg, #2b1f45, #3a2761); }
+.chamada__palco[data-tipo="voz"] .tile { min-height: 0; }
+
+.tile__nome { font-size: var(--texto-sm); font-weight: var(--peso-medio); }
+
+.chamada__palco[data-tipo="video"] .tile__nome {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  padding: 4px 12px;
+  border-radius: var(--raio-pilula);
+  background: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
+
+.chamada__avatar { width: 112px; height: 112px; font-size: 36px; }
+
+/* Destaque de quem está a falar */
+.tile--fala { border-color: var(--cor-destaque); box-shadow: 0 0 0 4px rgba(204, 103, 255, 0.25); }
+
+/* A tocar: o avatar pulsa */
+[data-fase="a-chamar"] .tile .chamada__avatar { animation: pulsar 1.4s ease-in-out infinite; }
+
+@keyframes pulsar {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(204, 103, 255, 0.5); }
+  50% { box-shadow: 0 0 0 18px rgba(204, 103, 255, 0); }
+}
+
+.tile video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tile--eu video { transform: scaleX(-1); }              /* espelho, como nas outras apps */
+.tile--ecra { grid-column: 1 / -1; min-height: 320px; background: #000 !important; }
+.tile--ecra video { object-fit: contain; }
+
+/* --- Controlos ------------------------------------------------------------- */
+.chamada__controlos { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--esp-5); }
+
+.ctrl {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.ctrl svg {
+  box-sizing: content-box;
+  padding: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.ctrl:hover svg { background: rgba(255, 255, 255, 0.24); }
+.ctrl[aria-pressed="true"] svg { background: #fff; color: #1a1228; }
+.ctrl__rotulo { font-size: 12px; color: rgba(255, 255, 255, 0.75); }
+
+/* Traço por cima do ícone só quando está desligado */
+.ctrl .barra { display: none; }
+.ctrl[aria-pressed="true"] .barra { display: block; }
+
+.ctrl--terminar svg { background: var(--estado-erro); color: #fff; }
+.ctrl--terminar:hover svg { background: #c41f38; }
+.ctrl__desligar { transform: rotate(135deg); }
+
+/* --- Ecrã final ------------------------------------------------------------ */
+.chamada-fim { align-items: center; justify-content: center; gap: var(--esp-3); text-align: center; }
+.chamada-fim__titulo { font-size: 32px; font-weight: var(--peso-bold); }
+.chamada-fim__texto { color: rgba(255, 255, 255, 0.7); }
+.chamada-fim__acoes { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--esp-3); margin-top: var(--esp-5); }
+
+@media (max-width: 560px) {
+  .chamada__controlos { gap: var(--esp-3); }
+  .chamada__avatar { width: 88px; height: 88px; font-size: 30px; }
+}

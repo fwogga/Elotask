@@ -1,4 +1,4 @@
-// Janelas (modais) e menu de equipas, partilhados por várias páginas.
+// Janelas (models) e menu de equipas, partilhados por várias páginas.
 //
 // Como usar: qualquer botão com data-abrir="nome" abre a janela correspondente:
 //   criar-equipa · terminar-sessao · menu-equipas · nova-tarefa

@@ -1,11 +1,9 @@
-// Código partilhado por todas as páginas da aplicação.
-// Basta incluir <script type="module" src="../js/comum.js"> para a sidebar
-// aparecer; as páginas importam daqui as funções de que precisam.
+
 import { getUtilizadorAtual } from "./api/client.js";
 
-// ==========================================================================
+
 // Formatação (datas, tamanhos, texto seguro)
-// ==========================================================================
+
 
 const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 const MESES_LONGOS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
@@ -76,9 +74,9 @@ export function extensao(nome) {
   return partes.length > 1 ? partes.pop().toUpperCase() : "";
 }
 
-// ==========================================================================
+
 // Interface (ícones, avatares, avisos, confirmação)
-// ==========================================================================
+
 
 export const icone = (nome, tamanho, classe = "") =>
   `<img${classe ? ` class="${classe}"` : ""} src="../assets/icons/${nome}" alt="" width="${tamanho}" height="${tamanho}">`;
@@ -128,9 +126,9 @@ export function confirmar(texto, rotuloConfirmar = "Confirmar") {
   });
 }
 
-// ==========================================================================
+
 // Cartão de projeto (Início e Projetos)
-// ==========================================================================
+
 
 export const ESTADOS_PROJETO = {
   em_andamento: { rotulo: "Em andamento", classe: "sucesso" },
