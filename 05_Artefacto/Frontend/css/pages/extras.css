@@ -1,0 +1,342 @@
+/* Ecrãs simples: Notificações, Assistente IA, Administração, Estado do sistema e Turnos */
+
+.lista-simples {
+  margin-top: var(--esp-6);
+}
+
+.lista-simples > li {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+  padding: var(--esp-4) var(--esp-5);
+}
+
+.lista-simples > li + li {
+  border-top: 1px solid var(--divisoria);
+}
+
+.lista-simples__corpo {
+  flex: 1;
+  min-width: 0;
+}
+
+.lista-simples__titulo {
+  font-weight: var(--peso-semibold);
+}
+
+.lista-simples__texto,
+.lista-simples__meta {
+  margin-top: 2px;
+  font-size: var(--texto-sm);
+  color: var(--texto-secundario);
+}
+
+.lista-simples__acoes {
+  display: flex;
+  gap: var(--esp-3);
+}
+
+/* --- Notificações --------------------------------------------------------- */
+
+.notificacao__icone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--raio-icone);
+  background: var(--fundo-icone);
+}
+
+.notificacao--por-ler {
+  background: var(--fundo-ativo);
+}
+
+.notificacao--por-ler .lista-simples__titulo::after {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: var(--esp-2);
+  border-radius: 50%;
+  background: var(--estado-notificacao);
+  vertical-align: middle;
+}
+
+/* --- Assistente IA -------------------------------------------------------- */
+
+.assistente {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 180px);
+  min-height: 420px;
+  margin-top: var(--esp-6);
+}
+
+.assistente__mensagens {
+  margin: 0;
+  list-style: none;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  overflow-y: auto;
+  padding: var(--esp-5);
+}
+
+.bolha {
+  max-width: 70%;
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: 16px;
+  background: var(--fundo-suave);
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.bolha--eu {
+  align-self: flex-end;
+  background: var(--cor-primaria);
+  color: var(--texto-inverso);
+}
+
+.assistente__sugestoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+  padding: 0 var(--esp-5) var(--esp-3);
+}
+
+.sugestao {
+  padding: var(--esp-2) var(--esp-4);
+  border: 1px solid var(--borda-campo);
+  border-radius: var(--raio-pilula);
+  background: var(--fundo-superficie);
+  color: var(--cor-primaria);
+  font: inherit;
+  font-size: var(--texto-xs);
+  cursor: pointer;
+}
+
+.sugestao:hover {
+  background: var(--fundo-icone);
+}
+
+.assistente__form {
+  display: flex;
+  gap: var(--esp-3);
+  padding: var(--esp-4) var(--esp-5);
+  border-top: 1px solid var(--divisoria);
+}
+
+.assistente__form input {
+  flex: 1;
+  height: 48px;
+  padding: 0 var(--esp-4);
+  border: 1px solid var(--borda-campo);
+  border-radius: var(--raio-controlo);
+  background: var(--fundo-pesquisa);
+  font: inherit;
+  font-size: var(--texto-sm);
+}
+
+.assistente__form input:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+}
+
+/* --- Administração e estado ---------------------------------------------- */
+
+.resumo-numeros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--esp-4);
+  margin-top: var(--esp-6);
+}
+
+.resumo-numeros > div {
+  padding: var(--esp-5);
+}
+
+.resumo-numeros dt {
+  font-size: var(--texto-sm);
+  color: var(--texto-secundario);
+}
+
+.resumo-numeros dd {
+  margin: var(--esp-1) 0 0;
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-bold);
+}
+
+.tabela {
+  width: 100%;
+  margin-top: var(--esp-6);
+  overflow-x: auto;
+}
+
+.tabela table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--texto-sm);
+}
+
+.tabela th,
+.tabela td {
+  padding: var(--esp-3) var(--esp-5);
+  text-align: left;
+}
+
+.tabela th {
+  font-weight: var(--peso-semibold);
+  color: var(--texto-secundario);
+  border-bottom: 1px solid var(--borda);
+}
+
+.tabela tr + tr td {
+  border-top: 1px solid var(--divisoria);
+}
+
+.pessoa {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  font-weight: var(--peso-medio);
+}
+
+.nota {
+  margin-top: var(--esp-4);
+  font-size: var(--texto-sm);
+  color: var(--texto-secundario);
+}
+
+.estado-ponto {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--estado-erro);
+}
+
+.estado-ponto--ok {
+  background: var(--estado-sucesso);
+}
+
+/* --- Turnos --------------------------------------------------------------- */
+
+.turnos-dia {
+  margin-top: var(--esp-6);
+}
+
+.turnos-dia__titulo {
+  margin-bottom: var(--esp-3);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-semibold);
+}
+
+.turnos-dia__lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--esp-4);
+}
+
+.turno {
+  display: grid;
+  gap: var(--esp-3);
+  padding: var(--esp-5);
+}
+
+.turno--meu {
+  border-color: var(--cor-primaria);
+}
+
+.turno__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+}
+
+.turno__nome {
+  font-weight: var(--peso-semibold);
+}
+
+.turno__hora {
+  font-size: var(--texto-sm);
+  color: var(--texto-secundario);
+}
+
+@media (max-width: 700px) {
+  .lista-simples > li {
+    flex-wrap: wrap;
+  }
+
+  .bolha {
+    max-width: 90%;
+  }
+}
+
+/* --- Videochamada --------------------------------------------------------- */
+
+.videos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--esp-4);
+  margin-top: var(--esp-4);
+}
+
+.video {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--raio-controlo);
+  background: #1d0b33;
+  overflow: hidden;
+}
+
+.video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video figcaption {
+  position: absolute;
+  left: var(--esp-3);
+  bottom: var(--esp-3);
+  padding: var(--esp-1) var(--esp-3);
+  border-radius: var(--raio-pilula);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: var(--texto-xs);
+}
+
+.chamada__barra {
+  display: flex;
+  justify-content: center;
+  gap: var(--esp-3);
+  margin-top: var(--esp-6);
+}
+
+.chamada__barra [aria-pressed="false"] {
+  text-decoration: line-through;
+}
+
+/* --- Secções extra (ausências, resumos, checklists, sugestões) ------------ */
+
+.seccao {
+  margin-top: var(--esp-8);
+}
+
+.seccao__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-3);
+}
+
+.seccao__titulo {
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-semibold);
+}

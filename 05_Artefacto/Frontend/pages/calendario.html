@@ -49,9 +49,14 @@
       <aside class="proximos" aria-labelledby="proximos-titulo">
         <header class="proximos__cabecalho">
           <h2 id="proximos-titulo">Próximos eventos</h2>
-          <a class="proximos__agendar" href="reunioes.html?agendar=1" title="Agendar reunião" aria-label="Agendar reunião">
-            <img src="../assets/icons/calendar-sm.svg" alt="" width="20" height="20">
-          </a>
+          <div class="proximos__botoes">
+            <button class="proximos__agendar" type="button" data-novo-evento title="Novo evento" aria-label="Novo evento" hidden>
+              <img src="../assets/icons/plus-roxo.svg" alt="" width="20" height="20">
+            </button>
+            <a class="proximos__agendar" href="reunioes.html?agendar=1" title="Agendar reunião" aria-label="Agendar reunião">
+              <img src="../assets/icons/calendar-sm.svg" alt="" width="20" height="20">
+            </a>
+          </div>
         </header>
         <div class="proximos__lista" data-proximos></div>
       </aside>

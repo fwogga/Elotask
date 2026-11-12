@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assistente IA · EloTask</title>
+  <link rel="icon" href="../assets/img/logo-elotask.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/pages/extras.css">
+
+  <script type="module" src="../js/comum.js"></script>
+  <script type="module" src="../js/pages/assistente.js"></script>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" data-sidebar data-ativo="assistente"></aside>
+
+    <main class="conteudo">
+      <header class="cabecalho-pagina">
+        <h1 class="titulo-pagina">Assistente IA</h1>
+      </header>
+
+      <section class="cartao assistente" aria-label="Conversa com o assistente">
+        <ol class="assistente__mensagens" data-mensagens aria-live="polite"></ol>
+        <div class="assistente__sugestoes" data-sugestoes>
+          <button class="sugestao" type="button">Quais são as minhas próximas reuniões?</button>
+          <button class="sugestao" type="button">Que decisões foram tomadas nas reuniões?</button>
+          <button class="sugestao" type="button">O que devo fazer a seguir?</button>
+        </div>
+        <form class="assistente__form" data-form>
+          <label class="sr-only" for="pergunta">Pergunta</label>
+          <input id="pergunta" name="pergunta" type="text" maxlength="4000" placeholder="Escreve uma pergunta..." autocomplete="off">
+          <button class="botao botao--compacto" type="submit">Enviar</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+</body>
+</html>

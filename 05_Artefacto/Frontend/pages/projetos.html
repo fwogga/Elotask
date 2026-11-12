@@ -57,6 +57,7 @@
           <button class="separador" type="button" role="tab" id="tab-documentos" aria-controls="painel-documentos" aria-selected="false" tabindex="-1">Documentos</button>
           <button class="separador" type="button" role="tab" id="tab-reunioes" aria-controls="painel-reunioes" aria-selected="false" tabindex="-1">Reuniões</button>
           <button class="separador" type="button" role="tab" id="tab-membros" aria-controls="painel-membros" aria-selected="false" tabindex="-1">Membros</button>
+          <button class="separador" type="button" role="tab" id="tab-sugestoes" aria-controls="painel-sugestoes" aria-selected="false" tabindex="-1" hidden>Sugestões IA</button>
         </div>
 
         <div class="painel painel--geral" role="tabpanel" id="painel-geral" aria-labelledby="tab-geral">
@@ -110,6 +111,13 @@
 
         <div class="painel" role="tabpanel" id="painel-membros" aria-labelledby="tab-membros" hidden>
           <ul class="cartao lista membros membros--painel" data-membros></ul>
+        </div>
+
+        <div class="painel" role="tabpanel" id="painel-sugestoes" aria-labelledby="tab-sugestoes" hidden>
+          <div class="painel__acoes">
+            <button class="botao botao--compacto" type="button" data-gerar-sugestoes>Gerar sugestões</button>
+          </div>
+          <ul class="cartao lista lista-linhas" data-sugestoes></ul>
         </div>
       </section>
     </main>

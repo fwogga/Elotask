@@ -5,8 +5,13 @@ import {
   criarTarefa,
   atualizarTarefa,
   apagarTarefa,
+  getUtilizadorAtual,
+  getChecklists,
+  criarChecklist,
+  criarItemChecklist,
+  marcarItemChecklist,
 } from "../api/client.js";
-import { esc, dataCurta, estaAtrasada, chaveDia, icone, avatar, porId, aviso, confirmar } from "../comum.js";
+import { esc, dataCurta, estaAtrasada, chaveDia, icone, avatar, porId, aviso, confirmar, pedirDados } from "../comum.js";
 
 const PRIORIDADES = {
   alta: { rotulo: "Alta", classe: "erro" },
@@ -14,7 +19,7 @@ const PRIORIDADES = {
   baixa: { rotulo: "Baixa", classe: "sucesso" },
 };
 
-const estado = { tarefas: [], projetos: new Map(), pessoas: new Map(), editarId: null };
+const estado = { tarefas: [], projetos: new Map(), pessoas: new Map(), editarId: null, eu: null };
 const filtros = { texto: "", projeto: "", responsavel: "", prioridade: "" };
 
 const dialogo = document.querySelector("[data-dialogo-tarefa]");
@@ -106,6 +111,68 @@ function ativarArrastar() {
   }
 }
 
+// --- Checklists (dentro da janela da tarefa; só com o backend) -------------
+
+const caixaChecklists = document.querySelector("[data-checklists]");
+
+async function renderChecklists() {
+  const tarefaId = estado.editarId;
+  const admin = estado.eu?.tipo === "admin";
+  const checklists = tarefaId ? await getChecklists(tarefaId) : [];
+  if (tarefaId !== estado.editarId) return;
+  caixaChecklists.hidden = !checklists.length && !admin;
+  if (caixaChecklists.hidden) return;
+
+  caixaChecklists.innerHTML = `
+    <p class="campo__rotulo">Checklist</p>
+    ${checklists.map((c) => `
+      <div class="checklist">
+        <p class="checklist__titulo">${esc(c.titulo)}</p>
+        ${c.itens.map((i) => `
+          <label class="checklist__item">
+            <input type="checkbox" data-item="${c.id}:${i.id}"${i.feito ? " checked" : ""}> ${esc(i.texto)}
+          </label>`).join("")}
+        ${admin ? `
+          <div class="checklist__novo">
+            <input type="text" data-novo-item="${c.id}" placeholder="Novo item" aria-label="Novo item em ${esc(c.titulo)}">
+            <button class="botao-texto" type="button" data-adicionar-item="${c.id}">Adicionar</button>
+          </div>` : ""}
+      </div>`).join("")}
+    ${admin ? '<button class="botao-texto" type="button" data-nova-checklist>+ Nova checklist</button>' : ""}`;
+}
+
+async function adicionarItem(checklistId) {
+  const campo = caixaChecklists.querySelector(`[data-novo-item="${checklistId}"]`);
+  if (!campo.value.trim()) return;
+  await criarItemChecklist(estado.editarId, checklistId, campo.value.trim());
+  await renderChecklists();
+}
+
+function ligarChecklists() {
+  caixaChecklists.addEventListener("change", (e) => {
+    const item = e.target.closest("[data-item]");
+    if (!item) return;
+    const [checklistId, itemId] = item.dataset.item.split(":");
+    marcarItemChecklist(estado.editarId, checklistId, itemId, item.checked);
+  });
+  caixaChecklists.addEventListener("click", async (e) => {
+    const adicionar = e.target.closest("[data-adicionar-item]");
+    if (adicionar) await adicionarItem(adicionar.dataset.adicionarItem);
+    if (e.target.closest("[data-nova-checklist]")) {
+      const d = await pedirDados("Nova checklist", [{ nome: "titulo", rotulo: "Título" }], "Criar");
+      if (!d) return;
+      await criarChecklist(estado.editarId, d.titulo);
+      await renderChecklists();
+    }
+  });
+  // Enter no campo de novo item adiciona o item em vez de guardar a tarefa
+  caixaChecklists.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" || !e.target.dataset.novoItem) return;
+    e.preventDefault();
+    adicionarItem(e.target.dataset.novoItem);
+  });
+}
+
 // --- Formulário (criar / editar) ------------------------------------------
 
 function preencherOpcoes() {
@@ -157,6 +224,10 @@ function abrirFormulario(tarefa = null) {
     form.prazo.value = chaveDia(new Date());
     if (filtros.projeto) form.projetoId.value = filtros.projeto;
   }
+
+  caixaChecklists.hidden = true;
+  caixaChecklists.innerHTML = "";
+  if (tarefa) renderChecklists();
 
   dialogo.showModal();
   form.titulo.focus();
@@ -228,6 +299,7 @@ function ligarEventos() {
   });
   form.querySelector("[data-cancelar]").addEventListener("click", () => dialogo.close());
   form.querySelector("[data-apagar]").addEventListener("click", apagar);
+  ligarChecklists();
 
   document.querySelector("[data-pesquisa]").addEventListener("submit", (e) => e.preventDefault());
   document.getElementById("pesquisa").addEventListener("input", (e) => {
@@ -244,7 +316,8 @@ function ligarEventos() {
 }
 
 async function iniciar() {
-  const [tarefas, projetos, pessoas] = await Promise.all([getTarefas(), getProjetos(), getUtilizadores()]);
+  const [tarefas, projetos, pessoas, eu] = await Promise.all([getTarefas(), getProjetos(), getUtilizadores(), getUtilizadorAtual()]);
+  estado.eu = eu;
   estado.tarefas = tarefas;
   estado.projetos = porId(projetos);
   estado.pessoas = porId(pessoas);

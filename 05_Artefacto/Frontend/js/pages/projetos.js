@@ -5,6 +5,10 @@ import {
   getTarefas,
   getDocumentos,
   getReunioes,
+  usarApi,
+  getSugestoes,
+  gerarSugestoes,
+  responderSugestao,
 } from "../api/client.js";
 import { cartaoProjeto, ESTADOS_PROJETO, esc, dataCurta, dataCompleta, intervalo, extensao, icone, avatar, porId } from "../comum.js";
 
@@ -103,6 +107,45 @@ function ativarSeparadores() {
   }
 }
 
+// --- Sugestões da IA ---------------------------------------------------------
+
+const ESTADOS_SUGESTAO = { pendente: "aviso", aceite: "sucesso", rejeitada: "erro" };
+
+function renderSugestoes(sugestoes) {
+  document.querySelector("[data-sugestoes]").innerHTML = sugestoes.map((s, i) => `
+    <li class="linha">
+      <div class="linha__principal">
+        <p class="linha__titulo">${esc(s.texto)}</p>
+        <p class="linha__meta">${esc(s.motivo)}</p>
+      </div>
+      ${s.estado === "pendente" ? `
+        <button class="botao-texto" type="button" data-sugestao="${i}" data-estado="aceite">Aceitar</button>
+        <button class="botao-texto" type="button" data-sugestao="${i}" data-estado="rejeitada">Rejeitar</button>`
+        : `<span class="etiqueta etiqueta--${ESTADOS_SUGESTAO[s.estado]}">${esc(s.estado)}</span>`}
+    </li>`).join("") || vazio("Ainda não há sugestões. Carrega em \"Gerar sugestões\".");
+}
+
+async function ligarSugestoes(projetoId) {
+  if (!(await usarApi())) return;
+  document.getElementById("tab-sugestoes").hidden = false;
+  let sugestoes = await getSugestoes(projetoId);
+  renderSugestoes(sugestoes);
+
+  document.querySelector("[data-gerar-sugestoes]").addEventListener("click", async () => {
+    await gerarSugestoes(projetoId);
+    sugestoes = await getSugestoes(projetoId);
+    renderSugestoes(sugestoes);
+  });
+  document.querySelector("[data-sugestoes]").addEventListener("click", async (e) => {
+    const botao = e.target.closest("[data-sugestao]");
+    if (!botao) return;
+    const s = sugestoes[botao.dataset.sugestao];
+    await responderSugestao(s, botao.dataset.estado);
+    s.estado = botao.dataset.estado;
+    renderSugestoes(sugestoes);
+  });
+}
+
 async function mostrarDetalhe(id) {
   const [projeto, pessoasLista, tarefas, documentos, reunioes] = await Promise.all([
     getProjeto(id),
@@ -149,6 +192,7 @@ async function mostrarDetalhe(id) {
   document.querySelector("[data-link-quadro]").href = `tarefas.html?projeto=${projeto.id}`;
   document.querySelector("[data-link-agendar]").href = `reunioes.html?agendar=1&projeto=${projeto.id}`;
   ativarSeparadores();
+  await ligarSugestoes(projeto.id);
 }
 
 const id = new URLSearchParams(location.search).get("id");

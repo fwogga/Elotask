@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administração · EloTask</title>
+  <link rel="icon" href="../assets/img/logo-elotask.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/pages/extras.css">
+
+  <script type="module" src="../js/comum.js"></script>
+  <script type="module" src="../js/pages/administracao.js"></script>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" data-sidebar data-ativo="administracao"></aside>
+
+    <main class="conteudo">
+      <header class="cabecalho-pagina">
+        <h1 class="titulo-pagina">Administração</h1>
+      </header>
+
+      <dl class="resumo-numeros" data-numeros></dl>
+
+      <div class="cartao tabela">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Pessoa</th>
+              <th scope="col">Email</th>
+              <th scope="col">Função</th>
+              <th scope="col">Perfil</th>
+              <th scope="col">Estado</th>
+            </tr>
+          </thead>
+          <tbody data-linhas></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+</body>
+</html>

@@ -12,17 +12,68 @@
 
   <link rel="stylesheet" href="../css/tokens.css">
   <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/pages/extras.css">
 
   <script type="module" src="../js/comum.js"></script>
+  <script type="module" src="../js/pages/turnos.js"></script>
 </head>
 <body>
   <div class="app">
     <aside class="sidebar" data-sidebar data-ativo="turnos"></aside>
 
     <main class="conteudo">
-      <h1 class="titulo-pagina">Turnos</h1>
-      <p class="cartao em-construcao">Este ecrã ainda está em construção.</p>
+      <header class="cabecalho-pagina">
+        <h1 class="titulo-pagina">Turnos</h1>
+        <div class="lista-simples__acoes">
+          <button class="botao botao--compacto botao--secundario" type="button" data-disponibilidade hidden>Disponibilidade</button>
+          <button class="botao botao--compacto botao--secundario" type="button" data-novo-turno hidden>Novo turno</button>
+          <button class="botao botao--compacto botao--secundario" type="button" data-gerar-escala hidden>Gerar escala com IA</button>
+          <button class="botao botao--compacto" type="button" data-pedir>Pedir troca de turno</button>
+        </div>
+      </header>
+
+      <div data-dias></div>
+
+      <section class="turnos-dia" aria-labelledby="titulo-pedidos">
+        <h2 class="turnos-dia__titulo" id="titulo-pedidos">Os meus pedidos de troca</h2>
+        <ul class="cartao lista-simples" data-pedidos></ul>
+      </section>
+
+      <section class="turnos-dia" aria-labelledby="titulo-ausencias" data-seccao-ausencias hidden>
+        <div class="seccao__cabecalho">
+          <h2 class="turnos-dia__titulo" id="titulo-ausencias">As minhas ausências</h2>
+          <button class="botao botao--compacto" type="button" data-pedir-ausencia>Pedir ausência</button>
+        </div>
+        <ul class="cartao lista-simples" data-ausencias></ul>
+      </section>
+
+      <section class="turnos-dia" aria-labelledby="titulo-aprovar" data-seccao-aprovar hidden>
+        <h2 class="turnos-dia__titulo" id="titulo-aprovar">Ausências por aprovar</h2>
+        <ul class="cartao lista-simples" data-aprovar></ul>
+      </section>
     </main>
   </div>
+
+  <dialog class="dialogo dialogo--pequeno" data-dialogo aria-labelledby="troca-titulo">
+    <form class="formulario" method="dialog" data-form>
+      <h2 class="dialogo__titulo formulario__total" id="troca-titulo">Pedir troca de turno</h2>
+      <div class="campo formulario__total">
+        <label for="turno">O meu turno</label>
+        <select id="turno" name="turno" data-turnos></select>
+      </div>
+      <div class="campo formulario__total">
+        <label for="troca">Trocar com</label>
+        <select id="troca" name="troca" data-trocas></select>
+      </div>
+      <div class="campo formulario__total">
+        <label for="motivo">Motivo</label>
+        <textarea id="motivo" name="motivo" rows="3" placeholder="Ex.: consulta médica"></textarea>
+      </div>
+      <div class="dialogo__acoes formulario__total">
+        <button class="botao botao--secundario" type="button" data-cancelar>Cancelar</button>
+        <button class="botao" type="submit">Enviar pedido</button>
+      </div>
+    </form>
+  </dialog>
 </body>
 </html>

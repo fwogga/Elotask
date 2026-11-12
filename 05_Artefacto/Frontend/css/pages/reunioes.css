@@ -288,3 +288,47 @@
     flex-basis: 100%;
   }
 }
+
+/* --- Detalhe da reunião ---------------------------------------------------- */
+
+.reuniao-linha__abrir {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.reuniao-linha__abrir:hover {
+  color: var(--cor-primaria);
+}
+
+.detalhe__texto {
+  margin-top: var(--esp-3);
+  line-height: 1.5;
+}
+
+.detalhe__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-3);
+  margin-top: var(--esp-5);
+}
+
+.dialogo .seccao {
+  margin-top: var(--esp-6);
+}
+
+.dialogo .lista-simples {
+  margin-top: var(--esp-3);
+}
+
+.dialogo .lista-simples > li {
+  padding: var(--esp-3) 0;
+}
+
+.dialogo .formulario {
+  margin-top: var(--esp-4);
+}

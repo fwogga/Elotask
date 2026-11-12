@@ -1,0 +1,219 @@
+/* Escolher equipa  */
+
+/* --- Cabeçalho ------------------------------------------------------------ */
+.eq-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-4);
+  padding: var(--esp-4) 6vw;
+}
+
+.eq-marca {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-bold);
+}
+
+.eq-marca img { width: 32px; height: auto; }
+
+.eq-utilizador {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+}
+
+.eq-sair {
+  padding-left: var(--esp-3);
+  border-left: 1px solid var(--borda);
+  color: var(--cor-primaria);
+}
+
+.eq-sair:hover { text-decoration: underline; }
+
+/* --- Título e duas colunas ------------------------------------------------ */
+.eq-pagina { padding: var(--esp-4) 6vw var(--esp-8); }
+
+.eq-subtitulo {
+  margin: var(--esp-2) 0 var(--esp-6);
+  font-size: var(--texto-sm);
+  color: var(--texto-secundario);
+}
+
+.eq-grelha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--esp-6);
+  align-items: start;
+}
+
+.eq-rotulo {
+  margin-bottom: var(--esp-3);
+  font-size: 12px;
+  font-weight: var(--peso-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cor-primaria);
+}
+
+.eq-rotulo span {
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--texto-secundario);
+}
+
+/* --- Cartão de cada equipa ------------------------------------------------ */
+.eq-item {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+  margin-bottom: var(--esp-3);
+  padding: var(--esp-4) var(--esp-5);
+}
+
+.eq-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  font-weight: var(--peso-bold);
+}
+
+.eq-avatar--violeta { background: #7b61ff; color: #fff; }
+.eq-avatar--rosa    { background: #ffb8dc; color: var(--texto-titulo); }
+.eq-avatar--escuro  { background: #1d1745; color: #fff; }
+
+.eq-info { flex: 1; min-width: 0; }
+
+.eq-nome {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+  font-weight: var(--peso-bold);
+}
+
+.eq-dados {
+  margin-top: 2px;
+  font-size: var(--texto-xs);
+  color: var(--texto-secundario);
+}
+
+.eq-papel {
+  padding: 2px 10px;
+  border-radius: var(--raio-pilula);
+  background: var(--fundo-icone);
+  color: var(--cor-primaria);
+  font-size: 12px;
+  font-weight: var(--peso-medio);
+}
+
+.eq-ultima,
+.eq-pendente {
+  padding: 3px 10px;
+  border-radius: var(--raio-pilula);
+  background: #ffe1ee;
+  color: #d6336c;
+  font-size: 12px;
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+}
+
+.eq-pendente { display: inline-block; margin-bottom: var(--esp-3); }
+
+/* --- Botões (variações do .botao do app.css) ------------------------------ */
+.eq-btn {
+  height: 40px;
+  padding: 0 22px;
+  font-size: var(--texto-sm);
+}
+
+.eq-btn--bloco { width: 100%; }
+
+.eq-btn.botao--secundario {
+  border-color: var(--cor-primaria);
+  color: var(--cor-primaria);
+}
+
+.eq-btn--claro { background: #fff; color: var(--cor-primaria); }
+.eq-btn--claro:hover { background: var(--fundo-icone); }
+
+/* --- Coluna lateral ------------------------------------------------------- */
+.eq-lateral { display: grid; gap: var(--esp-4); }
+.eq-bloco { padding: var(--esp-5); }
+
+.eq-bloco__titulo {
+  margin-bottom: var(--esp-2);
+  font-size: var(--texto-md);
+  font-weight: var(--peso-bold);
+}
+
+.eq-bloco__texto {
+  font-size: var(--texto-xs);
+  line-height: 1.5;
+  color: var(--texto-secundario);
+}
+
+.eq-convite + .eq-convite {
+  margin-top: var(--esp-4);
+  padding-top: var(--esp-4);
+  border-top: 1px solid var(--borda);
+}
+
+.eq-convite__equipa { font-weight: var(--peso-bold); }
+
+.eq-convite__botoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--esp-3);
+  margin-top: var(--esp-4);
+}
+
+.eq-campo {
+  width: 100%;
+  height: 44px;
+  margin: var(--esp-3) 0;
+  padding: 0 var(--esp-4);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-controlo);
+  background: var(--fundo-pesquisa);
+  font-size: var(--texto-sm);
+}
+
+.eq-campo:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+  box-shadow: 0 0 0 3px rgba(142, 54, 230, 0.18);
+}
+
+.eq-msg {
+  min-height: 1.3em;
+  margin-top: var(--esp-2);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+  color: var(--estado-sucesso);
+}
+
+.eq-msg--erro { color: var(--estado-erro); }
+
+.eq-criar {
+  padding: var(--esp-5);
+  border-radius: var(--raio-cartao);
+  background: linear-gradient(180deg, var(--sidebar-gradiente-inicio), var(--sidebar-gradiente-fim));
+  color: var(--texto-inverso);
+}
+
+.eq-criar .eq-bloco__texto {
+  margin-bottom: var(--esp-4);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+@media (max-width: 900px) {
+  .eq-grelha { grid-template-columns: minmax(0, 1fr); }
+}

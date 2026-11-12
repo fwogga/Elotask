@@ -168,3 +168,48 @@
     width: auto;
   }
 }
+
+/* --- Checklist dentro da janela da tarefa ---------------------------------- */
+
+.checklist {
+  display: grid;
+  gap: var(--esp-2);
+  padding: var(--esp-3) var(--esp-4);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-controlo);
+}
+
+.checklist__titulo {
+  font-weight: var(--peso-semibold);
+}
+
+.checklist__item {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--texto-sm);
+}
+
+.formulario .checklist__item input {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  padding: 0;
+  accent-color: var(--cor-primaria);
+}
+
+.checklist__novo {
+  display: flex;
+  gap: var(--esp-3);
+}
+
+.formulario .checklist__novo input {
+  flex: 1;
+  min-height: 40px;
+  font-size: var(--texto-sm);
+}
+
+.checklists {
+  display: grid;
+  gap: var(--esp-3);
+}

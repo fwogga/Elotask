@@ -31,6 +31,7 @@
             <label class="sr-only" for="pesquisa">Pesquisar conversas</label>
             <input id="pesquisa" type="search" placeholder="Pesquisar conversas...">
           </form>
+          <button class="botao-texto chat__novo-canal" type="button" data-novo-canal hidden>+ Novo canal</button>
           <ul class="conversas" data-conversas></ul>
         </section>
 
@@ -41,6 +42,7 @@
               <h2 class="chat__nome" id="conversa-nome" data-conversa-nome></h2>
               <p class="chat__info" data-conversa-info></p>
             </div>
+            <a class="botao botao--compacto chat__ligar" data-chamada hidden>Videochamada</a>
           </header>
 
           <ol class="mensagens" data-mensagens aria-live="polite"></ol>

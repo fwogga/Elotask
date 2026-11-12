@@ -1,5 +1,5 @@
-import { getReunioes, getTarefas } from "../api/client.js";
-import { esc, hora, chaveDia, diaRelativo, dataCurta, mesAno, paraData } from "../comum.js";
+import { getReunioes, getTarefas, getEventos, criarEvento, apagarEvento, usarPrincipal } from "../api/client.js";
+import { esc, hora, chaveDia, diaRelativo, dataCurta, mesAno, paraData, pedirDados, confirmar, aviso } from "../comum.js";
 
 const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const MAX_POR_DIA = 3;
@@ -7,8 +7,21 @@ const MAX_POR_DIA = 3;
 const estado = { vista: "mes", ref: new Date(), eventos: [] };
 const corpo = document.querySelector("[data-corpo]");
 
-// Reuniões e prazos de tarefas por concluir, no mesmo formato
-function prepararEventos(reunioes, tarefas) {
+// Reuniões, eventos pessoais e prazos de tarefas por concluir, no mesmo formato
+function prepararEventos(reunioes, tarefas, eventos) {
+  const pessoais = eventos.map((e) => ({
+    id: e.id,
+    titulo: e.titulo,
+    descricao: e.descricao,
+    dia: chaveDia(e.inicio),
+    ordem: e.inicio,
+    hora: `${hora(e.inicio)} – ${hora(e.fim)}`,
+    horaCurta: hora(e.inicio),
+    classe: "evento--pessoal",
+    prazo: false,
+    link: `#evento-${e.id}`,
+  }));
+
   const deReunioes = reunioes.map((r) => ({
     titulo: r.titulo,
     dia: chaveDia(r.inicio),
@@ -33,7 +46,7 @@ function prepararEventos(reunioes, tarefas) {
       link: `tarefas.html?tarefa=${t.id}`,
     }));
 
-  return [...deReunioes, ...dePrazos].sort((a, b) => a.ordem.localeCompare(b.ordem));
+  return [...deReunioes, ...pessoais, ...dePrazos].sort((a, b) => a.ordem.localeCompare(b.ordem));
 }
 
 const eventosDoDia = (dia) => estado.eventos.filter((e) => e.dia === dia);
@@ -146,9 +159,57 @@ function mover(passo) {
   render();
 }
 
+// Os eventos vêm de um ano para trás até um ano para a frente
+async function carregar() {
+  const hoje = new Date();
+  const de = chaveDia(new Date(hoje.getFullYear() - 1, hoje.getMonth(), 1));
+  const ate = chaveDia(new Date(hoje.getFullYear() + 1, hoje.getMonth(), 1));
+  const [reunioes, tarefas, eventos] = await Promise.all([getReunioes(), getTarefas(), getEventos(de, ate)]);
+  estado.eventos = prepararEventos(reunioes, tarefas, eventos);
+  render();
+  renderProximos();
+}
+
+async function novoEvento() {
+  const dados = await pedirDados("Novo evento", [
+    { nome: "titulo", rotulo: "Título" },
+    { nome: "dia", rotulo: "Dia", tipo: "date", valor: chaveDia(new Date()) },
+    { nome: "inicio", rotulo: "Início", tipo: "time", valor: "09:00" },
+    { nome: "fim", rotulo: "Fim", tipo: "time", valor: "10:00" },
+    { nome: "tipo", rotulo: "Tipo", tipo: "select", opcoes: [["evento", "Evento"], ["prazo", "Prazo"], ["reuniao", "Reunião"], ["outro", "Outro"]] },
+    { nome: "descricao", rotulo: "Descrição", tipo: "textarea" },
+  ], "Criar evento");
+  if (!dados) return;
+  await criarEvento({
+    titulo: dados.titulo,
+    descricao: dados.descricao,
+    tipo: dados.tipo,
+    inicio: new Date(`${dados.dia}T${dados.inicio}`).toISOString(),
+    fim: new Date(`${dados.dia}T${dados.fim}`).toISOString(),
+  });
+  aviso("Evento criado.");
+  await carregar();
+}
+
+// Clicar num evento pessoal mostra-o e deixa apagá-lo
+async function abrirEvento(id) {
+  const e = estado.eventos.find((x) => x.link === `#evento-${id}`);
+  const texto = `${e.titulo} · ${diaRelativo(e.dia)}, ${e.hora}${e.descricao ? `\n${e.descricao}` : ""}`;
+  if (!(await confirmar(texto, "Apagar evento"))) return;
+  await apagarEvento(id);
+  aviso("Evento apagado.");
+  await carregar();
+}
+
 async function iniciar() {
-  const [reunioes, tarefas] = await Promise.all([getReunioes(), getTarefas()]);
-  estado.eventos = prepararEventos(reunioes, tarefas);
+  document.querySelector("[data-novo-evento]").hidden = !(await usarPrincipal());
+  document.querySelector("[data-novo-evento]").addEventListener("click", novoEvento);
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest('a[href^="#evento-"]');
+    if (!link) return;
+    e.preventDefault();
+    abrirEvento(Number(link.getAttribute("href").slice(8)));
+  });
 
   document.querySelector("[data-anterior]").addEventListener("click", () => mover(-1));
   document.querySelector("[data-seguinte]").addEventListener("click", () => mover(1));
@@ -163,8 +224,7 @@ async function iniciar() {
     });
   }
 
-  render();
-  renderProximos();
+  await carregar();
 }
 
 iniciar().catch((erro) => {

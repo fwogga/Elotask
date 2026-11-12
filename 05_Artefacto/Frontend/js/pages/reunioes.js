@@ -1,4 +1,15 @@
-import { getReunioes, getProjetos, getUtilizadores, getUtilizadorAtual, criarReuniao } from "../api/client.js";
+import {
+  getReunioes,
+  getProjetos,
+  getUtilizadores,
+  getUtilizadorAtual,
+  criarReuniao,
+  usarApi,
+  alterarEstadoReuniao,
+  getResumos,
+  gerarResumo,
+  validarDecisao,
+} from "../api/client.js";
 import { esc, intervalo, dataCurta, hora, chaveDia, avatar, porId, aviso } from "../comum.js";
 
 const MAX_AVATARES = 3;
@@ -37,7 +48,7 @@ function linha(r) {
     <li class="reuniao-linha">
       <span class="reuniao-linha__icone"><img src="../assets/icons/calendar-days.svg" alt="" width="32" height="32"></span>
       <div>
-        <h2 class="reuniao-linha__titulo">${esc(r.titulo)}</h2>
+        <h2 class="reuniao-linha__titulo"><button class="reuniao-linha__abrir" type="button" data-abrir="${r.id}">${esc(r.titulo)}</button></h2>
         <p class="reuniao-linha__quando">${quando(r)}</p>
         ${local(r.local)}
       </div>
@@ -222,6 +233,88 @@ function ligarFormulario() {
   form.fim.addEventListener("change", atualizarDuracao);
 }
 
+// --- Detalhe: estado, videochamada, resumo e decisões (só com o backend) ----
+
+const ESTADOS_REUNIAO = { agendada: "Agendada", em_curso: "Em curso", concluida: "Concluída", cancelada: "Cancelada" };
+const ESTADOS_DECISAO = { pendente: "aviso", confirmada: "sucesso", rejeitada: "erro" };
+
+async function htmlDetalhe(r) {
+  const organizador = r.organizadorId === dados.eu.id;
+  const ativa = ["agendada", "em_curso"].includes(r.estado);
+  const { resumos, decisoes } = await getResumos(r.id);
+
+  return `
+    <h2 class="dialogo__titulo">${esc(r.titulo)}</h2>
+    <p class="nota">${quando(r)} · ${ESTADOS_REUNIAO[r.estado] ?? ""}</p>
+    ${r.descricao ? `<p class="detalhe__texto">${esc(r.descricao)}</p>` : ""}
+
+    <div class="detalhe__acoes">
+      ${ativa ? `<a class="botao botao--compacto" href="chamada.html?reuniao=${r.id}">Entrar na videochamada</a>` : ""}
+      ${organizador && r.estado === "agendada" ? '<button class="botao botao--compacto botao--secundario" type="button" data-mudar-estado="em_curso">Começar reunião</button>' : ""}
+      ${organizador && r.estado === "em_curso" ? '<button class="botao botao--compacto botao--secundario" type="button" data-mudar-estado="concluida">Concluir reunião</button>' : ""}
+    </div>
+
+    <section class="seccao">
+      <h3 class="seccao__titulo">Resumo e decisões</h3>
+      ${resumos.map((x) => `<p class="detalhe__texto">${esc(x.texto)}</p>`).join("") || '<p class="nota">Ainda não há resumo.</p>'}
+      <ul class="lista-simples">
+        ${decisoes.map((d) => `
+          <li>
+            <div class="lista-simples__corpo">
+              <p class="lista-simples__titulo">${esc(d.texto)}</p>
+              ${d.responsavel ? `<p class="lista-simples__meta">Responsável: ${esc(d.responsavel)}</p>` : ""}
+            </div>
+            ${d.estado === "pendente" ? `
+              <button class="botao-texto" type="button" data-decisao="${d.id}" data-estado="confirmada">Confirmar</button>
+              <button class="botao-texto" type="button" data-decisao="${d.id}" data-estado="rejeitada">Rejeitar</button>`
+              : `<span class="etiqueta etiqueta--${ESTADOS_DECISAO[d.estado]}">${esc(d.estado)}</span>`}
+          </li>`).join("")}
+      </ul>
+      ${organizador && ["em_curso", "concluida"].includes(r.estado) ? `
+        <div class="formulario">
+          <div class="campo formulario__total">
+            <label for="notas-reuniao">Notas da reunião</label>
+            <textarea id="notas-reuniao" rows="4" data-notas placeholder="O que se falou e o que ficou decidido"></textarea>
+          </div>
+          <button class="botao botao--compacto formulario__total" type="button" data-gerar-resumo>Gerar resumo com IA</button>
+        </div>` : ""}
+    </section>
+
+    <div class="dialogo__acoes">
+      <button class="botao botao--secundario" type="button" data-fechar>Fechar</button>
+    </div>`;
+}
+
+async function abrirDetalhe(id) {
+  const r = dados.reunioes.find((x) => x.id === id);
+  const janela = document.createElement("dialog");
+  janela.className = "dialogo";
+  document.body.append(janela);
+  const desenhar = async () => {
+    janela.innerHTML = await htmlDetalhe(r);
+  };
+  await desenhar();
+  janela.showModal();
+
+  janela.addEventListener("close", () => janela.remove());
+  janela.addEventListener("click", async (e) => {
+    const alvo = e.target.closest("button");
+    if (!alvo) return;
+    if (alvo.dataset.fechar !== undefined) janela.close();
+    if (alvo.dataset.mudarEstado) {
+      await alterarEstadoReuniao(r.id, alvo.dataset.mudarEstado);
+      r.estado = alvo.dataset.mudarEstado;
+    }
+    if (alvo.dataset.decisao) await validarDecisao(alvo.dataset.decisao, alvo.dataset.estado);
+    if (alvo.dataset.gerarResumo !== undefined) {
+      alvo.disabled = true;
+      await gerarResumo(r.id, janela.querySelector("[data-notas]").value).finally(() => (alvo.disabled = false));
+      aviso("Resumo gerado.");
+    }
+    if (alvo.dataset.mudarEstado || alvo.dataset.decisao || alvo.dataset.gerarResumo !== undefined) await desenhar();
+  });
+}
+
 // --- Arranque -------------------------------------------------------------
 
 async function iniciar() {
@@ -232,6 +325,12 @@ async function iniciar() {
   ativarSeparadores();
   ligarFormulario();
   renderLista();
+  if (await usarApi()) {
+    lista.addEventListener("click", (e) => {
+      const botao = e.target.closest("[data-abrir]");
+      if (botao) abrirDetalhe(Number(botao.dataset.abrir));
+    });
+  }
 
   // Links de outras páginas: ?agendar=1 abre o formulário; &projeto=2 já escolhe o projeto
   const params = new URLSearchParams(location.search);

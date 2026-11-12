@@ -386,3 +386,16 @@
     flex-wrap: wrap;
   }
 }
+
+/* Eventos pessoais (criados no calendário) */
+.evento--pessoal {
+  --cor-evento: #0f8a5f;
+  --fundo-evento: #e3f6ee;
+  --ponto-evento: #16a974;
+  --hora-evento: #6bbf9d;
+}
+
+.proximos__botoes {
+  display: flex;
+  gap: var(--esp-2);
+}

@@ -11,6 +11,11 @@
   box-sizing: border-box;
 }
 
+/* "hidden" ganha sempre, mesmo a classes que mudam o display */
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   margin: 0;
@@ -153,6 +158,30 @@ svg {
   gap: var(--esp-1);
 }
 
+/* A navegação pode deslizar em ecrãs baixos; a pessoa fica sempre em baixo */
+.sidebar nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.sidebar__nav--extra {
+  margin-top: var(--esp-3);
+  padding-top: var(--esp-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.sidebar__nav--extra .nav-item {
+  height: 44px;
+  font-size: var(--texto-sm);
+}
+
+.sidebar__nav--extra .nav-item__icone {
+  width: 22px;
+  height: 22px;
+}
+
 .nav-item {
   position: relative;
   display: flex;
@@ -209,6 +238,7 @@ svg {
   white-space: nowrap;
 }
 
+.sidebar__utilizador[aria-current="page"],
 .sidebar__utilizador:hover {
   background: rgba(255, 255, 255, 0.12);
 }
@@ -774,6 +804,7 @@ fieldset.campo > legend {
 
 .dialogo__texto {
   font-size: var(--texto-lg);
+  white-space: pre-line;
 }
 
 .dialogo__acoes {

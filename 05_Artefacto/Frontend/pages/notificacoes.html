@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notificações · EloTask</title>
+  <link rel="icon" href="../assets/img/logo-elotask.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/pages/extras.css">
+
+  <script type="module" src="../js/comum.js"></script>
+  <script type="module" src="../js/pages/notificacoes.js"></script>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" data-sidebar data-ativo="notificacoes"></aside>
+
+    <main class="conteudo">
+      <header class="cabecalho-pagina">
+        <h1 class="titulo-pagina">Notificações</h1>
+        <button class="botao botao--compacto botao--secundario" type="button" data-todas-lidas>Marcar todas como lidas</button>
+      </header>
+
+      <ul class="cartao lista-simples" data-lista aria-live="polite"></ul>
+
+      <section class="seccao" aria-labelledby="titulo-lembretes" data-seccao-lembretes hidden>
+        <h2 class="seccao__titulo" id="titulo-lembretes">Lembretes de prazos</h2>
+        <ul class="cartao lista-simples" data-lembretes></ul>
+      </section>
+    </main>
+  </div>
+
+</body>
+</html>

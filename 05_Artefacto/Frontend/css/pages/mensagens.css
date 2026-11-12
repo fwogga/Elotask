@@ -365,3 +365,14 @@
     font-size: var(--texto-md);
   }
 }
+
+/* --- Canais e videochamada ------------------------------------------------ */
+
+.chat__novo-canal {
+  align-self: flex-start;
+  margin: -20px 18px 12px;
+}
+
+.chat__ligar {
+  margin-left: auto;
+}

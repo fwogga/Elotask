@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Videochamada · EloTask</title>
+  <link rel="icon" href="../assets/img/logo-elotask.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/pages/extras.css">
+
+  <script type="module" src="../js/comum.js"></script>
+  <script type="module" src="../js/pages/chamada.js"></script>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" data-sidebar data-ativo="mensagens"></aside>
+
+    <main class="conteudo">
+      <header class="cabecalho-pagina">
+        <h1 class="titulo-pagina">Videochamada</h1>
+      </header>
+
+      <p class="nota" data-estado aria-live="polite">A ligar…</p>
+      <div class="videos" data-videos></div>
+
+      <div class="chamada__barra">
+        <button class="botao botao--secundario" type="button" data-microfone aria-pressed="true">Microfone</button>
+        <button class="botao botao--secundario" type="button" data-camara aria-pressed="true">Câmara</button>
+        <button class="botao botao--perigo" type="button" data-sair>Sair</button>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

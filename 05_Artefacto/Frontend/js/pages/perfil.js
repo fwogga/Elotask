@@ -1,6 +1,6 @@
 // Perfil: dados do utilizador e separadores.
-import { getUtilizadorAtual } from "../api/client.js";
-import { esc, iniciais, dataCompleta } from "../comum.js";
+import { getUtilizadorAtual, terminarSessao } from "../api/client.js";
+import { esc, iniciais, dataCompleta, confirmar } from "../comum.js";
 
 const $ = (seletor) => document.querySelector(seletor);
 
@@ -39,6 +39,13 @@ async function iniciar() {
   $("[data-dados]").innerHTML = renderDados(u);
 
   ligarSeparadores();
+
+  $("[data-sair]").addEventListener("click", async () => {
+    if (await confirmar("Tem a certeza de que quer terminar a sessão?", "Terminar sessão")) {
+      await terminarSessao();
+      location.href = "login.html";
+    }
+  });
 }
 
 iniciar().catch((erro) => {

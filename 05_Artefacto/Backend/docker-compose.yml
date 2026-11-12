@@ -1,0 +1,97 @@
+# Arranca tudo com:  docker compose up -d --build
+# Os segredos vêm do ficheiro .env desta pasta (ver .env.example).
+
+x-principal: &principal
+  build: ./backend_principal
+  restart: always
+  environment:
+    PORT: 3000
+    DB_HOST: db
+    DB_PORT: 3306
+    DB_USER: root
+    DB_PASSWORD: ${DB_PASSWORD}
+    DB_NAME: elotask
+    JWT_SECRET: ${JWT_SECRET}
+    IA_API_URL: http://ia_turnos:8001
+    TZ: Europe/Lisbon
+  depends_on:
+    db:
+      condition: service_healthy
+
+x-comunicacao: &comunicacao
+  build: ./backend_comunicacao
+  restart: always
+  environment: &ambiente-comunicacao
+    PORT: 3002
+    DB_HOST: db
+    DB_PORT: 3306
+    DB_USER: root
+    DB_PASSWORD: ${DB_PASSWORD}
+    DB_NAME: elotask
+    AUTH_MODE: dev
+    JWT_SECRET: ${JWT_SECRET}
+    CHAMADAS_CHAVE: ${CHAMADAS_CHAVE}
+    IA_SERVICE_URL: http://ia:8000
+    IA_SERVICE_API_KEY: ${IA_API_KEY}
+    TZ: Europe/Lisbon
+  volumes:
+    - ficheiros:/app/uploads
+  depends_on:
+    db:
+      condition: service_healthy
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      TZ: Europe/Lisbon
+    volumes:
+      - dados:/var/lib/mysql
+      - ./base_dados:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_PASSWORD}"]
+      interval: 5s
+      retries: 30
+
+  ia:
+    build: ./ia_service
+    restart: always
+    environment:
+      IA_API_KEY: ${IA_API_KEY}
+
+  ia_turnos:
+    build: ./ia_turnos
+    restart: always
+
+  principal1: *principal
+  principal2: *principal
+
+  comunicacao1: *comunicacao
+  comunicacao2:
+    <<: *comunicacao
+    environment:
+      <<: *ambiente-comunicacao
+      LEMBRETES_ATIVOS: "false"
+
+  proxy:
+    image: nginx:alpine
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "3000:3000"
+      - "3002:3002"
+    depends_on:
+      - principal1
+      - principal2
+      - comunicacao1
+      - comunicacao2
+
+volumes:
+  dados:
+  ficheiros:

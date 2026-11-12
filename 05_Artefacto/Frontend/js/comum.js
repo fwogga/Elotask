@@ -1,7 +1,7 @@
 // Código partilhado por todas as páginas da aplicação.
 // Basta incluir <script type="module" src="../js/comum.js"> para a sidebar
 // aparecer; as páginas importam daqui as funções de que precisam.
-import { getUtilizadorAtual } from "./api/client.js";
+import { getUtilizadorAtual, tempoReal, recusarChamada } from "./api/client.js";
 
 // ==========================================================================
 // Formatação (datas, tamanhos, texto seguro)
@@ -87,7 +87,7 @@ export const icone = (nome, tamanho, classe = "") =>
 export function avatar(utilizador, tamanho = "md") {
   if (!utilizador) return "";
   const cor = utilizador.cor && utilizador.cor !== "primaria" ? ` avatar--${utilizador.cor}` : "";
-  return `<span class="avatar avatar--${tamanho}${cor}" title="${esc(utilizador.nome)}" aria-hidden="true">${iniciais(utilizador.nome)}</span>`;
+  return `<span class="avatar avatar--${tamanho}${cor}" title="${esc(utilizador.nome)}" aria-hidden="true">${esc(iniciais(utilizador.nome))}</span>`;
 }
 
 export const porId = (lista) => new Map(lista.map((x) => [x.id, x]));
@@ -123,6 +123,41 @@ export function confirmar(texto, rotuloConfirmar = "Confirmar") {
   return new Promise((resolver) => {
     dialogo.addEventListener("close", () => {
       resolver(dialogo.returnValue === "sim");
+      dialogo.remove();
+    });
+  });
+}
+
+// Formulário rápido numa janela. campos: [{ nome, rotulo, tipo, opcoes: [[valor, texto]], valor }]
+// Devolve { nome: valor, ... } ou null se cancelar.
+export function pedirDados(titulo, campos, rotuloBotao = "Guardar") {
+  const campoHtml = ({ nome, rotulo, tipo = "text", opcoes = [], valor = "" }) => {
+    const id = `campo-${nome}`;
+    let controlo = `<input id="${id}" name="${nome}" type="${tipo}" value="${esc(valor)}">`;
+    if (tipo === "select") {
+      controlo = `<select id="${id}" name="${nome}">${opcoes.map(([v, t]) => `<option value="${esc(v)}"${v === valor ? " selected" : ""}>${esc(t)}</option>`).join("")}</select>`;
+    }
+    if (tipo === "textarea") controlo = `<textarea id="${id}" name="${nome}" rows="3">${esc(valor)}</textarea>`;
+    return `<div class="campo formulario__total"><label for="${id}">${esc(rotulo)}</label>${controlo}</div>`;
+  };
+
+  const dialogo = document.createElement("dialog");
+  dialogo.className = "dialogo dialogo--pequeno";
+  dialogo.innerHTML = `
+    <form class="formulario" method="dialog">
+      <h2 class="dialogo__titulo formulario__total">${esc(titulo)}</h2>
+      ${campos.map(campoHtml).join("")}
+      <div class="dialogo__acoes formulario__total">
+        <button class="botao botao--secundario" value="nao">Cancelar</button>
+        <button class="botao" value="sim">${esc(rotuloBotao)}</button>
+      </div>
+    </form>`;
+  document.body.append(dialogo);
+  dialogo.showModal();
+  return new Promise((resolver) => {
+    dialogo.addEventListener("close", () => {
+      const dados = Object.fromEntries(new FormData(dialogo.querySelector("form")));
+      resolver(dialogo.returnValue === "sim" ? dados : null);
       dialogo.remove();
     });
   });
@@ -180,6 +215,15 @@ export const NAV_ITENS = [
   { id: "turnos", rotulo: "Turnos", pagina: "turnos.html", icone: "nav-turnos.svg" },
 ];
 
+// Ecrãs extra, numa lista mais compacta por baixo da principal
+export const NAV_EXTRA = [
+  { id: "notificacoes", rotulo: "Notificações", pagina: "notificacoes.html", icone: "nav-notificacoes.svg" },
+  { id: "assistente", rotulo: "Assistente IA", pagina: "assistente.html", icone: "nav-assistente.svg" },
+  { id: "historico", rotulo: "Histórico", pagina: "historico.html", icone: "clock.svg" },
+  { id: "administracao", rotulo: "Administração", pagina: "administracao.html", icone: "nav-admin.svg" },
+  { id: "estado", rotulo: "Estado do sistema", pagina: "estado.html", icone: "nav-estado.svg" },
+];
+
 function itemNav(item, ativo, naoLidas) {
   const atual = item.id === ativo ? ' aria-current="page"' : "";
   const badge = naoLidas
@@ -200,6 +244,7 @@ export async function renderSidebar(el) {
   const utilizador = await getUtilizadorAtual();
   const ativo = el.dataset.ativo;
   const itens = NAV_ITENS.map((item) => itemNav(item, ativo, utilizador.naoLidas?.[item.id])).join("");
+  const extra = NAV_EXTRA.map((item) => itemNav(item, ativo, utilizador.naoLidas?.[item.id])).join("");
 
   el.setAttribute("aria-label", "Navegação principal");
   el.innerHTML = `
@@ -209,16 +254,34 @@ export async function renderSidebar(el) {
     </a>
     <nav>
       <ul class="sidebar__nav">${itens}</ul>
+      <ul class="sidebar__nav sidebar__nav--extra">${extra}</ul>
     </nav>
-    <button class="sidebar__utilizador" type="button" aria-haspopup="menu">
-      <span class="avatar" aria-hidden="true">${iniciais(utilizador.nome)}</span>
-      <span>${utilizador.nome}</span>
+    <a class="sidebar__utilizador" href="perfil.html"${ativo === "perfil" ? ' aria-current="page"' : ""}>
+      <span class="avatar" aria-hidden="true">${esc(iniciais(utilizador.nome))}</span>
+      <span>${esc(utilizador.nome)}</span>
       <img src="${asset("icons/chevron-down.svg")}" alt="" width="16" height="20">
-    </button>`;
+    </a>`;
+}
+
+// Erros que nenhuma página tratou (ex.: sem permissão no backend) aparecem como aviso
+window.addEventListener("unhandledrejection", (e) => {
+  if (e.reason?.message) aviso(e.reason.message);
+});
+
+// Chamada recebida: aparece em qualquer página, menos na própria página da chamada
+async function avisarChamadas() {
+  const socket = await tempoReal();
+  if (!socket || location.pathname.endsWith("chamada.html")) return;
+  socket.on("chamada:recebida", async ({ chamada }) => {
+    const atender = await confirmar(`${chamada.nome_iniciador} está a ligar-te.`, "Atender");
+    if (atender) location.href = `chamada.html?id=${chamada.id_chamada}`;
+    else recusarChamada(chamada.id_chamada);
+  });
 }
 
 // Desenha a sidebar em qualquer página que a tenha
 const sidebar = document.querySelector("[data-sidebar]");
 if (sidebar) {
   renderSidebar(sidebar);
+  avisarChamadas().catch(() => {});
 }

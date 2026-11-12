@@ -18,7 +18,7 @@ for (const botao of form.querySelectorAll("[data-alternar-senha]")) {
   });
 }
 
-// Só aparece se o servidor (passo 12) devolver um erro
+// Só aparece se o servidor devolver um erro (ex.: email sem conta)
 async function submeter(acao) {
   botaoSubmeter.disabled = true;
   erroGeral.hidden = true;
@@ -46,9 +46,7 @@ function iniciarLogin() {
         palavra: form.palavra.value,
         manter: form.manter.checked,
       });
-            location.href = "equipas.html";
-// comentando para discutir com o grupo
-      //location.href = "dashboard.html";
+      location.href = "equipas.html";
     });
   });
 }
