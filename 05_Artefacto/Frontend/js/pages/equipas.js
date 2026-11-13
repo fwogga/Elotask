@@ -8,8 +8,10 @@ import {
   entrarComConvite,
   criarEquipa,
   terminarSessao,
+  getMembrosEquipa,
+  conversaCom,
 } from "../api/client.js";
-import { esc, iniciais, aviso, confirmar } from "../comum.js";
+import { esc, iniciais, aviso, confirmar, linkPerfil } from "../comum.js";
 
 const $ = (seletor) => document.querySelector(seletor);
 const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
@@ -33,6 +35,8 @@ function renderEquipas(equipas) {
         <p class="eq-dados">${plural(e.membros, "membro", "membros")}${e.projetos == null ? "" : ` · ${plural(e.projetos, "projeto", "projetos")}`}</p>
       </div>
       ${e.ultima ? '<span class="eq-ultima">Última utilizada</span>' : ""}
+      <button class="botao botao--compacto botao--secundario eq-btn" type="button" data-membros="${e.id}"
+              data-nome-equipa="${esc(e.nome)}">Membros</button>
       <button class="botao botao--compacto eq-btn" type="button" data-entrar="${e.id}"
               aria-label="Entrar na ${esc(e.nome)}">Entrar</button>
     </li>`).join("");
@@ -63,6 +67,35 @@ async function carregar() {
 }
 
 // --- Ações ------------------------------------------------------------------
+
+// Lista de membros: cada nome abre o perfil e "Mensagem" abre a conversa com a pessoa
+async function mostrarMembros(equipaId, nomeEquipa) {
+  const [membros, eu] = await Promise.all([getMembrosEquipa(equipaId), getUtilizadorAtual()]);
+  const dialogo = document.createElement("dialog");
+  dialogo.className = "dialogo dialogo--pequeno";
+  dialogo.innerHTML = `
+    <form method="dialog">
+      <h2 class="dialogo__titulo">Membros · ${esc(nomeEquipa)}</h2>
+      <ul class="eq-membros">
+        ${membros.map((m) => `
+          <li>
+            ${linkPerfil(m)}
+            <span class="eq-papel">${esc(m.funcao)}</span>
+            ${m.id === eu.id ? "" : `<button class="botao-texto" type="button" data-conversar="${m.id}">Mensagem</button>`}
+          </li>`).join("") || '<li class="vazio">Esta equipa ainda não tem membros.</li>'}
+      </ul>
+      <div class="dialogo__acoes">
+        <button class="botao botao--secundario" value="fechar">Fechar</button>
+      </div>
+    </form>`;
+  document.body.append(dialogo);
+  dialogo.addEventListener("close", () => dialogo.remove());
+  dialogo.addEventListener("click", async (e) => {
+    const botao = e.target.closest("[data-conversar]");
+    if (botao) location.href = `mensagens.html?c=${await conversaCom(Number(botao.dataset.conversar))}`;
+  });
+  dialogo.showModal();
+}
 
 async function tratarConvite(id, aceitar) {
   await responderConvite(id, aceitar);
@@ -119,6 +152,8 @@ async function iniciar() {
   await carregar();
 
   $("[data-equipas]").addEventListener("click", async (e) => {
+    const membros = e.target.closest("[data-membros]");
+    if (membros) return mostrarMembros(Number(membros.dataset.membros), membros.dataset.nomeEquipa);
     const botao = e.target.closest("[data-entrar]");
     if (!botao) return;
     await escolherEquipa(Number(botao.dataset.entrar));

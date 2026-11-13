@@ -151,15 +151,12 @@
   gap: 14px;
 }
 
+/* A imagem já traz o cartão branco e a sombra; não se corta nem se emoldura */
 .bv-hero__ilustracao {
   flex-shrink: 0;
-  width: 588px;
-  max-width: 45%;
+  width: 620px;
+  max-width: 48%;
   height: auto;
-  aspect-ratio: 588 / 470;
-  object-fit: cover;
-  border-radius: 28px;
-  box-shadow: 0 16px 40px rgba(80, 22, 137, 0.14);
 }
 
 /* --- Secções ------------------------------------------------------------- */

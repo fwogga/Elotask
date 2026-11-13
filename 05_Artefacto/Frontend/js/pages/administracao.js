@@ -1,5 +1,5 @@
 import { getUtilizadores } from "../api/client.js";
-import { esc, avatar } from "../comum.js";
+import { esc, linkPerfil } from "../comum.js";
 
 const PERFIS = { admin: "Administrador", colaborador: "Colaborador" };
 const ESTADOS = { ativo: "sucesso", inativo: "aviso", suspenso: "erro" };
@@ -18,7 +18,7 @@ async function iniciar() {
     const estado = p.estado ?? "ativo";
     return `
       <tr>
-        <td><span class="pessoa">${avatar(p, "sm")} ${esc(p.nome)}</span></td>
+        <td>${linkPerfil(p)}</td>
         <td>${esc(p.email)}</td>
         <td>${esc(p.funcao ?? "")}</td>
         <td>${PERFIS[p.tipo] ?? "Colaborador"}</td>

@@ -1,62 +1,57 @@
-# Arranca tudo com:  docker compose up -d --build
+# Metade do EloTask corre no PC e a outra metade aqui, no Docker:
+#
+#   browser -> balanceador-frontend (8080) -> Live Server do PC (5501)    + contentor "frontend"
+#           -> balanceador-backend  (8081) -> servidor do PC (iniciar.bat) + contentor "servidor"
+#                                          -> MySQL do MAMP (PC)           + contentor "db" (cada uma copia a outra)
+#
+# Arrancar: primeiro o MAMP, o iniciar.bat e o Live Server; depois  docker compose up -d --build
+# Abrir:    http://localhost:8080
 # Os segredos vêm do ficheiro .env desta pasta (ver .env.example).
-
-x-principal: &principal
-  build: ./backend_principal
-  restart: always
-  environment:
-    PORT: 3000
-    DB_HOST: db
-    DB_PORT: 3306
-    DB_USER: root
-    DB_PASSWORD: ${DB_PASSWORD}
-    DB_NAME: elotask
-    JWT_SECRET: ${JWT_SECRET}
-    IA_API_URL: http://ia_turnos:8001
-    TZ: Europe/Lisbon
-  depends_on:
-    db:
-      condition: service_healthy
-
-x-comunicacao: &comunicacao
-  build: ./backend_comunicacao
-  restart: always
-  environment: &ambiente-comunicacao
-    PORT: 3002
-    DB_HOST: db
-    DB_PORT: 3306
-    DB_USER: root
-    DB_PASSWORD: ${DB_PASSWORD}
-    DB_NAME: elotask
-    AUTH_MODE: dev
-    JWT_SECRET: ${JWT_SECRET}
-    CHAMADAS_CHAVE: ${CHAMADAS_CHAVE}
-    IA_SERVICE_URL: http://ia:8000
-    IA_SERVICE_API_KEY: ${IA_API_KEY}
-    TZ: Europe/Lisbon
-  volumes:
-    - ficheiros:/app/uploads
-  depends_on:
-    db:
-      condition: service_healthy
+#
+# Só na primeira vez, depois de o contentor "replicacao" terminar, corre no phpMyAdmin do PC
+# (para o PC também copiar as alterações feitas no Docker):
+#   CHANGE MASTER TO MASTER_HOST='127.0.0.1', MASTER_PORT=3307, MASTER_USER='replicacao',
+#     MASTER_PASSWORD='<REPLICACAO_PASSWORD>', MASTER_AUTO_POSITION=1;
+#   START SLAVE;
 
 services:
   db:
-    image: mysql:8.0
+    image: mysql:5.7
     restart: always
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: >-
+      --server-id=2 --log-bin=mysql-bin --binlog-format=ROW --log-slave-updates=ON
+      --gtid-mode=ON --enforce-gtid-consistency=ON
+      --auto-increment-increment=2 --auto-increment-offset=2
+      --lower-case-table-names=1
+      --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       TZ: Europe/Lisbon
     volumes:
       - dados:/var/lib/mysql
-      - ./base_dados:/docker-entrypoint-initdb.d:ro
     ports:
       - "3307:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${DB_PASSWORD}"]
       interval: 5s
-      retries: 30
+      retries: 60
+
+  # Corre uma vez: copia a base de dados do PC e liga a replicação PC -> Docker
+  replicacao:
+    image: mysql:5.7
+    restart: on-failure
+    entrypoint: ["sh", "/base_dados/replicacao.sh"]
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD}
+      REPLICACAO_PASSWORD: ${REPLICACAO_PASSWORD}
+    volumes:
+      - ./base_dados:/base_dados:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
 
   ia:
     build: ./ia_service
@@ -64,34 +59,59 @@ services:
     environment:
       IA_API_KEY: ${IA_API_KEY}
 
-  ia_turnos:
-    build: ./ia_turnos
+  servidor:
+    build: ./servidor
     restart: always
-
-  principal1: *principal
-  principal2: *principal
-
-  comunicacao1: *comunicacao
-  comunicacao2:
-    <<: *comunicacao
     environment:
-      <<: *ambiente-comunicacao
+      PORT: 3000
+      DB_HOST: balanceador-backend
+      DB_PORT: 3306
+      DB_USER: elotask
+      DB_PASSWORD: ${DB_APP_PASSWORD}
+      DB_NAME: elotask
+      AUTH_MODE: dev
+      JWT_SECRET: ${JWT_SECRET}
+      CHAMADAS_CHAVE: ${CHAMADAS_CHAVE}
+      IA_SERVICE_URL: http://ia:8000
+      IA_SERVICE_API_KEY: ${IA_API_KEY}
+      # Os lembretes de prazos já são enviados pelo servidor do PC
       LEMBRETES_ATIVOS: "false"
+      TZ: Europe/Lisbon
+    volumes:
+      # A mesma pasta de anexos que o servidor do PC usa
+      - ./servidor/uploads:/app/uploads
+    depends_on:
+      - balanceador-backend
+      - ia
 
-  proxy:
-    image: nginx:alpine
+  frontend:
+    image: nginx:1.29-alpine
     restart: always
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../Frontend:/usr/share/nginx/html:ro
+
+  balanceador-frontend:
+    image: nginx:1.29-alpine
+    restart: always
+    volumes:
+      - ./nginx-frontend.conf:/etc/nginx/nginx.conf:ro
     ports:
-      - "3000:3000"
-      - "3002:3002"
+      - "8080:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  balanceador-backend:
+    image: nginx:1.29-alpine
+    restart: always
+    volumes:
+      - ./nginx-backend.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8081:8081"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
-      - principal1
-      - principal2
-      - comunicacao1
-      - comunicacao2
+      db:
+        condition: service_healthy
 
 volumes:
   dados:
-  ficheiros:

@@ -217,3 +217,14 @@
 @media (max-width: 900px) {
   .eq-grelha { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* --- Membros de uma equipa ------------------------------------------------ */
+.eq-membros { margin: var(--esp-4) 0; }
+.eq-membros li {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  padding: 10px 0;
+  border-top: 1px solid var(--divisoria);
+}
+.eq-membros .pessoa--link { flex: 1; min-width: 0; }

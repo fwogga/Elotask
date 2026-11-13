@@ -236,7 +236,7 @@ CREATE TABLE `equipas` (
 --
 
 INSERT INTO `equipas` (`id_equipa`, `nome`, `descricao`, `id_criador`, `data_criacao`) VALUES
-(1, 'Desenvolvimento', 'Equipa responsável pelo desenvolvimento do EloTask.', 1, '2026-10-01 10:00:00'),
+(1, 'Desenvolvimento', 'Equipa responsável pelo desenvolvimento do EloTask.', 2, '2026-10-01 10:00:00'),
 (2, 'Design e Experiência', 'Equipa responsável pela interface e usabilidade.', 2, '2026-10-01 10:15:00');
 
 -- --------------------------------------------------------
@@ -606,7 +606,7 @@ CREATE TABLE `projetos` (
 --
 
 INSERT INTO `projetos` (`id_projeto`, `nome`, `descricao`, `id_criador`, `data_inicio`, `data_fim`, `estado`, `data_criacao`) VALUES
-(1, 'Plataforma EloTask', 'Aplicação de comunicação, colaboração e gestão de trabalho.', 1, '2026-10-01', '2026-12-31', 'em_curso', '2026-10-01 11:00:00'),
+(1, 'Plataforma EloTask', 'Aplicação de comunicação, colaboração e gestão de trabalho.', 2, '2026-10-01', '2026-12-31', 'em_curso', '2026-10-01 11:00:00'),
 (2, 'Redesign da Interface', 'Melhorias na interface e experiência do utilizador.', 2, '2026-10-05', '2026-11-30', 'em_curso', '2026-10-05 11:00:00');
 
 -- --------------------------------------------------------

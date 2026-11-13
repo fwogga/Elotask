@@ -1,10 +1,12 @@
 import os
 import secrets
+from typing import Any, Dict
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException
 
 from .csp_reunioes import PedidoHorarios, RespostaHorarios, sugerir_horarios
+from .csp_turnos import resolver_escala
 from .provedor import Provedor, obter_provedor
 from .schemas import (
     PedidoChat,
@@ -74,3 +76,44 @@ def sugestoes(pedido: PedidoSugestoes, provedor: Provedor = Depends(obter_proved
 def sugerir_horarios_endpoint(pedido: PedidoHorarios):
     """Sugerir horários de reunião em que todos os participantes estão livres (CSP)."""
     return sugerir_horarios(pedido)
+
+
+@app.post("/gerar-escala", dependencies=[Depends(exigir_chave)])
+def gerar_escala(dados: Dict[str, Any]):
+    """Distribuir os colaboradores pelos turnos ainda vazios (CSP com backtracking)."""
+    colaboradores = dados.get("colaboradores", [])
+    turnos = dados.get("turnos", [])
+    ausencias = dados.get("ausencias", [])
+    turnos_atribuidos = dados.get("turnos_atribuidos", [])
+
+    if not colaboradores:
+        raise HTTPException(status_code=400, detail="Não foram enviados colaboradores.")
+    if not turnos:
+        raise HTTPException(status_code=400, detail="Não foram enviados turnos.")
+
+    # As datas podem chegar como "2026-11-09T00:00:00.000Z"; o CSP só quer "2026-11-09"
+    for turno in turnos:
+        turno["data_turno"] = str(turno["data_turno"])[:10]
+    for ausencia in ausencias:
+        ausencia["data_inicio"] = str(ausencia["data_inicio"])[:10]
+        ausencia["data_fim"] = str(ausencia["data_fim"])[:10]
+
+    solucao, turnos_por_variavel = resolver_escala(colaboradores, turnos, ausencias, turnos_atribuidos)
+
+    if solucao is None:
+        return {
+            "sucesso": False,
+            "mensagem": "Não foi possível gerar a escala. Verifica a disponibilidade dos colaboradores e as restrições dos turnos.",
+            "atribuicoes": [],
+        }
+
+    atribuicoes = [
+        {"id_turno": turnos_por_variavel[variavel]["id_turno"], "id_utilizador": id_colaborador, "vaga": variavel}
+        for variavel, id_colaborador in solucao.items()
+    ]
+    return {
+        "sucesso": True,
+        "mensagem": "Escala gerada com sucesso.",
+        "total_atribuicoes": len(atribuicoes),
+        "atribuicoes": atribuicoes,
+    }

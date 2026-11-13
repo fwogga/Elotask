@@ -8,7 +8,7 @@ async function verificar() {
   const okCount = verificacoes.filter((v) => v.ok).length;
 
   document.querySelector("[data-resumo]").innerHTML = `
-    <div class="cartao"><dt>Dados em uso</dt><dd>${{ api: "Backend", misto: "Misto", mocks: "Exemplo" }[modo]}</dd></div>
+    <div class="cartao"><dt>Dados em uso</dt><dd>${modo === "api" ? "Servidor" : "Exemplo"}</dd></div>
     <div class="cartao"><dt>Serviços disponíveis</dt><dd>${okCount}/${verificacoes.length}</dd></div>`;
 
   lista.innerHTML = verificacoes.map((v) => `
@@ -22,7 +22,7 @@ async function verificar() {
     <li>
       <div class="lista-simples__corpo">
         <p class="lista-simples__titulo">Endereço da API</p>
-        <p class="lista-simples__texto">${esc(apiUrl)}${modo === "api" ? "" : " — o que não responde usa os dados de exemplo"}</p>
+        <p class="lista-simples__texto">${esc(apiUrl)}${modo === "api" ? "" : " — sem resposta, usa os dados de exemplo"}</p>
       </div>
     </li>`;
 }

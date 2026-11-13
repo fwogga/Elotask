@@ -1,39 +1,52 @@
 // Único sítio onde as páginas vão buscar e guardar dados.
 //
-// Há dois backends (Node + MySQL, a mesma base de dados):
-//  - principal (porta 3000): login, equipas, projetos, tarefas, checklists, turnos,
+// Servidor (Node + MySQL), sempre através do balanceador do backend:
+//  - parte principal (raiz): login, equipas, projetos, tarefas, checklists, turnos,
 //    ausências, eventos do calendário, histórico
-//  - comunicação (porta 3002): utilizadores, mensagens, canais, chamadas, reuniões,
+//  - parte de comunicação (/api): utilizadores, mensagens, canais, chamadas, reuniões,
 //    notificações, lembretes, assistente IA
 // Documentos ainda não têm API e usam os dados de exemplo guardados no localStorage.
-// Cada parte usa o seu backend se ele responder; se não, usa os dados de exemplo.
+// Se o servidor não responder, tudo usa os dados de exemplo.
 // As páginas não sabem de onde vêm os dados.
 import * as seeds from "../mocks/dados.js";
 
-// "auto": usa os backends que estiverem ligados, senão os dados de exemplo
-// "api": usa sempre os backends   |   "mocks": usa sempre os dados de exemplo
+// "auto": usa o servidor se estiver ligado, senão os dados de exemplo
+// "api": usa sempre o servidor   |   "mocks": usa sempre os dados de exemplo
 const MODO = "auto";
-const API_URL = "http://localhost:3002/api";
-const API_PRINCIPAL = "http://localhost:3000";
+// Os pedidos vão sempre para o balanceador do backend (8081), que os reparte pelos servidores.
+// Sem o Docker a correr não há balanceador, e usa-se o servidor do PC diretamente (3000).
+const SERVIDORES = [`${location.protocol}//${location.hostname}:8081`, "http://localhost:3000"];
+let API_PRINCIPAL = SERVIDORES.at(-1);
+let API_URL = `${API_PRINCIPAL}/api`;
 const CHAVE = "elotask-mocks-v2";
 const CHAVE_SESSAO = "elotask-sessao";
 
 // --- Ligação aos backends -------------------------------------------------
 
-const disponivel = {};
+let escolha = null;
 
-// Verifica uma vez por página se um backend responde (no modo "auto")
-function responde(url) {
-  if (MODO === "mocks") return Promise.resolve(false);
-  if (MODO === "api") return Promise.resolve(true);
-  disponivel[url] ??= fetch(`${url}/health`, { signal: AbortSignal.timeout(1500) })
-    .then((r) => r.ok)
-    .catch(() => false);
-  return disponivel[url];
+// Uma vez por página: o primeiro endereço que responder passa a ser o usado (no modo "auto")
+function escolherServidor() {
+  escolha ??= (async () => {
+    if (MODO === "mocks") return false;
+    for (const servidor of SERVIDORES) {
+      const ok = await fetch(`${servidor}/api/health`, { signal: AbortSignal.timeout(1500) })
+        .then((r) => r.ok)
+        .catch(() => false);
+      if (ok) {
+        API_PRINCIPAL = servidor;
+        API_URL = `${servidor}/api`;
+        return true;
+      }
+    }
+    return MODO === "api";
+  })();
+  return escolha;
 }
 
-export const usarApi = () => responde(API_URL);
-export const usarPrincipal = () => responde(API_PRINCIPAL);
+export const usarApi = () => escolherServidor();
+// A parte principal e a de comunicação estão no mesmo servidor
+export const usarPrincipal = usarApi;
 
 function lerSessao() {
   try {
@@ -52,7 +65,10 @@ function guardarSessao(sessao) {
   }
 }
 
-async function pedido(rota, { metodo = "GET", corpo, formulario, base = API_URL, keepalive = false } = {}) {
+// raiz = true para as rotas da parte principal (/projetos...); as outras ficam em /api
+async function pedido(rota, { metodo = "GET", corpo, formulario, raiz = false, keepalive = false } = {}) {
+  await escolherServidor();
+  const base = raiz ? API_PRINCIPAL : API_URL;
   const sessao = lerSessao();
   const cabecalhos = { Accept: "application/json" };
   // O token serve nos dois backends (mesmo JWT_SECRET); sem token, o modo dev usa x-user-id
@@ -80,7 +96,7 @@ async function pedido(rota, { metodo = "GET", corpo, formulario, base = API_URL,
   return json?.dados ?? json;
 }
 
-const principal = (rota, opcoes = {}) => pedido(rota, { ...opcoes, base: API_PRINCIPAL });
+const principal = (rota, opcoes = {}) => pedido(rota, { ...opcoes, raiz: true });
 
 // O backend usa "AAAA-MM-DD HH:MM:SS" em hora local; as páginas usam ISO
 const daBd = (texto) => (texto ? new Date(texto.replace(" ", "T")).toISOString() : null);
@@ -194,15 +210,25 @@ const eHoje = (iso) => new Date(iso).toDateString() === new Date().toDateString(
 
 // --- Utilizadores ---------------------------------------------------------
 
+// gestor = criou pelo menos uma equipa (gere os turnos e as ausências);
+// cada projeto tem o seu gestor em projeto.gestorId
 export async function getUtilizadorAtual() {
   if (await usarApi()) {
-    const [eu, naoLidas] = await Promise.all([pedido("/utilizadores/eu"), pedido("/notificacoes/nao-lidas")]);
-    return { ...pessoaDaApi(eu), naoLidas: { notificacoes: naoLidas.total } };
+    const [eu, naoLidas, { equipas }] = await Promise.all([
+      pedido("/utilizadores/eu"),
+      pedido("/notificacoes/nao-lidas"),
+      principal("/equipas"),
+    ]);
+    return {
+      ...pessoaDaApi(eu),
+      gestor: equipas.some((e) => e.id_criador === eu.id_utilizador),
+      naoLidas: { notificacoes: naoLidas.total },
+    };
   }
   const eu = db.utilizadores.find((u) => u.id === db.utilizadorAtualId);
   const totalNaoLidas = Object.values(db.naoLidas).reduce((a, b) => a + b, 0);
   const notificacoes = db.notificacoes.filter((n) => !n.lida).length;
-  return copia({ ...eu, naoLidas: { mensagens: totalNaoLidas, notificacoes } });
+  return copia({ ...eu, gestor: true, naoLidas: { mensagens: totalNaoLidas, notificacoes } });
 }
 
 export async function getUtilizadores() {
@@ -237,9 +263,9 @@ export async function iniciarSessao({ identificador, palavra = "" }) {
 }
 
 // Campos vazios recebem valores por defeito; um email repetido reutiliza a conta
-export async function registar({ nome, email, telefone, nascimento }) {
+export async function registar({ nome, email, telefone, nascimento, palavra }) {
   if (await usarApi()) {
-    return pessoaDaApi(await pedido("/auth/registar", { metodo: "POST", corpo: { nome, email, telefone } }));
+    return pessoaDaApi(await pedido("/auth/registar", { metodo: "POST", corpo: { nome, email, telefone, palavra } }));
   }
   const existente = email && db.utilizadores.find((u) => u.email === email);
   if (existente) return copia(existente);
@@ -512,6 +538,22 @@ export async function getConversas() {
   return copia(lista);
 }
 
+// Conversa direta com uma pessoa; se já existir, o servidor devolve essa
+export async function conversaCom(pessoaId) {
+  if (await usarApi()) {
+    const c = await pedido("/conversas", { metodo: "POST", corpo: { tipo: "individual", participantes: [pessoaId] } });
+    return c.id_conversa;
+  }
+  const eu = db.utilizadorAtualId;
+  let c = db.conversas.find((x) => x.tipo === "direta" && x.membros.includes(eu) && x.membros.includes(pessoaId));
+  if (!c) {
+    c = { id: proximoId(db.conversas), tipo: "direta", membros: [eu, pessoaId] };
+    db.conversas.push(c);
+    guardar();
+  }
+  return c.id;
+}
+
 // canal = true quando o id é de um canal de equipa e não de uma conversa
 const rotaMensagens = (id, canal) => `/${canal ? "canais" : "conversas"}/${id}/mensagens`;
 
@@ -671,14 +713,13 @@ async function verificar(nome, url) {
 }
 
 export async function getEstadoSistema() {
+  const modo = (await usarApi()) ? "api" : "mocks";
   const verificacoes = await Promise.all([
-    verificar("Backend principal", `${API_PRINCIPAL}/health`),
-    verificar("Backend de comunicação", `${API_URL}/health`),
+    verificar("Servidor", `${API_URL}/health`),
     verificar("Base de dados", `${API_URL}/health/database`),
     verificar("Serviço de IA", `${API_URL}/health/ia`),
   ]);
-  const [p, c] = await Promise.all([usarPrincipal(), usarApi()]);
-  return { modo: p && c ? "api" : p || c ? "misto" : "mocks", apiUrl: `${API_PRINCIPAL} · ${API_URL}`, verificacoes };
+  return { modo, apiUrl: API_PRINCIPAL, verificacoes };
 }
 
 // --- Equipas e convites ---------------------------------------------------
@@ -691,6 +732,8 @@ export async function getEquipas() {
     const eu = lerSessao()?.id;
     const escolhida = Number(localStorage.getItem("elotask-equipa"));
     const membros = await Promise.all(equipas.map((e) => principal(`/equipas/${e.id_equipa}/membros`)));
+    const admin = (await pedido("/utilizadores/eu")).tipo_utilizador === "admin";
+    // "As minhas equipas": cada pessoa vê só as equipas de que faz parte (o admin vê todas)
     return equipas.map((e, i) => ({
       id: e.id_equipa,
       nome: e.nome,
@@ -699,9 +742,18 @@ export async function getEquipas() {
       projetos: null,
       cor: CORES_EQUIPA[(e.id_equipa - 1) % CORES_EQUIPA.length],
       ultima: e.id_equipa === escolhida,
-    }));
+      minha: admin || membros[i].membros.some((m) => m.id_utilizador === eu),
+    })).filter((e) => e.minha);
   }
   return copia(db.equipas);
+}
+
+export async function getMembrosEquipa(equipaId) {
+  if (await usarPrincipal()) {
+    const { membros } = await principal(`/equipas/${equipaId}/membros`);
+    return membros.map(pessoaDaApi);
+  }
+  return copia(db.utilizadores);
 }
 
 // O backend ainda não tem convites
@@ -808,7 +860,6 @@ export async function pedirTrocaTurno({ turnoId, paraTurnoId, comId, motivo }) {
 // Funcionalidades só com backend: sem ele as listas vêm vazias
 // ==========================================================================
 
-const SERVIDOR = API_URL.replace(/\/api$/, "");
 const apenasData = (texto) => (texto ? texto.slice(0, 10) : null);
 
 // --- Canais de equipa ------------------------------------------------------
@@ -861,9 +912,9 @@ let ligacao = null;
 // Socket.IO do backend de comunicação; o próprio servidor serve o cliente
 export async function tempoReal() {
   if (!lerSessao() || !(await usarApi())) return null;
-  ligacao ??= import(`${SERVIDOR}/socket.io/socket.io.esm.min.js`).then(({ io }) => {
+  ligacao ??= import(`${API_PRINCIPAL}/socket.io/socket.io.esm.min.js`).then(({ io }) => {
     const sessao = lerSessao();
-    return io(SERVIDOR, { auth: sessao?.token ? { token: sessao.token } : { userId: sessao?.id } });
+    return io(API_PRINCIPAL, { auth: sessao?.token ? { token: sessao.token } : { userId: sessao?.id } });
   });
   return ligacao;
 }

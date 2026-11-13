@@ -1,7 +1,18 @@
 // Código partilhado por todas as páginas da aplicação.
 // Basta incluir <script type="module" src="../js/comum.js"> para a sidebar
 // aparecer; as páginas importam daqui as funções de que precisam.
-import { getUtilizadorAtual, tempoReal, recusarChamada } from "./api/client.js";
+import {
+  getUtilizadorAtual,
+  tempoReal,
+  recusarChamada,
+  getNotificacoes,
+  marcarNotificacaoLida,
+  marcarTodasLidas,
+  apagarNotificacao,
+  getLembretes,
+  getEquipas,
+  escolherEquipa,
+} from "./api/client.js";
 
 // ==========================================================================
 // Formatação (datas, tamanhos, texto seguro)
@@ -91,6 +102,10 @@ export function avatar(utilizador, tamanho = "md") {
 }
 
 export const porId = (lista) => new Map(lista.map((x) => [x.id, x]));
+
+// Avatar e nome que abrem o perfil da pessoa
+export const linkPerfil = (u, tamanho = "sm") =>
+  `<a class="pessoa pessoa--link" href="perfil.html?id=${u.id}">${avatar(u, tamanho)} <span>${esc(u.nome)}</span></a>`;
 
 export function aviso(texto) {
   let el = document.querySelector(".toast");
@@ -217,11 +232,10 @@ export const NAV_ITENS = [
 
 // Ecrãs extra, numa lista mais compacta por baixo da principal
 export const NAV_EXTRA = [
-  { id: "notificacoes", rotulo: "Notificações", pagina: "notificacoes.html", icone: "nav-notificacoes.svg" },
   { id: "assistente", rotulo: "Assistente IA", pagina: "assistente.html", icone: "nav-assistente.svg" },
   { id: "historico", rotulo: "Histórico", pagina: "historico.html", icone: "clock.svg" },
-  { id: "administracao", rotulo: "Administração", pagina: "administracao.html", icone: "nav-admin.svg" },
-  { id: "estado", rotulo: "Estado do sistema", pagina: "estado.html", icone: "nav-estado.svg" },
+  { id: "administracao", rotulo: "Administração", pagina: "administracao.html", icone: "nav-admin.svg", soAdmin: true },
+  { id: "estado", rotulo: "Estado do sistema", pagina: "estado.html", icone: "nav-estado.svg", soAdmin: true },
 ];
 
 function itemNav(item, ativo, naoLidas) {
@@ -243,8 +257,17 @@ function itemNav(item, ativo, naoLidas) {
 export async function renderSidebar(el) {
   const utilizador = await getUtilizadorAtual();
   const ativo = el.dataset.ativo;
+  const admin = utilizador.tipo === "admin";
+
+  // Quem não é administrador não vê nem abre os ecrãs de administração
+  if (!admin && NAV_EXTRA.some((item) => item.soAdmin && item.id === ativo)) {
+    location.replace("dashboard.html");
+    return;
+  }
+
   const itens = NAV_ITENS.map((item) => itemNav(item, ativo, utilizador.naoLidas?.[item.id])).join("");
-  const extra = NAV_EXTRA.map((item) => itemNav(item, ativo, utilizador.naoLidas?.[item.id])).join("");
+  const extra = NAV_EXTRA.filter((item) => admin || !item.soAdmin)
+    .map((item) => itemNav(item, ativo, utilizador.naoLidas?.[item.id])).join("");
 
   el.setAttribute("aria-label", "Navegação principal");
   el.innerHTML = `
@@ -256,11 +279,65 @@ export async function renderSidebar(el) {
       <ul class="sidebar__nav">${itens}</ul>
       <ul class="sidebar__nav sidebar__nav--extra">${extra}</ul>
     </nav>
-    <a class="sidebar__utilizador" href="perfil.html"${ativo === "perfil" ? ' aria-current="page"' : ""}>
-      <span class="avatar" aria-hidden="true">${esc(iniciais(utilizador.nome))}</span>
-      <span>${esc(utilizador.nome)}</span>
-      <img src="${asset("icons/chevron-down.svg")}" alt="" width="16" height="20">
-    </a>`;
+    <div class="sidebar__conta">
+      <a class="sidebar__utilizador" href="perfil.html"${ativo === "perfil" ? ' aria-current="page"' : ""}>
+        <span class="avatar" aria-hidden="true">${esc(iniciais(utilizador.nome))}</span>
+        <span class="sidebar__textos">
+          <span>${esc(utilizador.nome)}</span>
+          <span class="sidebar__equipa" data-equipa-atual></span>
+        </span>
+      </a>
+      <button class="sidebar__trocar" type="button" aria-label="Trocar de equipa" aria-expanded="false">
+        <img src="${asset("icons/chevron-down.svg")}" alt="" width="16" height="20">
+      </button>
+    </div>`;
+
+  ligarTrocaEquipa(el);
+}
+
+// Seta ao lado do nome: lista curta das equipas para trocar sem sair da página
+async function ligarTrocaEquipa(el) {
+  const botao = el.querySelector(".sidebar__trocar");
+  const equipas = await getEquipas();
+  const atual = equipas.find((e) => e.ultima) ?? equipas[0];
+  if (atual) el.querySelector("[data-equipa-atual]").textContent = atual.nome;
+
+  const painel = document.createElement("div");
+  painel.className = "trocar-equipa";
+  painel.hidden = true;
+  painel.innerHTML = `
+    <p class="trocar-equipa__titulo">Trocar de equipa</p>
+    <ul>
+      ${equipas.map((e) => `
+        <li>
+          <button type="button" data-equipa="${e.id}"${e === atual ? ' aria-current="true"' : ""}>
+            <span class="trocar-equipa__ponto trocar-equipa__ponto--${esc(e.cor)}" aria-hidden="true"></span>
+            ${esc(e.nome)}
+          </button>
+        </li>`).join("") || '<li class="vazio">Ainda não fazes parte de nenhuma equipa.</li>'}
+    </ul>
+    <a class="trocar-equipa__todas" href="equipas.html">Ver todas as equipas</a>`;
+  document.body.append(painel);
+
+  function abrir(aberto) {
+    painel.hidden = !aberto;
+    botao.setAttribute("aria-expanded", String(aberto));
+    if (!aberto) return;
+    // A sidebar corta o que sai dela, por isso a lista fica fixa por cima do botão
+    const r = botao.closest(".sidebar__conta").getBoundingClientRect();
+    painel.style.left = `${r.left}px`;
+    painel.style.bottom = `${innerHeight - r.top + 8}px`;
+  }
+
+  botao.addEventListener("click", () => abrir(painel.hidden));
+  document.addEventListener("click", (e) => { if (!painel.contains(e.target) && !botao.contains(e.target)) abrir(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") abrir(false); });
+  painel.addEventListener("click", async (e) => {
+    const escolha = e.target.closest("[data-equipa]");
+    if (!escolha) return;
+    await escolherEquipa(Number(escolha.dataset.equipa));
+    location.reload();
+  });
 }
 
 // Erros que nenhuma página tratou (ex.: sem permissão no backend) aparecem como aviso
@@ -279,9 +356,121 @@ async function avisarChamadas() {
   });
 }
 
-// Desenha a sidebar em qualquer página que a tenha
+// ==========================================================================
+// Notificações: sino fixo no canto superior direito de todas as páginas
+// ==========================================================================
+
+function iconeNotificacao(tipo = "") {
+  if (tipo.includes("reuniao")) return "meeting.svg";
+  if (tipo.includes("prazo") || tipo.includes("lembrete")) return "clock.svg";
+  if (tipo.includes("mensagem")) return "task-chat.svg";
+  return "calendar-check.svg";
+}
+
+const quando = (v) => `${diaRelativo(v)}, ${hora(v)}`;
+
+function iniciarSino() {
+  const sino = document.createElement("div");
+  sino.className = "sino";
+  sino.innerHTML = `
+    <button class="sino__botao" type="button" aria-expanded="false" aria-controls="sino-painel" aria-label="Notificações">
+      <img src="${asset("icons/bell-28.svg")}" alt="" width="28" height="28">
+      <span class="sino__contador" hidden></span>
+    </button>
+    <p class="sino__alerta" role="status" hidden></p>
+    <section class="sino__painel" id="sino-painel" aria-label="Notificações" hidden>
+      <header class="sino__topo">
+        <h2>Notificações</h2>
+        <button class="botao-texto" type="button" data-todas-lidas>Marcar todas como lidas</button>
+      </header>
+      <ul class="sino__lista" data-notificacoes></ul>
+      <div data-bloco-lembretes hidden>
+        <h3 class="sino__subtitulo">Lembretes de prazos</h3>
+        <ul class="sino__lista" data-lembretes></ul>
+      </div>
+    </section>`;
+  document.body.append(sino);
+
+  const botao = sino.querySelector(".sino__botao");
+  const painel = sino.querySelector(".sino__painel");
+  const contador = sino.querySelector(".sino__contador");
+  const alerta = sino.querySelector(".sino__alerta");
+
+  function mostrarContador(n) {
+    contador.hidden = !n;
+    contador.textContent = n > 9 ? "9+" : String(n);
+    botao.setAttribute("aria-label", n ? `Notificações (${n} por ler)` : "Notificações");
+  }
+
+  async function render() {
+    const [notificacoes, lembretes] = await Promise.all([getNotificacoes(), getLembretes()]);
+    mostrarContador(notificacoes.filter((n) => !n.lida).length);
+    if (painel.hidden) return;
+
+    sino.querySelector("[data-notificacoes]").innerHTML = notificacoes.length ? notificacoes.map((n) => `
+      <li class="sino__item${n.lida ? "" : " sino__item--por-ler"}">
+        <img src="${asset("icons/" + iconeNotificacao(n.tipo))}" alt="" width="22" height="22">
+        <div class="sino__texto">
+          <p class="sino__titulo">${esc(n.titulo)}${n.lida ? "" : '<span class="sr-only"> (por ler)</span>'}</p>
+          <p>${esc(n.mensagem)}</p>
+          <p class="sino__quando">${quando(n.criadaEm)}</p>
+          <p class="sino__acoes">
+            ${n.lida ? "" : `<button class="botao-texto" type="button" data-lida="${n.id}">Marcar como lida</button>`}
+            <button class="botao-texto" type="button" data-apagar="${n.id}">Apagar</button>
+          </p>
+        </div>
+      </li>`).join("") : '<li class="vazio">Não tens notificações.</li>';
+
+    sino.querySelector("[data-bloco-lembretes]").hidden = !lembretes.length;
+    sino.querySelector("[data-lembretes]").innerHTML = lembretes.map((l) => `
+      <li class="sino__item">
+        <img src="${asset("icons/clock.svg")}" alt="" width="22" height="22">
+        <div class="sino__texto">
+          <p class="sino__titulo">${esc(l.mensagem)}</p>
+          <p class="sino__quando">${quando(l.quando)}</p>
+          <p class="sino__acoes"><a class="botao-texto" href="tarefas.html?tarefa=${l.tarefaId}">Ver tarefa</a></p>
+        </div>
+      </li>`).join("");
+  }
+
+  function abrir(aberto) {
+    painel.hidden = !aberto;
+    botao.setAttribute("aria-expanded", String(aberto));
+    if (aberto) {
+      alerta.hidden = true;
+      render();
+    }
+  }
+
+  botao.addEventListener("click", () => abrir(painel.hidden));
+  document.addEventListener("click", (e) => { if (!sino.contains(e.target)) abrir(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") abrir(false); });
+
+  painel.addEventListener("click", async (e) => {
+    const lida = e.target.closest("[data-lida]");
+    const apagar = e.target.closest("[data-apagar]");
+    if (lida) await marcarNotificacaoLida(Number(lida.dataset.lida));
+    if (apagar) await apagarNotificacao(Number(apagar.dataset.apagar));
+    if (e.target.closest("[data-todas-lidas]")) await marcarTodasLidas();
+    if (lida || apagar || e.target.closest("[data-todas-lidas]")) await render();
+  });
+
+  // Notificação nova em tempo real: aparece por baixo do sino durante uns segundos
+  tempoReal().then((socket) => socket?.on("notificacao:nova", (n) => {
+    alerta.innerHTML = `<strong>${esc(n.titulo)}</strong> ${esc(n.mensagem)}`;
+    alerta.hidden = !painel.hidden;
+    clearTimeout(alerta._timer);
+    alerta._timer = setTimeout(() => { alerta.hidden = true; }, 6000);
+    render();
+  })).catch(() => {});
+
+  render().catch(() => {});
+}
+
+// Desenha a sidebar e o sino em qualquer página da aplicação
 const sidebar = document.querySelector("[data-sidebar]");
 if (sidebar) {
   renderSidebar(sidebar);
   avisarChamadas().catch(() => {});
 }
+if (sidebar || document.querySelector("[data-sino]")) iniciarSino();

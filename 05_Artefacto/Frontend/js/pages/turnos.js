@@ -117,7 +117,7 @@ async function renderAusencias() {
     a.estado === "pendente" ? `<button class="botao-texto" type="button" data-cancelar-ausencia="${a.id}">Cancelar</button>` : "",
   )).join("") || '<li class="vazio">Ainda não pediste nenhuma ausência.</li>';
 
-  if (dados.eu.tipo !== "admin") return;
+  if (!dados.eu.gestor) return;
   const porAprovar = (await getAusenciasParaAprovar()).filter((a) => a.pessoaId !== dados.eu.id);
   document.querySelector("[data-seccao-aprovar]").hidden = false;
   document.querySelector("[data-aprovar]").innerHTML = porAprovar.map((a) => linhaAusencia(a, `
@@ -216,7 +216,7 @@ async function iniciar() {
     document.querySelector("[data-seccao-ausencias]").hidden = false;
     ligarAusencias();
     await renderAusencias();
-    if (eu.tipo === "admin") ligarAdmin();
+    if (eu.gestor) ligarAdmin();
   }
 }
 

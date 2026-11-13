@@ -202,6 +202,33 @@
   background: var(--borda);
 }
 
+.membro__link {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  min-width: 0;
+  color: inherit;
+}
+
+.membro__link:hover .membro__nome {
+  color: var(--cor-primaria);
+  text-decoration: underline;
+}
+
+.membro__conversar {
+  color: var(--cor-primaria);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.membro__conversar:hover {
+  background: var(--fundo-icone);
+}
+
 .membro__texto {
   flex: 1;
   display: flex;

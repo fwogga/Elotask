@@ -1,5 +1,5 @@
 // Perfil: dados do utilizador e separadores.
-import { getUtilizadorAtual, terminarSessao } from "../api/client.js";
+import { getUtilizadorAtual, getUtilizadores, terminarSessao, conversaCom } from "../api/client.js";
 import { esc, iniciais, dataCompleta, confirmar } from "../comum.js";
 
 const $ = (seletor) => document.querySelector(seletor);
@@ -30,7 +30,10 @@ function ligarSeparadores() {
 }
 
 async function iniciar() {
-  const u = await getUtilizadorAtual();
+  const eu = await getUtilizadorAtual();
+  const outroId = Number(new URLSearchParams(location.search).get("id"));
+  const outro = outroId && outroId !== eu.id ? (await getUtilizadores()).find((p) => p.id === outroId) : null;
+  const u = outro ?? eu;
 
   $("[data-iniciais]").textContent = iniciais(u.nome);
   $("[data-nome]").textContent = u.nome;
@@ -39,6 +42,18 @@ async function iniciar() {
   $("[data-dados]").innerHTML = renderDados(u);
 
   ligarSeparadores();
+
+  // Perfil de outra pessoa: só os dados e o botão para conversar
+  if (outro) {
+    document.title = `${u.nome} · EloTask`;
+    $(".titulo-pagina").textContent = "Perfil";
+    $(".separadores").hidden = true;
+    $(".perfil__acoes").innerHTML = '<button class="botao botao--compacto" type="button" data-conversar>Enviar mensagem</button>';
+    $("[data-conversar]").addEventListener("click", async () => {
+      location.href = `mensagens.html?c=${await conversaCom(u.id)}`;
+    });
+    return;
+  }
 
   $("[data-sair]").addEventListener("click", async () => {
     if (await confirmar("Tem a certeza de que quer terminar a sessão?", "Terminar sessão")) {

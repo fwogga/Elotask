@@ -1,7 +1,6 @@
 @echo off
-rem Abre os 4 servicos do EloTask, cada um na sua janela.
+rem Abre o servidor e o servico de IA do EloTask, cada um na sua janela.
+rem Na primeira vez instala as dependencias (demora um pouco).
 cd /d "%~dp0"
-start "ia_service :8000" cmd /k "cd ia_service && py -m uvicorn app.main:app --port 8000"
-start "ia_turnos :8001" cmd /k "cd ia_turnos && py -m uvicorn main:app --port 8001"
-start "backend_principal :3000" cmd /k "cd backend_principal && npm start"
-start "backend_comunicacao :3002" cmd /k "cd backend_comunicacao && npm start"
+start "servidor :3000" cmd /k "cd servidor && npm install --no-audit --no-fund && npm start"
+start "ia_service :8000" cmd /k "cd ia_service && py -m pip install -q -r requirements.txt && py -m uvicorn app.main:app --port 8000"

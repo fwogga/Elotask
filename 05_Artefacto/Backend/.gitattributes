@@ -1,0 +1,2 @@
+# Os scripts .sh correm dentro do Docker (Linux): têm de manter as quebras de linha LF
+*.sh text eol=lf

@@ -9,6 +9,8 @@ import {
   getSugestoes,
   gerarSugestoes,
   responderSugestao,
+  conversaCom,
+  getUtilizadorAtual,
 } from "../api/client.js";
 import { cartaoProjeto, ESTADOS_PROJETO, esc, dataCurta, dataCompleta, intervalo, extensao, icone, avatar, porId } from "../comum.js";
 
@@ -32,6 +34,12 @@ async function mostrarLista() {
 
 // --- Detalhe --------------------------------------------------------------
 
+// Botão de mensagem ao lado de cada membro: abre (ou cria) a conversa com essa pessoa
+document.addEventListener("click", async (e) => {
+  const botao = e.target.closest("[data-conversar]");
+  if (botao) location.href = `mensagens.html?c=${await conversaCom(Number(botao.dataset.conversar))}`;
+});
+
 function membro(u, gestorId) {
   const coroa = u.id === gestorId
     ? `<img src="../assets/icons/crown.svg" alt="Gestor do projeto" title="Gestor do projeto" width="24" height="24">`
@@ -39,12 +47,17 @@ function membro(u, gestorId) {
   return `
     <li>
       <div class="membro">
-        ${avatar(u, "lg")}
-        <div class="membro__texto">
-          <p class="membro__nome">${esc(u.nome)}</p>
-          <p class="membro__funcao">${esc(u.funcao)}</p>
-        </div>
+        <a class="membro__link" href="perfil.html?id=${u.id}">
+          ${avatar(u, "lg")}
+          <span class="membro__texto">
+            <span class="membro__nome">${esc(u.nome)}</span>
+            <span class="membro__funcao">${esc(u.funcao)}</span>
+          </span>
+        </a>
         ${coroa}
+        <button class="botao-icone membro__conversar" type="button" data-conversar="${u.id}" aria-label="Enviar mensagem a ${esc(u.nome)}" title="Enviar mensagem">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12Z"/></svg>
+        </button>
       </div>
     </li>`;
 }
@@ -111,6 +124,9 @@ function ativarSeparadores() {
 
 const ESTADOS_SUGESTAO = { pendente: "aviso", aceite: "sucesso", rejeitada: "erro" };
 
+// Só o gestor do projeto gera e responde às sugestões; os outros só as veem
+let gestorDoProjeto = false;
+
 function renderSugestoes(sugestoes) {
   document.querySelector("[data-sugestoes]").innerHTML = sugestoes.map((s, i) => `
     <li class="linha">
@@ -118,16 +134,18 @@ function renderSugestoes(sugestoes) {
         <p class="linha__titulo">${esc(s.texto)}</p>
         <p class="linha__meta">${esc(s.motivo)}</p>
       </div>
-      ${s.estado === "pendente" ? `
+      ${s.estado === "pendente" && gestorDoProjeto ? `
         <button class="botao-texto" type="button" data-sugestao="${i}" data-estado="aceite">Aceitar</button>
         <button class="botao-texto" type="button" data-sugestao="${i}" data-estado="rejeitada">Rejeitar</button>`
         : `<span class="etiqueta etiqueta--${ESTADOS_SUGESTAO[s.estado]}">${esc(s.estado)}</span>`}
     </li>`).join("") || vazio("Ainda não há sugestões. Carrega em \"Gerar sugestões\".");
 }
 
-async function ligarSugestoes(projetoId) {
+async function ligarSugestoes(projetoId, gestor) {
   if (!(await usarApi())) return;
+  gestorDoProjeto = gestor;
   document.getElementById("tab-sugestoes").hidden = false;
+  document.querySelector("[data-gerar-sugestoes]").hidden = !gestor;
   let sugestoes = await getSugestoes(projetoId);
   renderSugestoes(sugestoes);
 
@@ -192,7 +210,7 @@ async function mostrarDetalhe(id) {
   document.querySelector("[data-link-quadro]").href = `tarefas.html?projeto=${projeto.id}`;
   document.querySelector("[data-link-agendar]").href = `reunioes.html?agendar=1&projeto=${projeto.id}`;
   ativarSeparadores();
-  await ligarSugestoes(projeto.id);
+  await ligarSugestoes(projeto.id, projeto.gestorId === (await getUtilizadorAtual()).id);
 }
 
 const id = new URLSearchParams(location.search).get("id");

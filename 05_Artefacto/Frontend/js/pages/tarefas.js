@@ -19,7 +19,10 @@ const PRIORIDADES = {
   baixa: { rotulo: "Baixa", classe: "sucesso" },
 };
 
-const estado = { tarefas: [], projetos: new Map(), pessoas: new Map(), editarId: null, eu: null };
+const estado = { tarefas: [], projetos: new Map(), pessoas: new Map(), editarId: null, eu: null, soLeitura: false };
+
+// Só o gestor do projeto (quem o criou) cria, edita e apaga tarefas; os outros só mudam o estado
+const gereProjeto = (projetoId) => estado.projetos.get(projetoId)?.gestorId === estado.eu?.id;
 const filtros = { texto: "", projeto: "", responsavel: "", prioridade: "" };
 
 const dialogo = document.querySelector("[data-dialogo-tarefa]");
@@ -117,7 +120,7 @@ const caixaChecklists = document.querySelector("[data-checklists]");
 
 async function renderChecklists() {
   const tarefaId = estado.editarId;
-  const admin = estado.eu?.tipo === "admin";
+  const admin = gereProjeto(estado.tarefas.find((t) => t.id === tarefaId)?.projetoId);
   const checklists = tarefaId ? await getChecklists(tarefaId) : [];
   if (tarefaId !== estado.editarId) return;
   caixaChecklists.hidden = !checklists.length && !admin;
@@ -179,7 +182,8 @@ function preencherOpcoes() {
   const projetos = [...estado.projetos.values()];
   const pessoas = [...estado.pessoas.values()];
 
-  const opcoesProjeto = projetos.map((p) => `<option value="${p.id}">${esc(p.nome)}</option>`).join("");
+  const opcoesProjeto = projetos.filter((p) => gereProjeto(p.id))
+    .map((p) => `<option value="${p.id}">${esc(p.nome)}</option>`).join("");
   form.projetoId.innerHTML = `<option value="">Escolher projeto</option>${opcoesProjeto}`;
   document.querySelector('[data-filtro="projeto"]').insertAdjacentHTML(
     "beforeend",
@@ -210,10 +214,18 @@ function abrirFormulario(tarefa = null) {
   estado.editarId = tarefa?.id ?? null;
   form.reset();
   limparErros();
-  document.getElementById("dialogo-tarefa-titulo").textContent = tarefa ? "Editar tarefa" : "Nova tarefa";
-  form.querySelector("[data-apagar]").hidden = !tarefa;
+  estado.soLeitura = Boolean(tarefa) && !gereProjeto(tarefa.projetoId);
+  document.getElementById("dialogo-tarefa-titulo").textContent = !tarefa ? "Nova tarefa" : estado.soLeitura ? "Tarefa" : "Editar tarefa";
+  form.querySelector("[data-apagar]").hidden = !tarefa || estado.soLeitura;
+  for (const campo of form.querySelectorAll("input:not([data-novo-item]), select, textarea")) {
+    campo.disabled = estado.soLeitura && campo.name !== "estado" && !campo.dataset.item;
+  }
 
   if (tarefa) {
+    // Uma tarefa de um projeto que não gero pode não estar na lista de projetos do formulário
+    if (![...form.projetoId.options].some((o) => o.value === String(tarefa.projetoId))) {
+      form.projetoId.insertAdjacentHTML("beforeend", `<option value="${tarefa.projetoId}">${esc(estado.projetos.get(tarefa.projetoId)?.nome ?? "")}</option>`);
+    }
     form.titulo.value = tarefa.titulo;
     form.projetoId.value = tarefa.projetoId;
     form.prazo.value = tarefa.prazo;
@@ -230,7 +242,7 @@ function abrirFormulario(tarefa = null) {
   if (tarefa) renderChecklists();
 
   dialogo.showModal();
-  form.titulo.focus();
+  (estado.soLeitura ? form.estado : form.titulo).focus();
 }
 
 function lerFormulario() {
@@ -256,6 +268,11 @@ function lerFormulario() {
 
 async function guardar(e) {
   e.preventDefault();
+  if (estado.soLeitura) {
+    await mudarEstado(estado.editarId, form.estado.value);
+    dialogo.close();
+    return;
+  }
   const dados = lerFormulario();
   if (!dados) return;
 
@@ -324,6 +341,7 @@ async function iniciar() {
 
   preencherOpcoes();
   ligarEventos();
+  document.querySelector("[data-nova-tarefa]").hidden = !projetos.some((p) => gereProjeto(p.id));
 
   // Links vindos de outras páginas: ?projeto=1 filtra, ?tarefa=3 abre a tarefa, ?nova=1 abre o formulário
   const params = new URLSearchParams(location.search);
