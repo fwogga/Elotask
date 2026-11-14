@@ -1,5 +1,5 @@
    {
        "liveServer.settings.port": 5501,
-    "liveServer.settings.root": "/05_Artefacto/Frontend",
+       "liveServer.settings.root": "/Frontend",
     "python.terminal.useEnvFile": true
    }

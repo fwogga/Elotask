@@ -1,6 +1,6 @@
 # Metade do EloTask corre no PC e a outra metade aqui, no Docker:
 #
-#   browser -> balanceador-frontend (8080) -> Live Server do PC (5501)    + contentor "frontend"
+#   browser -> balanceador-frontend (8080) -> frontend do PC (5501, aberto pelo iniciar.bat)    + contentor "frontend"
 #           -> balanceador-backend  (8081) -> servidor do PC (iniciar.bat) + contentor "servidor"
 #                                          -> MySQL do MAMP (PC)           + contentor "db" (cada uma copia a outra)
 #
