@@ -3,7 +3,7 @@
 <img width="585" height="165" alt="Screenshot 2026-10-13 115951" src="https://github.com/user-attachments/assets/21b2b876-836d-489a-adc7-37e4187fb9ea" />
 
 **Licenciatura em Engenharia Informática**  
-LEIF02 | 25-26  
+LEIF01 | 26-27  
 **UC:** Projeto de Desenvolvimento de Software
 
 **Docente:** Rui Pascoal 
