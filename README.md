@@ -258,14 +258,15 @@ A partilha de ecrã nas reuniões foi identificada durante os testes como uma fu
 
 ### Design e prototipagem
 
-- **ClickUp:** https://app.clickup.com/90151677947/v/li/901526485764
+- **Figma:** (https://www.figma.com/design/ofLMVTGnjMNB202fdbInEd/Untitled?node-id=0-1&t=2F5S4YgS5IztbO42-1)
 
 ### Desenvolvimento e documentação
 
-- **GitHub:** [Repositório do projeto EloTask](INSERIR_LINK_DO_REPOSITORIO)
+- **ClickUp:** [https://app.clickup.com/90151677947/v/li/901526485764 ](https://app.clickup.com/90151677947/v/l/6-901526485764-1)
 
----
+- **Questionário google:**  https://docs.google.com/forms/d/e/1FAIpQLScyAI6RmXzD3EmXKJ5bDhA-nyrWAh0YOqo3VT_5mZkq5GklZw/viewform?usp=publish-editor
 
-**Projeto desenvolvido no âmbito da unidade curricular de Projeto de Desenvolvimento de Software.**
+
+
 
 
